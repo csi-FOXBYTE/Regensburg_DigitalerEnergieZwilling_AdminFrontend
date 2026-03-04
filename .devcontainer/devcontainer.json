@@ -1,0 +1,29 @@
+{
+    "name": "rg-dez-admin-frontend",
+    "dockerComposeFile": [
+        "docker-compose.yml"
+    ],
+    "service": "dev",
+    "workspaceFolder": "/workspace",
+    "features": {
+        "ghcr.io/devcontainers/features/desktop-lite:1": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "latest",
+            "moby": false
+        }
+    },
+    "customizations": {
+        "codespaces": {
+            "openFiles": [
+                "README.md",
+                "CONTRIBUTING.md"
+            ]
+        },
+        "vscode": {
+            "extensions": [
+                "astro-build.astro-vscode",
+                "esbenp.prettier-vscode"
+            ]
+        }
+    }
+}

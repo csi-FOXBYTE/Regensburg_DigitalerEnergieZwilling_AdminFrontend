@@ -1,0 +1,7 @@
+{
+    "i18n-ally.localesPaths": [
+        "src/locales",
+        "src/modules/viewer/locales"
+    ],
+    "i18n-ally.keystyle": "nested"
+}
