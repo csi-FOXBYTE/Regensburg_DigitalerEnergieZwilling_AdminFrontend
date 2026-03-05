@@ -1,3 +1,3 @@
 export default function HelloWorldIsland() {
-  return <div>Hello World</div>
+  return <div>Hello World v2</div>
 }
