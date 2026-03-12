@@ -1,42 +1,39 @@
 # ==========================================
 # Stage 1: Build-Umgebung (Node.js)
 # ==========================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
-# 1. WICHTIG: pnpm aktivieren! 
-# (Node.js bringt pnpm über "corepack" bereits mit, es muss nur aktiviert werden)
+# pnpm aktivieren
 RUN corepack enable pnpm
 
-# Arbeitsverzeichnis im Container festlegen
 WORKDIR /app
 
-# 2. WICHTIG: package.json UND pnpm-lock.yaml kopieren
-COPY package.json pnpm-lock.yaml ./
+# Schreibrechte fuer numerischen Non-Root User sicherstellen
+RUN chown -R 1000:1000 /app
+USER 1000:1000
 
-# 3. WICHTIG: Abhängigkeiten installieren
-# (--frozen-lockfile ist das pnpm-Äquivalent zu npm ci. Es garantiert, 
-# dass exakt die Versionen aus der Lockfile installiert werden).
+# Lockfiles zuerst fuer bessere Layer-Caching
+COPY --chown=1000:1000 package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# Restlichen Quellcode kopieren
-COPY . .
-
-# Astro SSG Build ausführen (erstellt standardmäßig den /dist Ordner)
+# Restlicher Quellcode + Build
+COPY --chown=1000:1000 . .
 RUN pnpm run build
 
 # ==========================================
-# Stage 2: Produktions-Umgebung (Nginx)
+# Stage 2: Produktions-Umgebung (Nginx non-root)
 # ==========================================
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine
 
-# Unsere optimierte Nginx-Config kopieren (falls du die Datei nginx.conf angelegt hast)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Wichtig: In nginx.conf muss "listen 8080;" stehen (nicht 80)
+COPY --chown=101:101 nginx.conf /etc/nginx/conf.d/default.conf
 
-# Kopiere nur das fertige statische Artefakt aus Stage 1 in den Nginx-Ordner
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Statische Build-Artefakte kopieren
+COPY --from=builder --chown=101:101 /app/dist /usr/share/nginx/html
 
-# Port 80 nach außen dokumentieren
-EXPOSE 80
+# Numerischer Non-Root User
+USER 101:101
 
-# Nginx starten
+EXPOSE 8080
+
 CMD ["nginx", "-g", "daemon off;"]
