@@ -117,24 +117,6 @@ const headerCellSx = {
 
 const colDividerSx = { borderRight: "1px solid", borderColor: "divider" };
 
-function SubTableLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <Typography
-      variant="subtitle2"
-      fontWeight="700"
-      mb={1}
-      sx={{
-        color: "text.secondary",
-        textTransform: "uppercase",
-        letterSpacing: 0.6,
-        fontSize: "0.68rem",
-      }}
-    >
-      {children}
-    </Typography>
-  );
-}
-
 export default function HeatingTypesSection({
   configStore,
   editState,
@@ -248,7 +230,7 @@ export default function HeatingTypesSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Heizungserzeugerart ({configStore.heat.heatingSystemTypes.length})
             </Typography>
           </Box>
@@ -274,7 +256,11 @@ export default function HeatingTypesSection({
                       Bezeichnung
                     </Typography>
                   </TableCell>
-                  <TableCell align="right">Aktionen</TableCell>
+                  <TableCell align="right">
+                    <Typography sx={{ fontWeight: "bold" }}>
+                      Aktionen
+                    </Typography>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -346,7 +332,11 @@ export default function HeatingTypesSection({
                         >
                           <Collapse in={isOpen} timeout="auto" unmountOnExit>
                             <Box sx={{ p: 2 }}>
-                              <Typography sx={{ mb: 1 }}>
+                              <Typography
+                                sx={{ mb: 2 }}
+                                fontWeight={"bold"}
+                                variant="body2"
+                              >
                                 Heizleistungsfaktoren (Aufwandzahl e)
                               </Typography>
                               {perfEntry ? (
@@ -448,7 +438,11 @@ export default function HeatingTypesSection({
                                   Keine Daten vorhanden
                                 </Typography>
                               )}
-                              <Typography sx={{ mb: 1 }}>
+                              <Typography
+                                sx={{ mb: 2 }}
+                                fontWeight={"bold"}
+                                variant="body2"
+                              >
                                 Temperaturregelungs‑Leistungsfaktoren
                               </Typography>
                               {tempEntry ? (

@@ -115,7 +115,7 @@ export function YearBandSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.yearBand ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Jahresbänder
             </Typography>
           </Box>

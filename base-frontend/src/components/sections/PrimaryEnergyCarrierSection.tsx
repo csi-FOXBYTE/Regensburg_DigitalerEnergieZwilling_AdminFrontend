@@ -133,7 +133,7 @@ export function PrimaryEnergyCarrierSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Primäre Energieträger (
               {configStore.heat.primaryEnergyCarriers.length})
             </Typography>
@@ -161,7 +161,9 @@ export function PrimaryEnergyCarrierSection({
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Typography>Aktionen</Typography>
+                    <Typography sx={{ fontWeight: "bold" }}>
+                      Aktionen
+                    </Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -205,17 +207,12 @@ export function PrimaryEnergyCarrierSection({
                           unmountOnExit
                         >
                           <Box sx={{ p: 2 }}>
-                            <Typography
-                              variant="subtitle2"
-                              fontWeight="600"
-                              mb={1}
-                            >
+                            <Typography variant="body2" fontWeight="600" mb={1}>
                               Daten zum Energieträger
                             </Typography>
 
-                            {/* Primärenergiefaktor */}
                             <Box sx={{ ...gridSx, mb: 1.5 }}>
-                              <Typography variant="body1">
+                              <Typography variant="body2">
                                 Primärenergiefaktor
                               </Typography>
                               <TextField
@@ -235,9 +232,8 @@ export function PrimaryEnergyCarrierSection({
                               />
                             </Box>
 
-                            {/* CO₂-Faktor – own row, aligned to grid */}
                             <Box sx={{ ...gridSx, mb: 2 }}>
-                              <Typography variant="body1">
+                              <Typography variant="body2">
                                 CO₂-Faktor gemäß Informationsblatt
                                 <br />
                                 CO₂-Faktoren der Bafa [gCO₂/kWh]
@@ -259,17 +255,11 @@ export function PrimaryEnergyCarrierSection({
                               />
                             </Box>
 
-                            <Typography
-                              variant="subtitle2"
-                              fontWeight="600"
-                              mb={1}
-                            >
+                            <Typography variant="body2" fontWeight="600" mb={1}>
                               Brennstoffdaten gemäß GEG/EnEV
                             </Typography>
-
-                            {/* Heizwert, Arbeitspreis, Grundpreis */}
                             <Box sx={{ ...gridSx, mb: 2 }}>
-                              <Typography variant="body1">
+                              <Typography variant="body2">
                                 Heizwert [kWh/x]
                               </Typography>
                               <TextField
@@ -294,7 +284,7 @@ export function PrimaryEnergyCarrierSection({
 
                               <Box />
 
-                              <Typography variant="body1">
+                              <Typography variant="body2">
                                 Arbeitspreis [€/x]
                               </Typography>
                               <TextField
@@ -317,7 +307,7 @@ export function PrimaryEnergyCarrierSection({
                                 }
                               />
 
-                              <Typography variant="body1">
+                              <Typography variant="body2">
                                 Grundpreis [€/a]
                               </Typography>
                               <TextField

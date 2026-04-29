@@ -108,7 +108,7 @@ export default function HeatingSurfaceTypesSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Heizflächenarten ({configStore.heat.heatingSurfaceTypes.length})
             </Typography>
           </Box>

@@ -31,6 +31,25 @@ const theme = createTheme({
         body { font-family: "Open Sans", sans-serif; color: #191919; }
       `,
     },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        inputSizeSmall: {
+          paddingTop: "4px",
+          paddingBottom: "4px",
+          paddingLeft: "8px",
+          paddingRight: "8px",
+          fontSize: "0.875rem",
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        label: {
+          fontSize: "0.875rem",
+          lineHeight: "22px",
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {

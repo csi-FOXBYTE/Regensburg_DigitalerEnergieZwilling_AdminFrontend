@@ -55,7 +55,7 @@ export default function SurfaceTempResistenceSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Wärmeübergangswiderstände
             </Typography>
           </Box>

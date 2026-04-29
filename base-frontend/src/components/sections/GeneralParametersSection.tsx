@@ -128,7 +128,7 @@ export function GeneralParametersSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.generalParams ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Allgemeine Parameter
             </Typography>
           </Box>
@@ -136,8 +136,7 @@ export function GeneralParametersSection({
 
         <Collapse in={expandedSections.generalParams}>
           <Box sx={{ p: 2 }}>
-            {/* Geometrische Annahmen */}
-            <Typography variant="h6" mb={1}>
+            <Typography variant="subtitle1" fontWeight={"bold"} mb={1}>
               Geometrische Annahmen
             </Typography>
             <Box sx={{ ...gridSx, mb: 3 }}>
@@ -215,7 +214,7 @@ export function GeneralParametersSection({
               <Box />
             </Box>
             <Box sx={{ mb: 2 }}>
-              <Typography variant="h6" fontWeight="600" mb={1}>
+              <Typography variant="subtitle1" fontWeight="600" mb={1}>
                 Faktor Nettogrundfläche über Nutzfläche
               </Typography>
               <Box sx={gridSx}>
@@ -267,7 +266,7 @@ export function GeneralParametersSection({
             </Box>
 
             <Box sx={{ width: "50%" }}>
-              <Typography variant="h6" fontWeight="600" mb={1}>
+              <Typography variant="subtitle1" fontWeight="600" mb={1}>
                 Faktor beheiztes Luftvolumen
               </Typography>
               {configStore.general.heatedAirVolumeCorrectionFactor.map(

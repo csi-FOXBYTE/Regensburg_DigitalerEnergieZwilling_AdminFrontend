@@ -172,7 +172,7 @@ export function EnergyEfficiencySection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Energieeffizienzklassen
             </Typography>
           </Box>
@@ -192,10 +192,26 @@ export function EnergyEfficiencySection({
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Klasse</TableCell>
-                  <TableCell>Hex-Wert Farbe</TableCell>
-                  <TableCell>Primärenergiebedarf</TableCell>
-                  <TableCell align="right">Aktionen</TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle1" fontWeight={"bold"}>
+                      Klasse
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle1" fontWeight={"bold"}>
+                      Hex-Wert Farbe
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="subtitle1" fontWeight={"bold"}>
+                      Primärenergiebedarf
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="right">
+                    <Typography variant="subtitle1" fontWeight={"bold"}>
+                      Aktionen
+                    </Typography>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -231,18 +247,20 @@ export function EnergyEfficiencySection({
                               border: "1px solid rgba(0,0,0,0.15)",
                             }}
                           />
-                          <Typography variant="body2">
+                          <Typography variant="body1">
                             {(item as EnergyEfficiencyEntry).color ??
                               getChipColor(item.value)}
                           </Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        {item.to == null && item.from != null
-                          ? ` > ${item.from} kWh/m²a`
-                          : item.from == null
-                            ? `< ${item.to} kWh/m²a`
-                            : `${item.from} - ${item.to} kWh/m²a`}
+                        <Typography variant="body1">
+                          {item.to == null && item.from != null
+                            ? ` > ${item.from} kWh/m²a`
+                            : item.from == null
+                              ? `< ${item.to} kWh/m²a`
+                              : `${item.from} - ${item.to} kWh/m²a`}
+                        </Typography>
                       </TableCell>
 
                       <TableCell align="right">

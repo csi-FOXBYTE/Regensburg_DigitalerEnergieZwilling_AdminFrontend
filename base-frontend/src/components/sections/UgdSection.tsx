@@ -55,14 +55,14 @@ export default function UgdSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.bottomFloor ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Unterste Geschossdecke
             </Typography>
           </Box>
         </Box>
         <Collapse in={expandedSections.bottomFloor}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -75,7 +75,7 @@ export default function UgdSection({
                 mb: 3,
               }}
             >
-              <Typography>Wärmeverlustfaktor F</Typography>
+              <Typography variant="body2">Wärmeverlustfaktor F</Typography>
               <TextField
                 size="small"
                 type="number"
@@ -88,7 +88,7 @@ export default function UgdSection({
                 }
               />
 
-              <Typography>Dämmschichtdicke [m]</Typography>
+              <Typography variant="body2">Dämmschichtdicke [m]</Typography>
               <TextField
                 size="small"
                 type="number"
@@ -101,7 +101,9 @@ export default function UgdSection({
                 }
               />
 
-              <Typography>Wärmeleitfähigkeit λ [W/mK]</Typography>
+              <Typography variant="body2">
+                Wärmeleitfähigkeit λ [W/mK]
+              </Typography>
               <TextField
                 size="small"
                 type="number"
@@ -115,7 +117,7 @@ export default function UgdSection({
               />
             </Box>
 
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Erlaubte Konstruktionen nach beheiztem Keller
             </Typography>
 
@@ -135,7 +137,7 @@ export default function UgdSection({
                       alignItems: "center",
                     }}
                   >
-                    <Typography sx={{ minWidth: 220 }}>
+                    <Typography sx={{ minWidth: 220 }} variant="body2">
                       Beheizter Keller:{" "}
                       {String(entry.key) == "true" ? "ja" : "nein"}
                     </Typography>
@@ -171,7 +173,7 @@ export default function UgdSection({
               )}
             </Box>
 
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Standard‑Konstruktion
             </Typography>
 
@@ -185,7 +187,7 @@ export default function UgdSection({
                   groupIndex: number,
                 ) => (
                   <Box key={groupIndex} sx={{ mb: 2 }}>
-                    <Typography fontWeight="500" sx={{ mb: 0.75 }}>
+                    <Typography sx={{ mb: 0.75 }} variant="body2">
                       Beheizter Keller:{" "}
                       {String(group.key) == "true" ? "ja" : "nein"}
                     </Typography>
@@ -212,7 +214,7 @@ export default function UgdSection({
                               gap: 1.5,
                             }}
                           >
-                            <Typography sx={{ minWidth: 120 }}>
+                            <Typography sx={{ minWidth: 120 }} variant="body2">
                               Baujahr&nbsp;{formatBand(band)}
                             </Typography>
                             <TextField
@@ -248,12 +250,14 @@ export default function UgdSection({
               )}
             </Box>
 
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
             </Typography>
             <TableContainer sx={{ overflowX: "auto" }}>
               <Table size="small">
-                <TableHead sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}>
+                <TableHead
+                  sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}
+                >
                   <TableRow>
                     <TableCell>Konstruktion \ Baualtersklasse</TableCell>
                     {yearBands.map((band, bandIndex) => (
@@ -274,7 +278,7 @@ export default function UgdSection({
                     ) => (
                       <TableRow key={construction.key}>
                         <TableCell>
-                          <strong>{lookUpForNames(construction.key)}</strong>
+                          {lookUpForNames(construction.key)}
                         </TableCell>
                         {yearBands.map((_, bandIndex) => (
                           <TableCell key={bandIndex} align="center">

@@ -52,7 +52,7 @@ export default function OuterWallSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.outerWall ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Außenwand
             </Typography>
           </Box>
@@ -60,7 +60,7 @@ export default function OuterWallSection({
 
         <Collapse in={expandedSections.outerWall}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -73,7 +73,7 @@ export default function OuterWallSection({
                 mb: 3,
               }}
             >
-              <Typography>Wärmeverlustfaktor F</Typography>
+              <Typography variant="body2">Wärmeverlustfaktor F</Typography>
               <TextField
                 size="small"
                 type="number"
@@ -83,7 +83,7 @@ export default function OuterWallSection({
                 }
               />
 
-              <Typography>Dämmschichtdicke [m]</Typography>
+              <Typography variant="body2">Dämmschichtdicke [m]</Typography>
               <TextField
                 size="small"
                 type="number"
@@ -96,7 +96,9 @@ export default function OuterWallSection({
                 }
               />
 
-              <Typography>Wärmeleitfähigkeit λ [W/mK]</Typography>
+              <Typography variant="body2">
+                Wärmeleitfähigkeit λ [W/mK]
+              </Typography>
               <TextField
                 size="small"
                 type="number"
@@ -110,7 +112,7 @@ export default function OuterWallSection({
               />
             </Box>
 
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Standard‑Konstruktion nach Baujahr
             </Typography>
 
@@ -132,7 +134,7 @@ export default function OuterWallSection({
                     key={index}
                     sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
                   >
-                    <Typography sx={{ minWidth: 120 }}>
+                    <Typography sx={{ minWidth: 120 }} variant="body2">
                       Baujahr&nbsp;{formatBand(band)}
                     </Typography>
                     <TextField
@@ -163,13 +165,13 @@ export default function OuterWallSection({
               )}
             </Box>
 
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Pauschalwerte für den Wärmedurchgangskoeffizienten [W/m²K]
             </Typography>
 
             <TableContainer sx={{ overflowX: "auto" }}>
               <Table size="small">
-                <TableHead>
+                <TableHead sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}>
                   <TableRow>
                     <TableCell>Konstruktion \ Baualtersklasse</TableCell>
                     {yearBands.map((band, bandIndex) => (

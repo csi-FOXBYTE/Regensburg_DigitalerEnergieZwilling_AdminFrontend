@@ -105,7 +105,7 @@ export function ConfigOverview() {
           }}
         >
           <Box>
-            <Typography variant="h1" component="h1" gutterBottom>
+            <Typography variant="h2" component="h1" gutterBottom>
               Systempflege
             </Typography>
             <Typography variant="body1" color="text.secondary">
@@ -115,13 +115,16 @@ export function ConfigOverview() {
           <TextField
             select
             label="Konfigurationsdatei"
-            size="small"
             value={selectedConfigFile}
             onChange={(e) => setselectedConfigFile(e.target.value)}
             sx={{ width: 250 }}
           >
             {configFiles.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
+              <MenuItem
+                key={option.value}
+                value={option.value}
+                sx={{ lineHeight: 1.5 }}
+              >
                 {option.value}
               </MenuItem>
             ))}

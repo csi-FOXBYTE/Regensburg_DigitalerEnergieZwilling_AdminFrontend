@@ -34,7 +34,7 @@ export default function ComunityParameterSection({
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {expandedSections.communityParams ? <ExpandMore /> : <ChevronRight />}
-          <Typography variant="h5" fontWeight="600">
+          <Typography variant="h6" fontWeight="600">
             Kommunale Parameter
           </Typography>
         </Box>
@@ -42,7 +42,7 @@ export default function ComunityParameterSection({
 
       <Collapse in={expandedSections.communityParams}>
         <Box sx={{ p: 3 }}>
-          <Typography variant="h6" fontWeight="600" mb={1}>
+          <Typography variant="subtitle1" fontWeight="600" mb={1}>
             Standard‑Auswahl
           </Typography>
 
@@ -153,7 +153,7 @@ export default function ComunityParameterSection({
             <Box />
           </Box>
 
-          <Typography variant="h6" fontWeight="600" mb={1}>
+          <Typography variant="subtitle1" fontWeight="600" mb={1}>
             Energetische Kennwerte
           </Typography>
 

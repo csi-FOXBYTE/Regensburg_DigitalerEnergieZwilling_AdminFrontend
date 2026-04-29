@@ -52,14 +52,14 @@ export default function OgdSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.topFloor ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h5" fontWeight="600">
+            <Typography variant="h6" fontWeight="600">
               Oberste Geschossdecke
             </Typography>
           </Box>
         </Box>
         <Collapse in={expandedSections.topFloor}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="h6" fontWeight="600" mb={1.5}>
+            <Typography variant="body1" fontWeight="600" mb={1.5}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -72,7 +72,7 @@ export default function OgdSection({
                 mb: 3,
               }}
             >
-              <Typography>Wärmeverlustfaktor F</Typography>
+              <Typography variant="body2">Wärmeverlustfaktor F</Typography>
               <TextField
                 size="small"
                 type="number"
@@ -82,7 +82,7 @@ export default function OgdSection({
                 }
               />
 
-              <Typography>Dämmschichtdicke [m]</Typography>
+              <Typography variant="body2">Dämmschichtdicke [m]</Typography>
               <TextField
                 size="small"
                 type="number"
@@ -95,7 +95,9 @@ export default function OgdSection({
                 }
               />
 
-              <Typography>Wärmeleitfähigkeit λ [W/mK]</Typography>
+              <Typography variant="body2">
+                Wärmeleitfähigkeit λ [W/mK]
+              </Typography>
               <TextField
                 size="small"
                 type="number"
@@ -108,7 +110,7 @@ export default function OgdSection({
                 }
               />
             </Box>
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Standard‑Deckentyp nach Baujahr
             </Typography>
 
@@ -129,7 +131,7 @@ export default function OgdSection({
                     key={bandIndex}
                     sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
                   >
-                    <Typography sx={{ minWidth: 120 }}>
+                    <Typography sx={{ minWidth: 120 }} variant="body2">
                       Baujahr&nbsp;{formatBand(band)}
                     </Typography>
                     <TextField
@@ -156,12 +158,14 @@ export default function OgdSection({
                 ),
               )}
             </Box>
-            <Typography variant="h6" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
             </Typography>
             <TableContainer sx={{ overflowX: "auto" }}>
               <Table size="small">
-                <TableHead sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}>
+                <TableHead
+                  sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}
+                >
                   <TableRow>
                     <TableCell>Konstruktion \ Baualtersklasse</TableCell>
                     {yearBands.map((band, bandIndex) => (
@@ -181,9 +185,7 @@ export default function OgdSection({
                       ceilingIndex: number,
                     ) => (
                       <TableRow key={ceilingType.key}>
-                        <TableCell>
-                          <strong>{lookUpForNames(ceilingType.key)}</strong>
-                        </TableCell>
+                        <TableCell>{lookUpForNames(ceilingType.key)}</TableCell>
                         {yearBands.map((_, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
