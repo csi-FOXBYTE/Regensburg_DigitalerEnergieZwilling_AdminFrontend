@@ -7,6 +7,7 @@ import {
   DialogTitle,
   MenuItem,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -17,7 +18,7 @@ interface EditDialogProps {
     key: string;
     label: string;
     value: any;
-    type?: "text" | "number" | "select";
+    type?: "text" | "number" | "select" | "color";
     required?: boolean;
     options?: Array<{ label: string; value: any }>;
   }>;
@@ -75,11 +76,97 @@ export function EditDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{
+        backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.1)" } },
+        paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
+      }}
+    >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
           {fields.map((field) => {
+            if (field.type === "color") {
+              const colorValue = values[field.key] ?? "#000000";
+              return (
+                <Box key={field.key} sx={{ position: "relative" }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      position: "absolute",
+                      top: -9,
+                      left: 10,
+                      px: 0.5,
+                      bgcolor: "background.paper",
+                      color: "text.secondary",
+                      fontSize: "0.75rem",
+                      lineHeight: 1,
+                      zIndex: 1,
+                    }}
+                  >
+                    {field.label}
+                    {field.required ? " *" : ""}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      px: 1.5,
+                      py: 1.25,
+                      border: "1px solid rgba(0,0,0,0.23)",
+                      borderRadius: 1,
+                      "&:hover": { borderColor: "rgba(0,0,0,0.87)" },
+                    }}
+                  >
+                    <Box sx={{ position: "relative", flexShrink: 0 }}>
+                      <Box
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 1,
+                          bgcolor: colorValue,
+                          border: "1px solid rgba(0,0,0,0.15)",
+                          boxShadow: "inset 0 1px 3px rgba(0,0,0,0.2)",
+                        }}
+                      />
+                      <input
+                        type="color"
+                        value={colorValue}
+                        onChange={(e) =>
+                          setValues({ ...values, [field.key]: e.target.value })
+                        }
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          opacity: 0,
+                          cursor: "pointer",
+                          width: "100%",
+                          height: "100%",
+                          border: "none",
+                          padding: 0,
+                        }}
+                      />
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        color: "text.secondary",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      {colorValue}
+                    </Typography>
+                  </Box>
+                </Box>
+              );
+            }
+
             if (field.type === "select" && field.options) {
               return (
                 <TextField

@@ -1,6 +1,7 @@
 import type {
   DETConfig,
   EnergyEfficiencyClass,
+  HeatFlowDirection,
 } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { DEFAULT_CONFIG } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { produce } from "immer";
@@ -10,6 +11,7 @@ export interface EnergyEfficiencyEntry {
   to?: number;
   from?: number;
   value: EnergyEfficiencyClass;
+  color?: string;
 }
 
 export interface YearBandEntry {
@@ -144,9 +146,9 @@ export const updateSimpleValue = (path: string, value: any) => {
     const keys = path.split(".");
     let current: any = draft;
     for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]];
+      current = current[keys[i]!];
     }
-    current[keys[keys.length - 1]] = value;
+    current[keys[keys.length - 1]!] = value;
   });
 };
 
@@ -233,13 +235,13 @@ export const deleteWindowType = (index: number) => {
 // Add functions
 export const addEnergyEfficiencyClass = (entry: EnergyEfficiencyEntry) => {
   updateConfig((draft) => {
-    draft.general.energyEfficiencyClasses.push(entry);
+    draft.general.energyEfficiencyClasses.push(entry as any);
   });
 };
 
 export const addYearBand = (entry: YearBandEntry) => {
   updateConfig((draft) => {
-    draft.general.generalYearBands.push(entry);
+    draft.general.generalYearBands.push(entry as any);
   });
 };
 
@@ -392,5 +394,185 @@ export const updateWindowsUValue = (
       draft.windows.uValue[constructionIndex].value[yearBandIndex].value =
         value;
     }
+  });
+};
+
+// Top Floor U-Value Updates
+export const updateTopFloorUValue = (
+  typeIndex: number,
+  yearBandIndex: number,
+  value: number,
+) => {
+  updateConfig((draft) => {
+    if (draft.topFloor.uValue[typeIndex]?.value[yearBandIndex] !== undefined) {
+      draft.topFloor.uValue[typeIndex].value[yearBandIndex].value = value;
+    }
+  });
+};
+
+// Missing heating system type delete
+export const deleteHeatingSystemType = (index: number) => {
+  updateConfig((draft) => {
+    draft.heat.heatingSystemTypes.splice(index, 1);
+  });
+};
+
+// Allowed heating system type management per carrier
+export const addAllowedHeatingSystemType = (
+  carrierKey: string,
+  value: string,
+) => {
+  updateConfig((draft) => {
+    const carrier = draft.heat.allowedHeatingSystemTypesByCarrier.find(
+      (c) => c.key === carrierKey,
+    );
+    if (carrier) carrier.allowedValues.push(value);
+  });
+};
+
+export const deleteAllowedHeatingSystemType = (
+  carrierKey: string,
+  index: number,
+) => {
+  updateConfig((draft) => {
+    const carrier = draft.heat.allowedHeatingSystemTypesByCarrier.find(
+      (c) => c.key === carrierKey,
+    );
+    if (carrier) carrier.allowedValues.splice(index, 1);
+  });
+};
+
+// Surface thermal resistance updates
+export const updateInnerSurfaceThermalResistance = (
+  key: HeatFlowDirection,
+  value: number,
+) => {
+  updateConfig((draft) => {
+    const entry = draft.heat.innerSurfaceThermalResistance.find(
+      (e) => e.key === key,
+    );
+    if (entry) entry.value = value;
+  });
+};
+
+export const updateOuterSurfaceThermalResistance = (
+  key: HeatFlowDirection,
+  value: number,
+) => {
+  updateConfig((draft) => {
+    const entry = draft.heat.outerSurfaceThermalResistance.find(
+      (e) => e.key === key,
+    );
+    if (entry) entry.value = value;
+  });
+};
+
+// Net floor area from usable floor area factor (nested: buildingType → basement → value)
+export const updateNetFloorAreaFromUsableFloorAreaFactor = (
+  buildingTypeKey: string,
+  basementKey: boolean,
+  value: number,
+) => {
+  updateConfig((draft) => {
+    const buildingType =
+      draft.general.netFloorAreaFromUsableFloorAreaFactor.find(
+        (entry) => entry.key === buildingTypeKey,
+      );
+    if (!buildingType) return;
+    const basementEntry = buildingType.value.find(
+      (v) => v.key === basementKey,
+    );
+    if (basementEntry) basementEntry.value = value;
+  });
+};
+
+export const updateHeatingPerformanceFactor = (
+  key: string,
+  yearIndex: number,
+  powerIndex: number,
+  value: number,
+) => {
+  updateConfig((draft) => {
+    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (entry) entry.value[yearIndex].value[powerIndex].value = value;
+  });
+};
+
+export const updateTemperatureControlPerformanceFactor = (
+  key: string,
+  yearIndex: number,
+  controlKey: string,
+  value: number,
+) => {
+  updateConfig((draft) => {
+    const entry = (draft.heat.temperatureControlPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (!entry) return;
+    const cell = entry.value[yearIndex]?.value?.find(
+      (v: any) => v.key === controlKey,
+    );
+    if (cell) cell.value = value;
+  });
+};
+
+// Add top floor type (was missing unlike the other addX functions)
+export const addTopFloorType = (entry: any) => {
+  updateConfig((draft) => {
+    draft.topFloor.topFloorTypes.push(entry);
+  });
+};
+
+// Default type selector updates
+export const updateTopFloorDefaultType = (index: number, value: string) => {
+  updateConfig((draft) => {
+    const entry = draft.topFloor.defaultTopFloorType[index];
+    if (entry) entry.value = value;
+  });
+};
+
+export const updateWindowDefaultType = (index: number, value: string) => {
+  updateConfig((draft) => {
+    const entry = (draft.windows.defaultWindowType as any[])[index];
+    if (entry) entry.value = value;
+  });
+};
+
+export const toggleAllowedBottomFloorConstructionType = (
+  groupIndex: number,
+  value: string,
+  checked: boolean,
+) => {
+  updateConfig((draft) => {
+    const group = (draft.bottomFloor.allowedConstructionTypesByHeatedCellar as any[])[groupIndex];
+    if (!group) return;
+    if (checked) {
+      if (!group.allowedValues.includes(value)) group.allowedValues.push(value);
+    } else {
+      group.allowedValues = group.allowedValues.filter((v: string) => v !== value);
+    }
+  });
+};
+
+export const updateBottomFloorDefaultConstructionType = (
+  groupIndex: number,
+  bandIndex: number,
+  value: string,
+) => {
+  updateConfig((draft) => {
+    const group = (draft.bottomFloor.defaultConstructionType as any[])[groupIndex];
+    if (group?.value?.[bandIndex]) group.value[bandIndex].value = value;
+  });
+};
+
+export const updateOuterWallDefaultConstructionType = (
+  index: number,
+  value: string,
+) => {
+  updateConfig((draft) => {
+    const entry = (draft.outerWall.defaultConstructionType as any[])[index];
+    if (entry) entry.value = value;
   });
 };

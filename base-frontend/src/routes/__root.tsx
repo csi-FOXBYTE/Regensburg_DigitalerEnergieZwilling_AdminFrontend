@@ -2,6 +2,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { Toaster } from "sonner";
 import "../lib/localization/i18next";
 import theme from "../theme/theme";
 
@@ -20,6 +21,7 @@ function RootComponent() {
           <Outlet />
         </QueryClientProvider>
       </ThemeProvider>
+      <Toaster richColors position="top-right" />
     </>
   );
 }
