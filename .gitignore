@@ -33,3 +33,6 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+#cache
+.pnpm-store
