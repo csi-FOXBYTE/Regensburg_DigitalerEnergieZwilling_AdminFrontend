@@ -1,7 +1,6 @@
 {
     "i18n-ally.localesPaths": [
-        "src/locales",
-        "src/modules/viewer/locales"
+        "src/locales"
     ],
-    "i18n-ally.keystyle": "nested"
+    "git.ignoreLimitWarning": true
 }
