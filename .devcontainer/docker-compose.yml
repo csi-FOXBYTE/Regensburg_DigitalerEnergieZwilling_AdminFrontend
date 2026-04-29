@@ -1,12 +1,11 @@
-version: "3.9"
-name: rg-dez-admin-frontend
 services:
   dev:
-    build:
-      context: ..
-      dockerfile: .devcontainer/Dockerfile
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
     volumes:
-      - ..:/workspace
+      - ..:/workspace:cached
     command: sleep infinity
     ports:
-      - 4322:4321
+      - "5173:5173"
+      - "8080:8080"
+    env_file:
+      - .env

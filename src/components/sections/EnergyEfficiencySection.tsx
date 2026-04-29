@@ -29,21 +29,6 @@ import {
 import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 import { EditDialog } from "../EditDialog";
 
-const COLOR_MAP: Record<string, string> = {
-  "A++": "#008f34",
-  "A+": "#22c55e",
-  A: "#84cc16",
-  B: "#eab308",
-  C: "#f97316",
-  D: "#ef4444",
-  E: "#dc2626",
-  F: "#991b1b",
-  G: "#7f1d1d",
-};
-
-function getChipColor(energyClass: string): string {
-  return COLOR_MAP[energyClass] ?? "#6b7280";
-}
 
 export function EnergyEfficiencySection({
   configStore,
@@ -101,7 +86,7 @@ export function EnergyEfficiencySection({
           key: "color",
           label: "Farbe",
           value:
-            (item as EnergyEfficiencyEntry).color ?? getChipColor(item.value),
+            (item as EnergyEfficiencyEntry).color ?? "#6b7280",
           type: "color",
           required: true,
         },
@@ -224,9 +209,7 @@ export function EnergyEfficiencySection({
                           size="small"
                           sx={{
                             minWidth: 50,
-                            bgcolor:
-                              (item as EnergyEfficiencyEntry).color ??
-                              getChipColor(item.value),
+                            bgcolor: (item as EnergyEfficiencyEntry).color ?? "#6b7280",
                             color: "white",
                             fontWeight: "600",
                           }}
@@ -241,15 +224,12 @@ export function EnergyEfficiencySection({
                               width: 20,
                               height: 20,
                               borderRadius: 0.5,
-                              bgcolor:
-                                (item as EnergyEfficiencyEntry).color ??
-                                getChipColor(item.value),
+                              bgcolor: (item as EnergyEfficiencyEntry).color ?? "#6b7280",
                               border: "1px solid rgba(0,0,0,0.15)",
                             }}
                           />
                           <Typography variant="body1">
-                            {(item as EnergyEfficiencyEntry).color ??
-                              getChipColor(item.value)}
+                            {(item as EnergyEfficiencyEntry).color ?? "#6b7280"}
                           </Typography>
                         </Box>
                       </TableCell>

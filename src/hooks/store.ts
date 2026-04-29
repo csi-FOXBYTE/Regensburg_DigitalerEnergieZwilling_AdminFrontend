@@ -19,7 +19,28 @@ export interface YearBandEntry {
   to?: number;
 }
 
-export const config = atom<DETConfig>(DEFAULT_CONFIG);
+const DEFAULT_ENERGY_CLASS_COLORS: Record<string, string> = {
+  "A+": "#008542",
+  A: "#3aaa35",
+  B: "#94c11c",
+  C: "#c7d21f",
+  D: "#f9e000",
+  E: "#f6a800",
+  F: "#f07d00",
+  G: "#e94e0f",
+  H: "#e2001a",
+};
+
+const withDefaultColors = (cfg: DETConfig): DETConfig =>
+  produce(cfg, (draft) => {
+    draft.general.energyEfficiencyClasses.forEach((entry: any) => {
+      if (!entry.color) {
+        entry.color = DEFAULT_ENERGY_CLASS_COLORS[entry.value] ?? "#6b7280";
+      }
+    });
+  });
+
+export const config = atom<DETConfig>(withDefaultColors(DEFAULT_CONFIG));
 
 // Helper function for config-updates: Immer immer nutzen!!
 export const updateConfig = (updater: (draft: DETConfig) => void) => {
@@ -86,9 +107,25 @@ export const updatePrimaryEnergyCarrier = (
   });
 };
 
-export const deletePrimaryEnergyCarrier = (index: number) => {
+export const deletePrimaryEnergyCarrier = (value: string) => {
   updateConfig((draft) => {
-    draft.heat.primaryEnergyCarriers.splice(index, 1);
+    const idx = draft.heat.primaryEnergyCarriers.findIndex(
+      (c) => c.value === value,
+    );
+    if (idx >= 0) draft.heat.primaryEnergyCarriers.splice(idx, 1);
+    draft.heat.primaryEnergyCarrierEfficiencyFactor =
+      draft.heat.primaryEnergyCarrierEfficiencyFactor.filter(
+        (c: any) => c.key !== value,
+      );
+    draft.heat.co2Factor = draft.heat.co2Factor.filter(
+      (c: any) => c.key !== value,
+    );
+    draft.heat.primaryEnergyCarrierData =
+      draft.heat.primaryEnergyCarrierData.filter((c: any) => c.key !== value);
+    draft.heat.allowedHeatingSystemTypesByCarrier =
+      draft.heat.allowedHeatingSystemTypesByCarrier.filter(
+        (c: any) => c.key !== value,
+      );
   });
 };
 
@@ -248,12 +285,56 @@ export const addYearBand = (entry: YearBandEntry) => {
 export const addPrimaryEnergyCarrier = (entry: any) => {
   updateConfig((draft) => {
     draft.heat.primaryEnergyCarriers.push(entry);
+    draft.heat.primaryEnergyCarrierEfficiencyFactor.push({
+      key: entry.value,
+      value: 0,
+    });
+    draft.heat.co2Factor.push({ key: entry.value, value: 0 });
+    draft.heat.primaryEnergyCarrierData.push({
+      key: entry.value,
+      value: { energyPerUnit: 0, unitRate: 0, baseRate: 0 },
+    });
+    draft.heat.allowedHeatingSystemTypesByCarrier.push({
+      key: entry.value,
+      allowedValues: [],
+    });
   });
 };
 
 export const addHeatingSystemType = (entry: any) => {
   updateConfig((draft) => {
     draft.heat.heatingSystemTypes.push(entry);
+
+    const surfaceTypeKeys = draft.heat.heatingSurfaceTypes.map(
+      (s: any) => s.value,
+    );
+    const existingPerf = (draft.heat.heatingPerformanceFactor as any[])[0];
+    const existingTemp = (
+      draft.heat.temperatureControlPerformanceFactor as any[]
+    )[0];
+
+    const perfYearBands = existingPerf
+      ? existingPerf.value.map((yearBand: any) => ({
+          ...yearBand,
+          value: [{ value: 0 }],
+        }))
+      : [{ value: [{ value: 0 }] }];
+
+    const tempYearBands = existingTemp
+      ? existingTemp.value.map((yearBand: any) => ({
+          ...yearBand,
+          value: surfaceTypeKeys.map((key: string) => ({ key, value: 0 })),
+        }))
+      : [{ value: surfaceTypeKeys.map((key: string) => ({ key, value: 0 })) }];
+
+    (draft.heat.heatingPerformanceFactor as any[]).push({
+      key: entry.value,
+      value: perfYearBands,
+    });
+    (draft.heat.temperatureControlPerformanceFactor as any[]).push({
+      key: entry.value,
+      value: tempYearBands,
+    });
   });
 };
 
@@ -410,10 +491,28 @@ export const updateTopFloorUValue = (
   });
 };
 
-// Missing heating system type delete
 export const deleteHeatingSystemType = (index: number) => {
   updateConfig((draft) => {
+    const value = draft.heat.heatingSystemTypes[index]?.value;
     draft.heat.heatingSystemTypes.splice(index, 1);
+    if (!value) return;
+    (draft.heat.heatingPerformanceFactor as any[]).splice(
+      (draft.heat.heatingPerformanceFactor as any[]).findIndex(
+        (e) => e.key === value,
+      ),
+      1,
+    );
+    (draft.heat.temperatureControlPerformanceFactor as any[]).splice(
+      (draft.heat.temperatureControlPerformanceFactor as any[]).findIndex(
+        (e) => e.key === value,
+      ),
+      1,
+    );
+    draft.heat.allowedHeatingSystemTypesByCarrier.forEach((carrier: any) => {
+      carrier.allowedValues = carrier.allowedValues.filter(
+        (v: string) => v !== value,
+      );
+    });
   });
 };
 
@@ -479,9 +578,7 @@ export const updateNetFloorAreaFromUsableFloorAreaFactor = (
         (entry) => entry.key === buildingTypeKey,
       );
     if (!buildingType) return;
-    const basementEntry = buildingType.value.find(
-      (v) => v.key === basementKey,
-    );
+    const basementEntry = buildingType.value.find((v) => v.key === basementKey);
     if (basementEntry) basementEntry.value = value;
   });
 };
@@ -507,14 +604,174 @@ export const updateTemperatureControlPerformanceFactor = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    const entry = (draft.heat.temperatureControlPerformanceFactor as any[]).find(
-      (e) => e.key === key,
-    );
+    const entry = (
+      draft.heat.temperatureControlPerformanceFactor as any[]
+    ).find((e) => e.key === key);
     if (!entry) return;
     const cell = entry.value[yearIndex]?.value?.find(
       (v: any) => v.key === controlKey,
     );
     if (cell) cell.value = value;
+  });
+};
+
+export const updateHeatingPerformanceFactorYearBand = (
+  key: string,
+  yearIndex: number,
+  from?: number,
+  to?: number,
+) => {
+  updateConfig((draft) => {
+    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (!entry) return;
+    const row = entry.value[yearIndex];
+    if (!row) return;
+    if (from !== undefined) row.from = from;
+    else delete row.from;
+    if (to !== undefined) row.to = to;
+    else delete row.to;
+  });
+};
+
+export const updateTemperatureControlYearBand = (
+  key: string,
+  yearIndex: number,
+  from?: number,
+  to?: number,
+) => {
+  updateConfig((draft) => {
+    const entry = (
+      draft.heat.temperatureControlPerformanceFactor as any[]
+    ).find((e) => e.key === key);
+    if (!entry) return;
+    const row = entry.value[yearIndex];
+    if (!row) return;
+    if (from !== undefined) row.from = from;
+    else delete row.from;
+    if (to !== undefined) row.to = to;
+    else delete row.to;
+  });
+};
+
+export const addHeatingPerformanceFactorRow = (
+  key: string,
+  yearBand: { from?: number; to?: number },
+) => {
+  updateConfig((draft) => {
+    let entry = (draft.heat.heatingPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (!entry) {
+      entry = { key, value: [] };
+      (draft.heat.heatingPerformanceFactor as any[]).push(entry);
+    }
+    const numCols = entry.value[0]?.value.length ?? 1;
+    entry.value.push({
+      ...yearBand,
+      value: Array.from({ length: numCols }, () => ({ value: 0 })),
+    });
+  });
+};
+
+export const deleteHeatingPerformanceFactorRow = (
+  key: string,
+  yearIndex: number,
+) => {
+  updateConfig((draft) => {
+    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (entry) entry.value.splice(yearIndex, 1);
+  });
+};
+
+export const addHeatingPerformanceFactorColumn = (
+  key: string,
+  powerBand: { from?: number; to?: number },
+) => {
+  updateConfig((draft) => {
+    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (!entry) return;
+    entry.value.forEach((yearRow: any) =>
+      yearRow.value.push({ ...powerBand, value: 0 }),
+    );
+  });
+};
+
+export const deleteHeatingPerformanceFactorColumn = (
+  key: string,
+  colIndex: number,
+) => {
+  updateConfig((draft) => {
+    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (!entry) return;
+    entry.value.forEach((yearRow: any) => yearRow.value.splice(colIndex, 1));
+  });
+};
+
+export const addTemperatureControlRow = (
+  key: string,
+  yearBand: { from?: number; to?: number },
+) => {
+  updateConfig((draft) => {
+    let entry = (draft.heat.temperatureControlPerformanceFactor as any[]).find(
+      (e) => e.key === key,
+    );
+    if (!entry) {
+      entry = { key, value: [] };
+      (draft.heat.temperatureControlPerformanceFactor as any[]).push(entry);
+    }
+    const controlKeys: string[] =
+      entry.value[0]?.value.map((v: any) => v.key) ?? [];
+    entry.value.push({
+      ...yearBand,
+      value: controlKeys.map((k) => ({ key: k, value: 0 })),
+    });
+  });
+};
+
+export const deleteTemperatureControlRow = (key: string, yearIndex: number) => {
+  updateConfig((draft) => {
+    const entry = (
+      draft.heat.temperatureControlPerformanceFactor as any[]
+    ).find((e) => e.key === key);
+    if (entry) entry.value.splice(yearIndex, 1);
+  });
+};
+
+export const addTemperatureControlColumn = (
+  key: string,
+  controlKey: string,
+) => {
+  updateConfig((draft) => {
+    const entry = (
+      draft.heat.temperatureControlPerformanceFactor as any[]
+    ).find((e) => e.key === key);
+    if (!entry) return;
+    entry.value.forEach((yearRow: any) =>
+      yearRow.value.push({ key: controlKey, value: 0 }),
+    );
+  });
+};
+
+export const deleteTemperatureControlColumn = (
+  key: string,
+  controlKey: string,
+) => {
+  updateConfig((draft) => {
+    const entry = (
+      draft.heat.temperatureControlPerformanceFactor as any[]
+    ).find((e) => e.key === key);
+    if (!entry) return;
+    entry.value.forEach((yearRow: any) => {
+      yearRow.value = yearRow.value.filter((v: any) => v.key !== controlKey);
+    });
   });
 };
 
@@ -546,12 +803,16 @@ export const toggleAllowedBottomFloorConstructionType = (
   checked: boolean,
 ) => {
   updateConfig((draft) => {
-    const group = (draft.bottomFloor.allowedConstructionTypesByHeatedCellar as any[])[groupIndex];
+    const group = (
+      draft.bottomFloor.allowedConstructionTypesByHeatedCellar as any[]
+    )[groupIndex];
     if (!group) return;
     if (checked) {
       if (!group.allowedValues.includes(value)) group.allowedValues.push(value);
     } else {
-      group.allowedValues = group.allowedValues.filter((v: string) => v !== value);
+      group.allowedValues = group.allowedValues.filter(
+        (v: string) => v !== value,
+      );
     }
   });
 };
@@ -562,7 +823,9 @@ export const updateBottomFloorDefaultConstructionType = (
   value: string,
 ) => {
   updateConfig((draft) => {
-    const group = (draft.bottomFloor.defaultConstructionType as any[])[groupIndex];
+    const group = (draft.bottomFloor.defaultConstructionType as any[])[
+      groupIndex
+    ];
     if (group?.value?.[bandIndex]) group.value[bandIndex].value = value;
   });
 };

@@ -95,7 +95,7 @@ export function ConfigOverview() {
   );
 
   return (
-    <Container maxWidth={false} sx={{ py: 4, maxWidth: 1152 }}>
+    <Container maxWidth={false} sx={{ py: 4, maxWidth: 1170 }}>
       <Box sx={{ mb: 4 }}>
         <Box
           sx={{
@@ -225,7 +225,7 @@ export function ConfigOverview() {
         sx={{
           position: "fixed",
           bottom: 32,
-          right: 128,
+          right: "max(128px, calc((100vw - 1170px) / 2 + 32px))",
           zIndex: 1200,
         }}
       >

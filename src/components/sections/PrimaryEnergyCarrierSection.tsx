@@ -190,7 +190,7 @@ export function PrimaryEnergyCarrierSection({
                           size="small"
                           onClick={() =>
                             handleDeleteConfirm(() => {
-                              deletePrimaryEnergyCarrier(index);
+                              deletePrimaryEnergyCarrier(item.value);
                               toast.success("Energieträger gelöscht");
                             })
                           }

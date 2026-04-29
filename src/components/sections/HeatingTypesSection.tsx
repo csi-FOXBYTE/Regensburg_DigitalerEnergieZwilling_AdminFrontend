@@ -1,4 +1,10 @@
-import { ChevronRight, Delete, Edit, ExpandMore } from "@mui/icons-material";
+import {
+  Add,
+  ChevronRight,
+  Delete,
+  Edit,
+  ExpandMore,
+} from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -20,12 +26,22 @@ import {
   type EditState,
 } from "../../features/ConfigOverview";
 import {
+  addHeatingPerformanceFactorColumn,
+  addHeatingPerformanceFactorRow,
   addHeatingSystemType,
+  addTemperatureControlColumn,
+  addTemperatureControlRow,
   config,
+  deleteHeatingPerformanceFactorColumn,
+  deleteHeatingPerformanceFactorRow,
   deleteHeatingSystemType,
+  deleteTemperatureControlColumn,
+  deleteTemperatureControlRow,
   updateHeatingPerformanceFactor,
+  updateHeatingPerformanceFactorYearBand,
   updateHeatingSystemType,
   updateTemperatureControlPerformanceFactor,
+  updateTemperatureControlYearBand,
 } from "../../hooks/store";
 import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
 import { EditDialog } from "../EditDialog";
@@ -44,7 +60,7 @@ function formatPowerRange(r: RangeEntry | null): string {
   if (r.from != null && r.to != null) return `${r.from}–${r.to} kW`;
   if (r.to != null) return `≤ ${r.to} kW`;
   if (r.from != null) return `> ${r.from} kW`;
-  return "";
+  return "Alle Leistungen";
 }
 
 function InlineNumberCell({
@@ -108,6 +124,77 @@ function InlineNumberCell({
   );
 }
 
+function InlineYearBandCell({
+  from,
+  to,
+  onCommit,
+}: {
+  from?: number;
+  to?: number;
+  onCommit: (from?: number, to?: number) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draftFrom, setDraftFrom] = useState("");
+  const [draftTo, setDraftTo] = useState("");
+
+  const commit = () => {
+    const f = draftFrom !== "" ? Number(draftFrom) : undefined;
+    const t = draftTo !== "" ? Number(draftTo) : undefined;
+    onCommit(f, t);
+    setEditing(false);
+  };
+
+  if (!editing) {
+    return (
+      <Box
+        onClick={() => {
+          setDraftFrom(from != null ? String(from) : "");
+          setDraftTo(to != null ? String(to) : "");
+          setEditing(true);
+        }}
+        sx={{ cursor: "text", px: 1, py: 0.5, borderRadius: 0.5, "&:hover": { bgcolor: "action.hover" } }}
+      >
+        {formatYearBand({ from, to })}
+      </Box>
+    );
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: 52,
+    textAlign: "center",
+    border: "1px solid #1976d2",
+    borderRadius: 4,
+    padding: "2px 4px",
+    fontSize: "inherit",
+    outline: "none",
+    background: "#fff",
+  };
+
+  return (
+    <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
+      <input
+        autoFocus
+        type="number"
+        placeholder="von"
+        value={draftFrom}
+        onChange={(e) => setDraftFrom(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
+        style={inputStyle}
+      />
+      <span>–</span>
+      <input
+        type="number"
+        placeholder="bis"
+        value={draftTo}
+        onChange={(e) => setDraftTo(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
+        style={inputStyle}
+      />
+    </Box>
+  );
+}
+
 const headerCellSx = {
   fontWeight: 700,
   bgcolor: "#E5E5E5",
@@ -116,6 +203,17 @@ const headerCellSx = {
 };
 
 const colDividerSx = { borderRight: "1px solid", borderColor: "divider" };
+
+function buildYearBand(values: Record<string, any>): {
+  from?: number;
+  to?: number;
+} {
+  const result: { from?: number; to?: number } = {};
+  if (values.from !== "" && values.from != null)
+    result.from = Number(values.from);
+  if (values.to !== "" && values.to != null) result.to = Number(values.to);
+  return result;
+}
 
 export default function HeatingTypesSection({
   configStore,
@@ -206,6 +304,73 @@ export default function HeatingTypesSection({
           draft.localization.en = values.de;
         });
         toast.success("Heizungstyp aktualisiert");
+      },
+    });
+  };
+
+  const openAddRowDialog = (itemValue: string, isPerf: boolean) => {
+    setEditState({
+      open: true,
+      title: "Zeile hinzufügen",
+      fields: [
+        {
+          key: "from",
+          label: "Baujahr von (optional)",
+          value: "",
+          type: "number",
+        },
+        {
+          key: "to",
+          label: "Baujahr bis (optional)",
+          value: "",
+          type: "number",
+        },
+      ],
+      onSave: (values) => {
+        const band = buildYearBand(values);
+        if (isPerf) addHeatingPerformanceFactorRow(itemValue, band);
+        else addTemperatureControlRow(itemValue, band);
+      },
+    });
+  };
+
+  const openAddPerfColumnDialog = (itemValue: string) => {
+    setEditState({
+      open: true,
+      title: "Leistungsstufe hinzufügen",
+      fields: [
+        { key: "from", label: "Von kW (optional)", value: "", type: "number" },
+        { key: "to", label: "Bis kW (optional)", value: "", type: "number" },
+      ],
+      onSave: (values) => {
+        addHeatingPerformanceFactorColumn(itemValue, buildYearBand(values));
+      },
+    });
+  };
+
+  const openAddTempColumnDialog = (
+    itemValue: string,
+    existingKeys: string[],
+  ) => {
+    const available = configStore.heat.heatingSurfaceTypes
+      .filter((ht) => !existingKeys.includes(ht.value))
+      .map((ht) => ({ label: ht.localization.de, value: ht.value }));
+    if (available.length === 0) return;
+    setEditState({
+      open: true,
+      title: "Heizfläche hinzufügen",
+      fields: [
+        {
+          key: "controlKey",
+          label: "Heizfläche",
+          value: available[0].value,
+          type: "select",
+          options: available,
+          required: true,
+        },
+      ],
+      onSave: (values) => {
+        addTemperatureControlColumn(itemValue, values.controlKey);
       },
     });
   };
@@ -332,21 +497,22 @@ export default function HeatingTypesSection({
                         >
                           <Collapse in={isOpen} timeout="auto" unmountOnExit>
                             <Box sx={{ p: 2 }}>
+                              {/* Heizleistungsfaktoren */}
                               <Typography
-                                sx={{ mb: 2 }}
-                                fontWeight={"bold"}
+                                sx={{ mb: 1 }}
+                                fontWeight="bold"
                                 variant="body2"
                               >
                                 Heizleistungsfaktoren (Aufwandzahl e)
                               </Typography>
-                              {perfEntry ? (
+                              {perfEntry && perfEntry.value.length > 0 ? (
                                 <TableContainer
                                   component={Paper}
                                   variant="outlined"
                                   sx={{
                                     borderRadius: 1,
                                     overflow: "hidden",
-                                    mb: 2.5,
+                                    mb: 0.5,
                                   }}
                                 >
                                   <Table size="small">
@@ -359,7 +525,7 @@ export default function HeatingTypesSection({
                                             minWidth: 110,
                                           }}
                                         >
-                                          Baujahr
+                                          Baualtersklasse
                                         </TableCell>
                                         {powerCols.map((range, i) => (
                                           <TableCell
@@ -367,14 +533,43 @@ export default function HeatingTypesSection({
                                             align="center"
                                             sx={{
                                               ...headerCellSx,
-                                              ...(i < powerCols.length - 1
-                                                ? colDividerSx
-                                                : {}),
+                                              ...(i < powerCols.length - 1 ? colDividerSx : {}),
+                                              "& .col-del": { opacity: 0, transition: "opacity 0.15s" },
+                                              "&:hover .col-del": { opacity: 1 },
                                             }}
                                           >
-                                            {formatPowerRange(range)}
+                                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
+                                              {formatPowerRange(range)}
+                                              {powerCols.length > 1 && (
+                                                <IconButton
+                                                  className="col-del"
+                                                  size="small"
+                                                  onClick={() => deleteHeatingPerformanceFactorColumn(item.value, i)}
+                                                  sx={{ p: 0 }}
+                                                >
+                                                  <Delete sx={{ fontSize: 14 }} />
+                                                </IconButton>
+                                              )}
+                                            </Box>
                                           </TableCell>
                                         ))}
+                                        <TableCell
+                                          sx={{ ...headerCellSx }}
+                                          padding="none"
+                                          align="center"
+                                          width={36}
+                                        >
+                                          <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                              openAddPerfColumnDialog(
+                                                item.value,
+                                              )
+                                            }
+                                          >
+                                            <Add fontSize="small" />
+                                          </IconButton>
+                                        </TableCell>
                                       </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -388,13 +583,14 @@ export default function HeatingTypesSection({
                                               },
                                             }}
                                           >
-                                            <TableCell
-                                              sx={{
-                                                ...colDividerSx,
-                                                fontWeight: 500,
-                                              }}
-                                            >
-                                              {formatYearBand(datedEntry)}
+                                            <TableCell sx={{ ...colDividerSx, fontWeight: 500 }}>
+                                              {perfEntry.value.length === 1 ? "alle" : (
+                                                <InlineYearBandCell
+                                                  from={datedEntry.from}
+                                                  to={datedEntry.to}
+                                                  onCommit={(f, t) => updateHeatingPerformanceFactorYearBand(item.value, yearIndex, f, t)}
+                                                />
+                                              )}
                                             </TableCell>
                                             {datedEntry.value.map(
                                               (cell, ci) => (
@@ -423,33 +619,68 @@ export default function HeatingTypesSection({
                                                 </TableCell>
                                               ),
                                             )}
+                                            <TableCell
+                                              padding="none"
+                                              align="center"
+                                            >
+                                              {perfEntry.value.length > 1 && (
+                                                <IconButton
+                                                  size="small"
+                                                  onClick={() =>
+                                                    deleteHeatingPerformanceFactorRow(
+                                                      item.value,
+                                                      yearIndex,
+                                                    )
+                                                  }
+                                                >
+                                                  <Delete fontSize="small" />
+                                                </IconButton>
+                                              )}
+                                            </TableCell>
                                           </TableRow>
                                         ),
                                       )}
                                     </TableBody>
                                   </Table>
                                 </TableContainer>
-                              ) : (
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                  mb={2.5}
+                              ) : null}
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                  mb: 2.5,
+                                }}
+                              >
+                                <Button
+                                  size="small"
+                                  startIcon={<Add />}
+                                  onClick={() =>
+                                    openAddRowDialog(item.value, true)
+                                  }
+                                  sx={{
+                                    color: "text.secondary",
+                                    fontSize: "0.75rem",
+                                  }}
                                 >
-                                  Keine Daten vorhanden
-                                </Typography>
-                              )}
+                                  Zeile hinzufügen
+                                </Button>
+                              </Box>
                               <Typography
-                                sx={{ mb: 2 }}
-                                fontWeight={"bold"}
+                                sx={{ mb: 1 }}
+                                fontWeight="bold"
                                 variant="body2"
                               >
                                 Temperaturregelungs‑Leistungsfaktoren
                               </Typography>
-                              {tempEntry ? (
+                              {tempEntry && tempEntry.value.length > 0 ? (
                                 <TableContainer
                                   component={Paper}
                                   variant="outlined"
-                                  sx={{ borderRadius: 1, overflow: "hidden" }}
+                                  sx={{
+                                    borderRadius: 1,
+                                    overflow: "hidden",
+                                    mb: 0.5,
+                                  }}
                                 >
                                   <Table size="small">
                                     <TableHead>
@@ -461,7 +692,7 @@ export default function HeatingTypesSection({
                                             minWidth: 110,
                                           }}
                                         >
-                                          Baujahr
+                                          Baualtersklasse
                                         </TableCell>
                                         {controlTypes.map((ct, ci) => (
                                           <TableCell
@@ -469,16 +700,46 @@ export default function HeatingTypesSection({
                                             align="center"
                                             sx={{
                                               ...headerCellSx,
-                                              ...(ci < controlTypes.length - 1
-                                                ? colDividerSx
-                                                : {}),
+                                              ...(ci < controlTypes.length - 1 ? colDividerSx : {}),
+                                              "& .col-del": { opacity: 0, transition: "opacity 0.15s" },
+                                              "&:hover .col-del": { opacity: 1 },
                                             }}
                                           >
-                                            {configStore.heat.heatingSurfaceTypes.find(
-                                              (ht) => ht.value === ct.key,
-                                            )?.localization.de ?? ct.key}
+                                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
+                                              {configStore.heat.heatingSurfaceTypes.find((ht) => ht.value === ct.key)?.localization.de ?? ct.key}
+                                              {controlTypes.length > 1 && (
+                                                <IconButton
+                                                  className="col-del"
+                                                  size="small"
+                                                  onClick={() => deleteTemperatureControlColumn(item.value, ct.key)}
+                                                  sx={{ p: 0 }}
+                                                >
+                                                  <Delete sx={{ fontSize: 14 }} />
+                                                </IconButton>
+                                              )}
+                                            </Box>
                                           </TableCell>
                                         ))}
+                                        <TableCell
+                                          sx={{ ...headerCellSx }}
+                                          padding="none"
+                                          align="center"
+                                          width={36}
+                                        >
+                                          <IconButton
+                                            size="small"
+                                            onClick={() =>
+                                              openAddTempColumnDialog(
+                                                item.value,
+                                                controlTypes.map(
+                                                  (ct) => ct.key,
+                                                ),
+                                              )
+                                            }
+                                          >
+                                            <Add fontSize="small" />
+                                          </IconButton>
+                                        </TableCell>
                                       </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -492,13 +753,14 @@ export default function HeatingTypesSection({
                                               },
                                             }}
                                           >
-                                            <TableCell
-                                              sx={{
-                                                ...colDividerSx,
-                                                fontWeight: 500,
-                                              }}
-                                            >
-                                              {formatYearBand(datedEntry)}
+                                            <TableCell sx={{ ...colDividerSx, fontWeight: 500 }}>
+                                              {tempEntry.value.length === 1 ? "alle" : (
+                                                <InlineYearBandCell
+                                                  from={datedEntry.from}
+                                                  to={datedEntry.to}
+                                                  onCommit={(f, t) => updateTemperatureControlYearBand(item.value, yearIndex, f, t)}
+                                                />
+                                              )}
                                             </TableCell>
                                             {controlTypes.map((ct, ci) => (
                                               <TableCell
@@ -528,20 +790,51 @@ export default function HeatingTypesSection({
                                                 />
                                               </TableCell>
                                             ))}
+                                            <TableCell
+                                              padding="none"
+                                              align="center"
+                                            >
+                                              {tempEntry.value.length > 1 && (
+                                                <IconButton
+                                                  size="small"
+                                                  onClick={() =>
+                                                    deleteTemperatureControlRow(
+                                                      item.value,
+                                                      yearIndex,
+                                                    )
+                                                  }
+                                                >
+                                                  <Delete fontSize="small" />
+                                                </IconButton>
+                                              )}
+                                            </TableCell>
                                           </TableRow>
                                         ),
                                       )}
                                     </TableBody>
                                   </Table>
                                 </TableContainer>
-                              ) : (
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
+                              ) : null}
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                }}
+                              >
+                                <Button
+                                  size="small"
+                                  startIcon={<Add />}
+                                  onClick={() =>
+                                    openAddRowDialog(item.value, false)
+                                  }
+                                  sx={{
+                                    color: "text.secondary",
+                                    fontSize: "0.75rem",
+                                  }}
                                 >
-                                  Keine Daten vorhanden
-                                </Typography>
-                              )}
+                                  Zeile hinzufügen
+                                </Button>
+                              </Box>
                             </Box>
                           </Collapse>
                         </TableCell>
