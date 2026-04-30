@@ -7,6 +7,38 @@ import { DEFAULT_CONFIG } from "@csi-foxbyte/regensburg_digitalerenergiezwilling
 import { produce } from "immer";
 import { atom } from "nanostores";
 
+export interface Foerderprogramm {
+  id: string;
+  name: string;
+  link: string;
+  description: string;
+  promotionType: "percent" | "absolute";
+  promotionAmount: number;
+  dependencies: string[];
+}
+
+export const foerderprogramme = atom<Foerderprogramm[]>([]);
+
+export const addFoerderprogramm = (entry: Foerderprogramm) => {
+  foerderprogramme.set([...foerderprogramme.get(), entry]);
+};
+
+export const updateFoerderprogramm = (
+  id: string,
+  updater: (draft: Foerderprogramm) => void,
+) => {
+  foerderprogramme.set(
+    produce(foerderprogramme.get(), (draft) => {
+      const item = draft.find((f) => f.id === id);
+      if (item) updater(item);
+    }),
+  );
+};
+
+export const deleteFoerderprogramm = (id: string) => {
+  foerderprogramme.set(foerderprogramme.get().filter((f) => f.id !== id));
+};
+
 export interface EnergyEfficiencyEntry {
   to?: number;
   from?: number;

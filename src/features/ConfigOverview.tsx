@@ -1,4 +1,5 @@
 import ComunityParameterSection from "@/components/sections/ComunityParameterSection";
+import FoerderprogrammeSection from "@/components/sections/FoerderprogrammeSection";
 import HeatingSurfaceTypesSection from "@/components/sections/HeatingSurfaceTypesSection";
 import HeatingTypesSection from "@/components/sections/HeatingTypesSection";
 import OgdSection from "@/components/sections/OgdSection";
@@ -21,6 +22,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../components/ConfirmDeleteDialog";
 import { EditDialog } from "../components/EditDialog";
+import { SaveDialog } from "../components/SaveDialog";
 import { EnergyEfficiencySection } from "../components/sections/EnergyEfficiencySection";
 import { GeneralParametersSection } from "../components/sections/GeneralParametersSection";
 import { YearBandSection } from "../components/sections/YearBandSection";
@@ -80,15 +82,28 @@ export function ConfigOverview() {
     }));
   };
 
-  const handleSaveAll = () => {
-    toast.success("Konfiguration gespeichert");
-  };
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
-  const configFiles = [
+  const configFilesDummies = [
     { value: "config1.json" },
     { value: "currentconfig.json" },
     { value: "default.json" },
   ];
+
+  const [configFiles, setConfigFiles] = useState(configFilesDummies);
+
+  const handleSaveAll = (fileName: string) => {
+    if (!fileName.endsWith(".json")) {
+      toast.error(`Konfigurationsdatei muss mit .json enden`);
+    } else if (configFiles.find((file) => file.value == fileName)) {
+      toast.error(`Es existiert schon eine Datei mit den Namen „${fileName}" `);
+    } else {
+      setConfigFiles((prev) => [...prev, { value: fileName }]);
+      setselectedConfigFile(fileName);
+      toast.success(`Konfiguration gespeichert als „${fileName}"`);
+      // Deal with new config that is contained in the nanostore
+    }
+  };
 
   const [selectedConfigFile, setselectedConfigFile] = useState<string>(
     configFiles[2]!.value,
@@ -218,6 +233,10 @@ export function ConfigOverview() {
         expandedSections={expandedSections}
         toggleSection={toggleSection}
       />
+      <FoerderprogrammeSection
+        expandedSections={expandedSections}
+        toggleSection={toggleSection}
+      />
 
       <Box sx={{ mb: 10 }} />
 
@@ -232,12 +251,20 @@ export function ConfigOverview() {
         <Button
           variant="contained"
           color="error"
-          onClick={handleSaveAll}
+          onClick={() => setSaveDialogOpen(true)}
           sx={{ boxShadow: 4 }}
         >
           Speichern
         </Button>
       </Box>
+
+      <SaveDialog
+        configFiles={configFiles}
+        open={saveDialogOpen}
+        defaultName={selectedConfigFile}
+        onClose={() => setSaveDialogOpen(false)}
+        onSave={handleSaveAll}
+      />
 
       <EditDialog
         open={editState.open}
