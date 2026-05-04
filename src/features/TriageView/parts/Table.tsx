@@ -1,0 +1,234 @@
+import {
+  ArrowDownward,
+  ArrowUpward,
+  SwapVertTwoTone,
+} from "@mui/icons-material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import React from "react";
+import type { BuildingRecord } from "../../../assets/types";
+import { statusConfig } from "../../../assets/types";
+
+type SortField = "date" | "address" | "status" | "assignedTo";
+
+function SortIcon({
+  field,
+  sortBy,
+  sortOrder,
+}: {
+  field: SortField;
+  sortBy: SortField;
+  sortOrder: "asc" | "desc";
+}) {
+  if (sortBy !== field)
+    return <SwapVertTwoTone fontSize="small" sx={{ color: "text.disabled" }} />;
+  return sortOrder === "asc" ? (
+    <ArrowUpward fontSize="small" />
+  ) : (
+    <ArrowDownward fontSize="small" />
+  );
+}
+
+function TableView({
+  records,
+  currentUserName,
+  navigate,
+  handleAssignToMe,
+  setRecordToDelete,
+  sortBy,
+  sortOrder,
+  toggleSort,
+  variantGroupCounts,
+}: {
+  records: BuildingRecord[];
+  currentUserName?: string | null;
+  navigate: any;
+  handleAssignToMe: (record: BuildingRecord) => void;
+  setRecordToDelete: (id: string | null) => void;
+  sortBy: SortField;
+  sortOrder: "asc" | "desc";
+  toggleSort: (field: SortField) => void;
+  variantGroupCounts: Map<string, number>;
+}) {
+  const sortableCellSx = {
+    fontWeight: 600,
+    cursor: "pointer",
+    userSelect: "none",
+    "&:hover": { bgcolor: "action.hover" },
+  } as const;
+
+  return (
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell sx={sortableCellSx} onClick={() => toggleSort("address")}>
+            <Box
+              sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+            >
+              Adresse
+              <SortIcon field="address" sortBy={sortBy} sortOrder={sortOrder} />
+            </Box>
+          </TableCell>
+
+          <TableCell sx={sortableCellSx} onClick={() => toggleSort("date")}>
+            <Box
+              sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+            >
+              Eingereicht am
+              <SortIcon field="date" sortBy={sortBy} sortOrder={sortOrder} />
+            </Box>
+          </TableCell>
+
+          <TableCell sx={sortableCellSx} onClick={() => toggleSort("status")}>
+            <Box
+              sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+            >
+              Status
+              <SortIcon field="status" sortBy={sortBy} sortOrder={sortOrder} />
+            </Box>
+          </TableCell>
+          <TableCell
+            sx={sortableCellSx}
+            onClick={() => toggleSort("assignedTo")}
+          >
+            <Box
+              sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
+            >
+              Prüfer
+              <SortIcon
+                field="assignedTo"
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+              />
+            </Box>
+          </TableCell>
+          <TableCell sx={{ fontWeight: 600 }} align="right">
+            Aktionen
+          </TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {records.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+              <Typography color="text.secondary">
+                Keine Datensätze gefunden.
+              </Typography>
+            </TableCell>
+          </TableRow>
+        ) : (
+          records.map((record) => {
+            return (
+              <TableRow
+                key={record.id}
+                hover
+                sx={{ cursor: "pointer", height: 52 }}
+                onClick={() =>
+                  navigate({
+                    to: "/record/$id",
+                    params: { id: record.id },
+                  })
+                }
+              >
+                <TableCell>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    {record.buildingAddress}
+                    {record.variantGroup &&
+                      (variantGroupCounts.get(record.variantGroup) ?? 0) >
+                        1 && (
+                        <Chip
+                          label={`${variantGroupCounts.get(record.variantGroup)} Einreichungen`}
+                          size="small"
+                          color="info"
+                          variant="outlined"
+                          sx={{ p: 1.7 }}
+                        />
+                      )}
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  {new Date(record.receivedDate).toLocaleString("de-DE", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={statusConfig[record.status].label}
+                    color={statusConfig[record.status].chipColor}
+                    size="small"
+                    sx={{ minWidth: 80, py: 1.7 }}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight:
+                        record.assignedTo === currentUserName ? 600 : 400,
+                      color: record.assignedTo
+                        ? record.assignedTo === currentUserName
+                          ? "secondary.main"
+                          : "text.primary"
+                        : "text.secondary",
+                    }}
+                  >
+                    {record.assignedTo ?? "Nicht zugewiesen"}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right" sx={{ py: 0 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: 1,
+                      minHeight: 36,
+                      alignItems: "center",
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {record.status === "NEU" && !record.assignedTo && (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => handleAssignToMe(record)}
+                      >
+                        Zuweisen
+                      </Button>
+                    )}
+                    {record.status === "UNPLAUSIBEL" && (
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => setRecordToDelete(record.id)}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                </TableCell>
+              </TableRow>
+            );
+          })
+        )}
+      </TableBody>
+    </Table>
+  );
+}
+
+const MemoizedTableView = React.memo(TableView);
+export default MemoizedTableView;

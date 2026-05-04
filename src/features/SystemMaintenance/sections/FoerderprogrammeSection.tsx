@@ -1,4 +1,10 @@
-import { Add, ChevronRight, Delete, Edit, ExpandMore, OpenInNew } from "@mui/icons-material";
+import {
+  ChevronRight,
+  Delete,
+  Edit,
+  ExpandMore,
+  OpenInNew,
+} from "@mui/icons-material";
 import {
   Autocomplete,
   Box,
@@ -27,7 +33,7 @@ import {
 import { useStore } from "@nanostores/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import type { DeleteConfirmState } from "../../features/ConfigOverview";
+import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
 import {
   type Foerderprogramm,
   addFoerderprogramm,
@@ -35,8 +41,8 @@ import {
   deleteFoerderprogramm,
   foerderprogramme,
   updateFoerderprogramm,
-} from "../../hooks/store";
-import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
+} from "../../../hooks/store";
+import type { DeleteConfirmState } from "../ConfigOverview";
 
 const EMPTY_FORM: Omit<Foerderprogramm, "id"> = {
   name: "",
@@ -151,14 +157,21 @@ function FoerderprogrammDialog({
               </Select>
             </FormControl>
             <TextField
-              label={form.promotionType === "percent" ? "Betrag (%)" : "Betrag (€)"}
+              label={
+                form.promotionType === "percent" ? "Betrag (%)" : "Betrag (€)"
+              }
               type="number"
               value={form.promotionAmount}
-              onChange={(e) => set("promotionAmount", parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                set("promotionAmount", parseFloat(e.target.value) || 0)
+              }
               fullWidth
               error={!!errors.promotionAmount}
               helperText={errors.promotionAmount}
-              inputProps={{ min: 0, step: form.promotionType === "percent" ? 1 : 100 }}
+              inputProps={{
+                min: 0,
+                step: form.promotionType === "percent" ? 1 : 100,
+              }}
             />
           </Box>
           <Autocomplete
@@ -167,7 +180,10 @@ function FoerderprogrammDialog({
             getOptionLabel={(o) => o.label}
             value={selectedDeps}
             onChange={(_, newValue) =>
-              set("dependencies", newValue.map((v) => v.value))
+              set(
+                "dependencies",
+                newValue.map((v) => v.value),
+              )
             }
             renderTags={(value, getTagProps) =>
               value.map((option, index) => (
@@ -191,11 +207,7 @@ function FoerderprogrammDialog({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Abbrechen</Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          sx={{ bgcolor: "#C1272D", color: "white", "&:hover": { bgcolor: "#9B1F24" } }}
-        >
+        <Button onClick={handleSave} variant="contained" color="error">
           Speichern
         </Button>
       </DialogActions>
@@ -273,13 +285,17 @@ export default function FoerderprogrammeSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("foerderprogramme")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.foerderprogramme ? <ExpandMore /> : <ChevronRight />}
+            {expandedSections.foerderprogramme ? (
+              <ExpandMore />
+            ) : (
+              <ChevronRight />
+            )}
             <Typography variant="h6" fontWeight="600">
               Förderprogramme ({programs.length})
             </Typography>
@@ -313,7 +329,9 @@ export default function FoerderprogrammeSection({
                     <TableCell sx={{ fontWeight: 700 }} align="right">
                       Förderung
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Abhängigkeiten</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>
+                      Abhängigkeiten
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 700 }} align="right">
                       Aktionen
                     </TableCell>
@@ -323,12 +341,19 @@ export default function FoerderprogrammeSection({
                   {programs.map((f) => {
                     const depLabels = f.dependencies.map(
                       (d) =>
-                        heatingSystemOptions.find((o) => o.value === d)?.label ?? d,
+                        heatingSystemOptions.find((o) => o.value === d)
+                          ?.label ?? d,
                     );
                     return (
                       <TableRow key={f.id} hover>
                         <TableCell sx={{ fontSize: "medium" }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 0.5,
+                            }}
+                          >
                             {f.name}
                             {f.link && (
                               <IconButton
@@ -344,17 +369,27 @@ export default function FoerderprogrammeSection({
                             )}
                           </Box>
                           {f.description && (
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
                               {f.description}
                             </Typography>
                           )}
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 260 }}>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{ maxWidth: 260 }}
+                          >
                             {f.description || "—"}
                           </Typography>
                         </TableCell>
-                        <TableCell align="right" sx={{ whiteSpace: "nowrap", fontWeight: 500 }}>
+                        <TableCell
+                          align="right"
+                          sx={{ whiteSpace: "nowrap", fontWeight: 500 }}
+                        >
                           {formatPromotion(f)}
                         </TableCell>
                         <TableCell>
@@ -363,7 +398,13 @@ export default function FoerderprogrammeSection({
                               —
                             </Typography>
                           ) : (
-                            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                              }}
+                            >
                               {depLabels.map((label) => (
                                 <Chip key={label} label={label} size="small" />
                               ))}
@@ -374,7 +415,10 @@ export default function FoerderprogrammeSection({
                           <IconButton size="small" onClick={() => openEdit(f)}>
                             <Edit fontSize="small" />
                           </IconButton>
-                          <IconButton size="small" onClick={() => handleDelete(f.id)}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDelete(f.id)}
+                          >
                             <Delete fontSize="small" />
                           </IconButton>
                         </TableCell>

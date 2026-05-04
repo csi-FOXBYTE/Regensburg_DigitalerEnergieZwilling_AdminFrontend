@@ -11,7 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as HelloWorldLayoutRouteImport } from './routes/hello-world/layout'
 import { Route as PageRouteImport } from './routes/page'
+import { Route as MaintenancePageRouteImport } from './routes/maintenance/page'
+import { Route as LoginPageRouteImport } from './routes/login/page'
 import { Route as HelloWorldPageRouteImport } from './routes/hello-world/page'
+import { Route as DashboardPageRouteImport } from './routes/dashboard/page'
+import { Route as ConfigPageRouteImport } from './routes/config/page'
+import { Route as AuditPageRouteImport } from './routes/audit/page'
+import { Route as RecordIdPageRouteImport } from './routes/record/$id/page'
 
 const HelloWorldLayoutRoute = HelloWorldLayoutRouteImport.update({
   id: '/hello-world',
@@ -23,38 +29,119 @@ const PageRoute = PageRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MaintenancePageRoute = MaintenancePageRouteImport.update({
+  id: '/maintenance/',
+  path: '/maintenance/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginPageRoute = LoginPageRouteImport.update({
+  id: '/login/',
+  path: '/login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HelloWorldPageRoute = HelloWorldPageRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => HelloWorldLayoutRoute,
 } as any)
+const DashboardPageRoute = DashboardPageRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfigPageRoute = ConfigPageRouteImport.update({
+  id: '/config/',
+  path: '/config/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditPageRoute = AuditPageRouteImport.update({
+  id: '/audit/',
+  path: '/audit/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecordIdPageRoute = RecordIdPageRouteImport.update({
+  id: '/record/$id/',
+  path: '/record/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PageRoute
   '/hello-world': typeof HelloWorldLayoutRouteWithChildren
+  '/audit/': typeof AuditPageRoute
+  '/config/': typeof ConfigPageRoute
+  '/dashboard/': typeof DashboardPageRoute
   '/hello-world/': typeof HelloWorldPageRoute
+  '/login/': typeof LoginPageRoute
+  '/maintenance/': typeof MaintenancePageRoute
+  '/record/$id/': typeof RecordIdPageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PageRoute
+  '/audit': typeof AuditPageRoute
+  '/config': typeof ConfigPageRoute
+  '/dashboard': typeof DashboardPageRoute
   '/hello-world': typeof HelloWorldPageRoute
+  '/login': typeof LoginPageRoute
+  '/maintenance': typeof MaintenancePageRoute
+  '/record/$id': typeof RecordIdPageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof PageRoute
   '/hello-world': typeof HelloWorldLayoutRouteWithChildren
+  '/audit/': typeof AuditPageRoute
+  '/config/': typeof ConfigPageRoute
+  '/dashboard/': typeof DashboardPageRoute
   '/hello-world/': typeof HelloWorldPageRoute
+  '/login/': typeof LoginPageRoute
+  '/maintenance/': typeof MaintenancePageRoute
+  '/record/$id/': typeof RecordIdPageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/hello-world' | '/hello-world/'
+  fullPaths:
+    | '/'
+    | '/hello-world'
+    | '/audit/'
+    | '/config/'
+    | '/dashboard/'
+    | '/hello-world/'
+    | '/login/'
+    | '/maintenance/'
+    | '/record/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/hello-world'
-  id: '__root__' | '/' | '/hello-world' | '/hello-world/'
+  to:
+    | '/'
+    | '/audit'
+    | '/config'
+    | '/dashboard'
+    | '/hello-world'
+    | '/login'
+    | '/maintenance'
+    | '/record/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/hello-world'
+    | '/audit/'
+    | '/config/'
+    | '/dashboard/'
+    | '/hello-world/'
+    | '/login/'
+    | '/maintenance/'
+    | '/record/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   PageRoute: typeof PageRoute
   HelloWorldLayoutRoute: typeof HelloWorldLayoutRouteWithChildren
+  AuditPageRoute: typeof AuditPageRoute
+  ConfigPageRoute: typeof ConfigPageRoute
+  DashboardPageRoute: typeof DashboardPageRoute
+  LoginPageRoute: typeof LoginPageRoute
+  MaintenancePageRoute: typeof MaintenancePageRoute
+  RecordIdPageRoute: typeof RecordIdPageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -73,12 +160,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/maintenance/': {
+      id: '/maintenance/'
+      path: '/maintenance'
+      fullPath: '/maintenance/'
+      preLoaderRoute: typeof MaintenancePageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login/'
+      preLoaderRoute: typeof LoginPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/hello-world/': {
       id: '/hello-world/'
       path: '/'
       fullPath: '/hello-world/'
       preLoaderRoute: typeof HelloWorldPageRouteImport
       parentRoute: typeof HelloWorldLayoutRoute
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/config/': {
+      id: '/config/'
+      path: '/config'
+      fullPath: '/config/'
+      preLoaderRoute: typeof ConfigPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit/': {
+      id: '/audit/'
+      path: '/audit'
+      fullPath: '/audit/'
+      preLoaderRoute: typeof AuditPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/record/$id/': {
+      id: '/record/$id/'
+      path: '/record/$id'
+      fullPath: '/record/$id/'
+      preLoaderRoute: typeof RecordIdPageRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -97,6 +226,12 @@ const HelloWorldLayoutRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   PageRoute: PageRoute,
   HelloWorldLayoutRoute: HelloWorldLayoutRouteWithChildren,
+  AuditPageRoute: AuditPageRoute,
+  ConfigPageRoute: ConfigPageRoute,
+  DashboardPageRoute: DashboardPageRoute,
+  LoginPageRoute: LoginPageRoute,
+  MaintenancePageRoute: MaintenancePageRoute,
+  RecordIdPageRoute: RecordIdPageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

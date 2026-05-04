@@ -16,19 +16,16 @@ import {
 import { useStore } from "@nanostores/react";
 import { Fragment } from "react";
 import { toast } from "sonner";
-import {
-  type DeleteConfirmState,
-  type EditState,
-} from "../../features/ConfigOverview";
+import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
+import { EditDialog } from "../../../components/EditDialog";
 import {
   addCorrectionFactor,
   deleteCorrectionFactor,
   updateCorrectionFactor,
   updateNetFloorAreaFromUsableFloorAreaFactor,
   updateSimpleValue,
-} from "../../hooks/store";
-import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
-import { EditDialog } from "../EditDialog";
+} from "../../../hooks/store";
+import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 function lookUpForNames(key: string): string {
   const BUILDING_TYPE_NAMES: Record<string, string> = {
@@ -121,7 +118,7 @@ export function GeneralParametersSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: " #F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("generalParams")}
@@ -324,7 +321,7 @@ export function GeneralParametersSection({
               <IconButton
                 size="small"
                 onClick={handleAddCorrectionFactor}
-                sx={{ color: "#C1272D", mt: 0.25 }}
+                sx={{ color: "error.main", mt: 0.25 }}
               >
                 <Add fontSize="small" />
               </IconButton>

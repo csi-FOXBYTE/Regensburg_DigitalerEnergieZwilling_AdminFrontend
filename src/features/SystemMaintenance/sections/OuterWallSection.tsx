@@ -15,17 +15,17 @@ import {
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
 import {
+  updateOuterWallDefaultConstructionType,
+  updateOuterWallUValue,
   updateSimpleValue,
-  updateWindowDefaultType,
-  updateWindowsUValue,
-} from "../../hooks/store";
+} from "../../../hooks/store";
 import {
   formatBand,
   lookUpForNames,
   type YearBand,
-} from "../../lib/buildingTypes";
+} from "../../../lib/buildingTypes";
 
-export default function WindowSection({
+export default function OuterWallSection({
   configStore,
   expandedSections,
   toggleSection,
@@ -45,19 +45,20 @@ export default function WindowSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
-          onClick={() => toggleSection("windows")}
+          onClick={() => toggleSection("outerWall")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.windows ? <ExpandMore /> : <ChevronRight />}
+            {expandedSections.outerWall ? <ExpandMore /> : <ChevronRight />}
             <Typography variant="h6" fontWeight="600">
-              Fenster
+              Außenwand
             </Typography>
           </Box>
         </Box>
-        <Collapse in={expandedSections.windows}>
+
+        <Collapse in={expandedSections.outerWall}>
           <Box sx={{ p: 2 }}>
             <Typography variant="body1" fontWeight="600" mb={1}>
               Allgemeine Parameter
@@ -76,33 +77,43 @@ export default function WindowSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.windows.roofWindowsHeatLossFactor}
+                value={configStore.outerWall.heatLossFactor}
+                onChange={(e) =>
+                  updateSimpleValue("outerWall.heatLossFactor", e.target.value)
+                }
+              />
+
+              <Typography variant="body2">Dämmschichtdicke [m]</Typography>
+              <TextField
+                size="small"
+                type="number"
+                value={configStore.outerWall.assumedInsulationThickness}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "windows.roofWindowsHeatLossFactor",
-                    parseFloat(e.target.value),
+                    "outerWall.assumedInsulationThickness",
+                    e.target.value,
                   )
                 }
               />
 
               <Typography variant="body2">
-                Wärmeverlustfaktor F – Außenwandfenster
+                Wärmeleitfähigkeit λ [W/mK]
               </Typography>
               <TextField
                 size="small"
                 type="number"
-                value={configStore.windows.exteriorWallWindowsHeatLossFactor}
+                value={configStore.outerWall.thermalConductivity}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "windows.exteriorWallWindowsHeatLossFactor",
-                    parseFloat(e.target.value),
+                    "outerWall.thermalConductivity",
+                    e.target.value,
                   )
                 }
               />
             </Box>
 
             <Typography variant="body1" fontWeight="600" mb={1}>
-              Standard‑Fenstertyp nach Baujahr
+              Standard‑Konstruktion nach Baujahr
             </Typography>
 
             <Box
@@ -114,7 +125,7 @@ export default function WindowSection({
                 mb: 3,
               }}
             >
-              {configStore.windows.defaultWindowType.map(
+              {configStore.outerWall.defaultConstructionType.map(
                 (
                   band: { from?: number; to?: number; value: string },
                   index: number,
@@ -131,17 +142,20 @@ export default function WindowSection({
                       size="small"
                       value={band.value}
                       onChange={(e) =>
-                        updateWindowDefaultType(index, e.target.value)
+                        updateOuterWallDefaultConstructionType(
+                          index,
+                          e.target.value,
+                        )
                       }
                       sx={{ flex: 1 }}
                     >
-                      {configStore.windows.windowTypes.map(
-                        (wt: {
+                      {configStore.outerWall.constructionTypes.map(
+                        (ct: {
                           value: string;
                           localization: { de: string };
                         }) => (
-                          <MenuItem key={wt.value} value={wt.value}>
-                            {wt.localization.de}
+                          <MenuItem key={ct.value} value={ct.value}>
+                            {ct.localization.de}
                           </MenuItem>
                         ),
                       )}
@@ -152,7 +166,7 @@ export default function WindowSection({
             </Box>
 
             <Typography variant="body1" fontWeight="600" mb={1}>
-              Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
+              Pauschalwerte für den Wärmedurchgangskoeffizienten [W/m²K]
             </Typography>
 
             <TableContainer sx={{ overflowX: "auto" }}>
@@ -170,25 +184,27 @@ export default function WindowSection({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {configStore.windows.uValue.map(
+                  {configStore.outerWall.uValue.map(
                     (
-                      windowType: {
+                      construction: {
                         key: string;
                         value: { value: number }[];
                       },
-                      windowTypeIndex: number,
+                      constructionIndex: number,
                     ) => (
-                      <TableRow key={windowType.key}>
-                        <TableCell>{lookUpForNames(windowType.key)}</TableCell>
+                      <TableRow key={construction.key}>
+                        <TableCell>
+                          {lookUpForNames(construction.key)}
+                        </TableCell>
                         {yearBands.map((_, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
                               size="small"
                               type="number"
-                              value={windowType.value[bandIndex]?.value ?? ""}
+                              value={construction.value[bandIndex]?.value ?? ""}
                               onChange={(e) =>
-                                updateWindowsUValue(
-                                  windowTypeIndex,
+                                updateOuterWallUValue(
+                                  constructionIndex,
                                   bandIndex,
                                   parseFloat(e.target.value),
                                 )

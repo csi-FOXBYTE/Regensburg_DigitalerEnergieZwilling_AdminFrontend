@@ -2,6 +2,7 @@ import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import {
   Box,
   Collapse,
+  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -13,21 +14,25 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
-import { updateRoofUValue, updateSimpleValue } from "../../hooks/store";
+import {
+  updateSimpleValue,
+  updateWindowDefaultType,
+  updateWindowsUValue,
+} from "../../../hooks/store";
 import {
   formatBand,
   lookUpForNames,
   type YearBand,
-} from "../../lib/buildingTypes";
+} from "../../../lib/buildingTypes";
 
-export default function RoofSection({
+export default function WindowSection({
   configStore,
   expandedSections,
   toggleSection,
 }: {
+  configStore: ReturnType<typeof useStore>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
-  configStore: ReturnType<typeof useStore>;
 }) {
   const yearBands = configStore.general.generalYearBands as YearBand[];
 
@@ -40,21 +45,21 @@ export default function RoofSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
-          onClick={() => toggleSection("roof")}
+          onClick={() => toggleSection("windows")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.roof ? <ExpandMore /> : <ChevronRight />}
+            {expandedSections.windows ? <ExpandMore /> : <ChevronRight />}
             <Typography variant="h6" fontWeight="600">
-              Dach
+              Fenster
             </Typography>
           </Box>
         </Box>
-        <Collapse in={expandedSections.roof}>
+        <Collapse in={expandedSections.windows}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="body1" fontWeight="600" mb={1.5}>
+            <Typography variant="body1" fontWeight="600" mb={1}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -71,53 +76,25 @@ export default function RoofSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.roof.heatLossFactor}
+                value={configStore.windows.roofWindowsHeatLossFactor}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "roof.heatLossFactor",
-                    parseFloat(e.target.value),
-                  )
-                }
-              />
-
-              <Typography variant="body2">Dämmschichtdicke [m]</Typography>
-              <TextField
-                size="small"
-                type="number"
-                value={configStore.roof.assumedInsulationThickness}
-                onChange={(e) =>
-                  updateSimpleValue(
-                    "roof.assumedInsulationThickness",
+                    "windows.roofWindowsHeatLossFactor",
                     parseFloat(e.target.value),
                   )
                 }
               />
 
               <Typography variant="body2">
-                Wärmeleitfähigkeit λ [W/mK]
+                Wärmeverlustfaktor F – Außenwandfenster
               </Typography>
               <TextField
                 size="small"
                 type="number"
-                value={configStore.roof.thermalConductivity}
+                value={configStore.windows.exteriorWallWindowsHeatLossFactor}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "roof.thermalConductivity",
-                    parseFloat(e.target.value),
-                  )
-                }
-              />
-
-              <Typography variant="body2">
-                Minderungsfaktor Zwischensparrendämmung
-              </Typography>
-              <TextField
-                size="small"
-                type="number"
-                value={configStore.roof.insulationReductionFactor}
-                onChange={(e) =>
-                  updateSimpleValue(
-                    "roof.insulationReductionFactor",
+                    "windows.exteriorWallWindowsHeatLossFactor",
                     parseFloat(e.target.value),
                   )
                 }
@@ -125,8 +102,59 @@ export default function RoofSection({
             </Box>
 
             <Typography variant="body1" fontWeight="600" mb={1}>
-              Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² · K)
+              Standard‑Fenstertyp nach Baujahr
             </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                columnGap: 10,
+                rowGap: 2,
+                mb: 3,
+              }}
+            >
+              {configStore.windows.defaultWindowType.map(
+                (
+                  band: { from?: number; to?: number; value: string },
+                  index: number,
+                ) => (
+                  <Box
+                    key={index}
+                    sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
+                  >
+                    <Typography sx={{ minWidth: 120 }} variant="body2">
+                      Baujahr&nbsp;{formatBand(band)}
+                    </Typography>
+                    <TextField
+                      select
+                      size="small"
+                      value={band.value}
+                      onChange={(e) =>
+                        updateWindowDefaultType(index, e.target.value)
+                      }
+                      sx={{ flex: 1 }}
+                    >
+                      {configStore.windows.windowTypes.map(
+                        (wt: {
+                          value: string;
+                          localization: { de: string };
+                        }) => (
+                          <MenuItem key={wt.value} value={wt.value}>
+                            {wt.localization.de}
+                          </MenuItem>
+                        ),
+                      )}
+                    </TextField>
+                  </Box>
+                ),
+              )}
+            </Box>
+
+            <Typography variant="body1" fontWeight="600" mb={1}>
+              Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
+            </Typography>
+
             <TableContainer sx={{ overflowX: "auto" }}>
               <Table size="small">
                 <TableHead
@@ -142,27 +170,25 @@ export default function RoofSection({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {configStore.roof.uValue.map(
+                  {configStore.windows.uValue.map(
                     (
-                      construction: {
+                      windowType: {
                         key: string;
                         value: { value: number }[];
                       },
-                      constructionIndex: number,
+                      windowTypeIndex: number,
                     ) => (
-                      <TableRow key={construction.key}>
-                        <TableCell>
-                          {lookUpForNames(construction.key)}
-                        </TableCell>
+                      <TableRow key={windowType.key}>
+                        <TableCell>{lookUpForNames(windowType.key)}</TableCell>
                         {yearBands.map((_, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
                               size="small"
                               type="number"
-                              value={construction.value[bandIndex]?.value ?? ""}
+                              value={windowType.value[bandIndex]?.value ?? ""}
                               onChange={(e) =>
-                                updateRoofUValue(
-                                  constructionIndex,
+                                updateWindowsUValue(
+                                  windowTypeIndex,
                                   bandIndex,
                                   parseFloat(e.target.value),
                                 )

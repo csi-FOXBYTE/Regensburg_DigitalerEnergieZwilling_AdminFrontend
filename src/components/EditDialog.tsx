@@ -225,11 +225,7 @@ export function EditDialog({
         <Button
           onClick={handleSave}
           variant="contained"
-          sx={{
-            bgcolor: "#C1272D",
-            color: "white",
-            "&:hover": { bgcolor: "#9B1F24" },
-          }}
+          color="error"
         >
           Speichern
         </Button>

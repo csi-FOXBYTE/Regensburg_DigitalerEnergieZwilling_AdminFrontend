@@ -8,7 +8,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { config, updateSimpleValue } from "../../hooks/store";
+import { config, updateSimpleValue } from "../../../hooks/store";
 
 export default function ComunityParameterSection({
   configStore,

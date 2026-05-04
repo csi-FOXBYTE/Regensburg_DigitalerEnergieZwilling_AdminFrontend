@@ -21,10 +21,8 @@ import {
 } from "@mui/material";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-import {
-  type DeleteConfirmState,
-  type EditState,
-} from "../../features/ConfigOverview";
+import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
+import { EditDialog } from "../../../components/EditDialog";
 import {
   addHeatingPerformanceFactorColumn,
   addHeatingPerformanceFactorRow,
@@ -42,9 +40,8 @@ import {
   updateHeatingSystemType,
   updateTemperatureControlPerformanceFactor,
   updateTemperatureControlYearBand,
-} from "../../hooks/store";
-import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
-import { EditDialog } from "../EditDialog";
+} from "../../../hooks/store";
+import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 type RangeEntry = { from?: number; to?: number };
 
@@ -152,7 +149,13 @@ function InlineYearBandCell({
           setDraftTo(to != null ? String(to) : "");
           setEditing(true);
         }}
-        sx={{ cursor: "text", px: 1, py: 0.5, borderRadius: 0.5, "&:hover": { bgcolor: "action.hover" } }}
+        sx={{
+          cursor: "text",
+          px: 1,
+          py: 0.5,
+          borderRadius: 0.5,
+          "&:hover": { bgcolor: "action.hover" },
+        }}
       >
         {formatYearBand({ from, to })}
       </Box>
@@ -178,7 +181,10 @@ function InlineYearBandCell({
         placeholder="von"
         value={draftFrom}
         onChange={(e) => setDraftFrom(e.target.value)}
-        onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") setEditing(false);
+        }}
         style={inputStyle}
       />
       <span>–</span>
@@ -188,7 +194,10 @@ function InlineYearBandCell({
         value={draftTo}
         onChange={(e) => setDraftTo(e.target.value)}
         onBlur={commit}
-        onKeyDown={(e) => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commit();
+          if (e.key === "Escape") setEditing(false);
+        }}
         style={inputStyle}
       />
     </Box>
@@ -197,7 +206,7 @@ function InlineYearBandCell({
 
 const headerCellSx = {
   fontWeight: 700,
-  bgcolor: "#E5E5E5",
+  bgcolor: "grey.200",
   borderBottom: "2px solid",
   borderColor: "divider",
 };
@@ -384,7 +393,7 @@ export default function HeatingTypesSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("heatingSystemTypes")}
@@ -533,21 +542,42 @@ export default function HeatingTypesSection({
                                             align="center"
                                             sx={{
                                               ...headerCellSx,
-                                              ...(i < powerCols.length - 1 ? colDividerSx : {}),
-                                              "& .col-del": { opacity: 0, transition: "opacity 0.15s" },
-                                              "&:hover .col-del": { opacity: 1 },
+                                              ...(i < powerCols.length - 1
+                                                ? colDividerSx
+                                                : {}),
+                                              "& .col-del": {
+                                                opacity: 0,
+                                                transition: "opacity 0.15s",
+                                              },
+                                              "&:hover .col-del": {
+                                                opacity: 1,
+                                              },
                                             }}
                                           >
-                                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: 0.5,
+                                              }}
+                                            >
                                               {formatPowerRange(range)}
                                               {powerCols.length > 1 && (
                                                 <IconButton
                                                   className="col-del"
                                                   size="small"
-                                                  onClick={() => deleteHeatingPerformanceFactorColumn(item.value, i)}
+                                                  onClick={() =>
+                                                    deleteHeatingPerformanceFactorColumn(
+                                                      item.value,
+                                                      i,
+                                                    )
+                                                  }
                                                   sx={{ p: 0 }}
                                                 >
-                                                  <Delete sx={{ fontSize: 14 }} />
+                                                  <Delete
+                                                    sx={{ fontSize: 14 }}
+                                                  />
                                                 </IconButton>
                                               )}
                                             </Box>
@@ -579,16 +609,30 @@ export default function HeatingTypesSection({
                                             key={yearIndex}
                                             sx={{
                                               "&:nth-of-type(even)": {
-                                                bgcolor: "#F4F4F4",
+                                                bgcolor: "grey.100",
                                               },
                                             }}
                                           >
-                                            <TableCell sx={{ ...colDividerSx, fontWeight: 500 }}>
-                                              {perfEntry.value.length === 1 ? "alle" : (
+                                            <TableCell
+                                              sx={{
+                                                ...colDividerSx,
+                                                fontWeight: 500,
+                                              }}
+                                            >
+                                              {perfEntry.value.length === 1 ? (
+                                                "alle"
+                                              ) : (
                                                 <InlineYearBandCell
                                                   from={datedEntry.from}
                                                   to={datedEntry.to}
-                                                  onCommit={(f, t) => updateHeatingPerformanceFactorYearBand(item.value, yearIndex, f, t)}
+                                                  onCommit={(f, t) =>
+                                                    updateHeatingPerformanceFactorYearBand(
+                                                      item.value,
+                                                      yearIndex,
+                                                      f,
+                                                      t,
+                                                    )
+                                                  }
                                                 />
                                               )}
                                             </TableCell>
@@ -700,21 +744,44 @@ export default function HeatingTypesSection({
                                             align="center"
                                             sx={{
                                               ...headerCellSx,
-                                              ...(ci < controlTypes.length - 1 ? colDividerSx : {}),
-                                              "& .col-del": { opacity: 0, transition: "opacity 0.15s" },
-                                              "&:hover .col-del": { opacity: 1 },
+                                              ...(ci < controlTypes.length - 1
+                                                ? colDividerSx
+                                                : {}),
+                                              "& .col-del": {
+                                                opacity: 0,
+                                                transition: "opacity 0.15s",
+                                              },
+                                              "&:hover .col-del": {
+                                                opacity: 1,
+                                              },
                                             }}
                                           >
-                                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5 }}>
-                                              {configStore.heat.heatingSurfaceTypes.find((ht) => ht.value === ct.key)?.localization.de ?? ct.key}
+                                            <Box
+                                              sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: 0.5,
+                                              }}
+                                            >
+                                              {configStore.heat.heatingSurfaceTypes.find(
+                                                (ht) => ht.value === ct.key,
+                                              )?.localization.de ?? ct.key}
                                               {controlTypes.length > 1 && (
                                                 <IconButton
                                                   className="col-del"
                                                   size="small"
-                                                  onClick={() => deleteTemperatureControlColumn(item.value, ct.key)}
+                                                  onClick={() =>
+                                                    deleteTemperatureControlColumn(
+                                                      item.value,
+                                                      ct.key,
+                                                    )
+                                                  }
                                                   sx={{ p: 0 }}
                                                 >
-                                                  <Delete sx={{ fontSize: 14 }} />
+                                                  <Delete
+                                                    sx={{ fontSize: 14 }}
+                                                  />
                                                 </IconButton>
                                               )}
                                             </Box>
@@ -749,16 +816,30 @@ export default function HeatingTypesSection({
                                             key={yearIndex}
                                             sx={{
                                               "&:nth-of-type(even)": {
-                                                bgcolor: "#F4F4F4",
+                                                bgcolor: "grey.100",
                                               },
                                             }}
                                           >
-                                            <TableCell sx={{ ...colDividerSx, fontWeight: 500 }}>
-                                              {tempEntry.value.length === 1 ? "alle" : (
+                                            <TableCell
+                                              sx={{
+                                                ...colDividerSx,
+                                                fontWeight: 500,
+                                              }}
+                                            >
+                                              {tempEntry.value.length === 1 ? (
+                                                "alle"
+                                              ) : (
                                                 <InlineYearBandCell
                                                   from={datedEntry.from}
                                                   to={datedEntry.to}
-                                                  onCommit={(f, t) => updateTemperatureControlYearBand(item.value, yearIndex, f, t)}
+                                                  onCommit={(f, t) =>
+                                                    updateTemperatureControlYearBand(
+                                                      item.value,
+                                                      yearIndex,
+                                                      f,
+                                                      t,
+                                                    )
+                                                  }
                                                 />
                                               )}
                                             </TableCell>

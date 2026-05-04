@@ -16,19 +16,15 @@ import {
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
 import { toast } from "sonner";
-import {
-  type DeleteConfirmState,
-  type EditState,
-} from "../../features/ConfigOverview";
+import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
+import { EditDialog } from "../../../components/EditDialog";
 import {
   addEnergyEfficiencyClass,
   deleteEnergyEfficiencyClass,
   type EnergyEfficiencyEntry,
   updateEnergyEfficiencyClass,
-} from "../../hooks/store";
-import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
-import { EditDialog } from "../EditDialog";
-
+} from "../../../hooks/store";
+import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 export function EnergyEfficiencySection({
   configStore,
@@ -85,8 +81,7 @@ export function EnergyEfficiencySection({
         {
           key: "color",
           label: "Farbe",
-          value:
-            (item as EnergyEfficiencyEntry).color ?? "#6b7280",
+          value: (item as EnergyEfficiencyEntry).color ?? "#6b7280",
           type: "color",
           required: true,
         },
@@ -146,7 +141,7 @@ export function EnergyEfficiencySection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("energyEfficiency")}
@@ -209,7 +204,9 @@ export function EnergyEfficiencySection({
                           size="small"
                           sx={{
                             minWidth: 50,
-                            bgcolor: (item as EnergyEfficiencyEntry).color ?? "#6b7280",
+                            bgcolor:
+                              (item as EnergyEfficiencyEntry).color ??
+                              "#6b7280",
                             color: "white",
                             fontWeight: "600",
                           }}
@@ -224,7 +221,9 @@ export function EnergyEfficiencySection({
                               width: 20,
                               height: 20,
                               borderRadius: 0.5,
-                              bgcolor: (item as EnergyEfficiencyEntry).color ?? "#6b7280",
+                              bgcolor:
+                                (item as EnergyEfficiencyEntry).color ??
+                                "#6b7280",
                               border: "1px solid rgba(0,0,0,0.15)",
                             }}
                           />

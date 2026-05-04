@@ -14,19 +14,16 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "sonner";
-import {
-  type DeleteConfirmState,
-  type EditState,
-} from "../../features/ConfigOverview";
+import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
+import { EditDialog } from "../../../components/EditDialog";
 import {
   addYearBand,
   config,
   deleteYearBand,
   updateYearBand,
   type YearBandEntry,
-} from "../../hooks/store";
-import { ConfirmDeleteDialog } from "../ConfirmDeleteDialog";
-import { EditDialog } from "../EditDialog";
+} from "../../../hooks/store";
+import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 export function YearBandSection({
   configStore,
@@ -108,7 +105,7 @@ export function YearBandSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: " #F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("yearBand")}

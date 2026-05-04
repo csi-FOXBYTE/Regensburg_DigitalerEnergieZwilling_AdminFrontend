@@ -17,7 +17,7 @@ import { useStore } from "@nanostores/react";
 import {
   updateInnerSurfaceThermalResistance,
   updateOuterSurfaceThermalResistance,
-} from "../../hooks/store";
+} from "../../../hooks/store";
 
 export default function SurfaceTempResistenceSection({
   configStore,

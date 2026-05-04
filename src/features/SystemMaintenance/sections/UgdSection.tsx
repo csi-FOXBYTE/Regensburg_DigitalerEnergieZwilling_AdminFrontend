@@ -21,12 +21,12 @@ import {
   updateBottomFloorDefaultConstructionType,
   updateBottomFloorUValue,
   updateSimpleValue,
-} from "../../hooks/store";
+} from "../../../hooks/store";
 import {
   formatBand,
   lookUpForNames,
   type YearBand,
-} from "../../lib/buildingTypes";
+} from "../../../lib/buildingTypes";
 
 export default function UgdSection({
   configStore,
@@ -48,7 +48,7 @@ export default function UgdSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("bottomFloor")}

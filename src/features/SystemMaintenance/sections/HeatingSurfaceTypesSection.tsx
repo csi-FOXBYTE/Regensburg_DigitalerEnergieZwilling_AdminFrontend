@@ -20,7 +20,7 @@ import {
   addHeatingSurfaceType,
   deleteHeatingSurfaceType,
   updateHeatingSurfaceType,
-} from "../../hooks/store";
+} from "../../../hooks/store";
 
 export default function HeatingSurfaceTypesSection({
   configStore,
@@ -97,7 +97,7 @@ export default function HeatingSurfaceTypesSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("heatingSurfaceTypes")}

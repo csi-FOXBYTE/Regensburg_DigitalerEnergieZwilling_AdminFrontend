@@ -15,17 +15,17 @@ import {
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
 import {
-  updateOuterWallDefaultConstructionType,
-  updateOuterWallUValue,
   updateSimpleValue,
-} from "../../hooks/store";
+  updateTopFloorDefaultType,
+  updateTopFloorUValue,
+} from "../../../hooks/store";
 import {
   formatBand,
   lookUpForNames,
   type YearBand,
-} from "../../lib/buildingTypes";
+} from "../../../lib/buildingTypes";
 
-export default function OuterWallSection({
+export default function OgdSection({
   configStore,
   expandedSections,
   toggleSection,
@@ -45,22 +45,21 @@ export default function OuterWallSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
-          onClick={() => toggleSection("outerWall")}
+          onClick={() => toggleSection("topFloor")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.outerWall ? <ExpandMore /> : <ChevronRight />}
+            {expandedSections.topFloor ? <ExpandMore /> : <ChevronRight />}
             <Typography variant="h6" fontWeight="600">
-              Außenwand
+              Oberste Geschossdecke
             </Typography>
           </Box>
         </Box>
-
-        <Collapse in={expandedSections.outerWall}>
+        <Collapse in={expandedSections.topFloor}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight="600" mb={1.5}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -77,9 +76,9 @@ export default function OuterWallSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.outerWall.heatLossFactor}
+                value={configStore.topFloor.heatLossFactor}
                 onChange={(e) =>
-                  updateSimpleValue("outerWall.heatLossFactor", e.target.value)
+                  updateSimpleValue("topFloor.heatLossFactor", e.target.value)
                 }
               />
 
@@ -87,10 +86,10 @@ export default function OuterWallSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.outerWall.assumedInsulationThickness}
+                value={configStore.topFloor.assumedInsulationThickness}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "outerWall.assumedInsulationThickness",
+                    "topFloor.assumedInsulationThickness",
                     e.target.value,
                   )
                 }
@@ -102,36 +101,34 @@ export default function OuterWallSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.outerWall.thermalConductivity}
+                value={configStore.topFloor.thermalConductivity}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "outerWall.thermalConductivity",
+                    "topFloor.thermalConductivity",
                     e.target.value,
                   )
                 }
               />
             </Box>
-
             <Typography variant="body1" fontWeight="600" mb={1}>
-              Standard‑Konstruktion nach Baujahr
+              Standard‑Deckentyp nach Baujahr
             </Typography>
 
             <Box
               sx={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                columnGap: 10,
-                rowGap: 2,
+                gap: 10,
                 mb: 3,
               }}
             >
-              {configStore.outerWall.defaultConstructionType.map(
+              {configStore.topFloor.defaultTopFloorType.map(
                 (
                   band: { from?: number; to?: number; value: string },
-                  index: number,
+                  bandIndex: number,
                 ) => (
                   <Box
-                    key={index}
+                    key={bandIndex}
                     sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
                   >
                     <Typography sx={{ minWidth: 120 }} variant="body2">
@@ -142,20 +139,17 @@ export default function OuterWallSection({
                       size="small"
                       value={band.value}
                       onChange={(e) =>
-                        updateOuterWallDefaultConstructionType(
-                          index,
-                          e.target.value,
-                        )
+                        updateTopFloorDefaultType(bandIndex, e.target.value)
                       }
                       sx={{ flex: 1 }}
                     >
-                      {configStore.outerWall.constructionTypes.map(
-                        (ct: {
+                      {configStore.topFloor.topFloorTypes.map(
+                        (type: {
                           value: string;
                           localization: { de: string };
                         }) => (
-                          <MenuItem key={ct.value} value={ct.value}>
-                            {ct.localization.de}
+                          <MenuItem key={type.value} value={type.value}>
+                            {type.localization.de}
                           </MenuItem>
                         ),
                       )}
@@ -164,14 +158,14 @@ export default function OuterWallSection({
                 ),
               )}
             </Box>
-
             <Typography variant="body1" fontWeight="600" mb={1}>
-              Pauschalwerte für den Wärmedurchgangskoeffizienten [W/m²K]
+              Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
             </Typography>
-
             <TableContainer sx={{ overflowX: "auto" }}>
               <Table size="small">
-                <TableHead sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}>
+                <TableHead
+                  sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}
+                >
                   <TableRow>
                     <TableCell>Konstruktion \ Baualtersklasse</TableCell>
                     {yearBands.map((band, bandIndex) => (
@@ -182,27 +176,25 @@ export default function OuterWallSection({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {configStore.outerWall.uValue.map(
+                  {configStore.topFloor.uValue.map(
                     (
-                      construction: {
+                      ceilingType: {
                         key: string;
                         value: { value: number }[];
                       },
-                      constructionIndex: number,
+                      ceilingIndex: number,
                     ) => (
-                      <TableRow key={construction.key}>
-                        <TableCell>
-                          {lookUpForNames(construction.key)}
-                        </TableCell>
+                      <TableRow key={ceilingType.key}>
+                        <TableCell>{lookUpForNames(ceilingType.key)}</TableCell>
                         {yearBands.map((_, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
                               size="small"
                               type="number"
-                              value={construction.value[bandIndex]?.value ?? ""}
+                              value={ceilingType.value[bandIndex]?.value ?? ""}
                               onChange={(e) =>
-                                updateOuterWallUValue(
-                                  constructionIndex,
+                                updateTopFloorUValue(
+                                  ceilingIndex,
                                   bandIndex,
                                   parseFloat(e.target.value),
                                 )

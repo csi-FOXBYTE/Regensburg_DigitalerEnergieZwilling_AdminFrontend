@@ -2,7 +2,6 @@ import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import {
   Box,
   Collapse,
-  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -14,25 +13,21 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
-import {
-  updateSimpleValue,
-  updateTopFloorDefaultType,
-  updateTopFloorUValue,
-} from "../../hooks/store";
+import { updateRoofUValue, updateSimpleValue } from "../../../hooks/store";
 import {
   formatBand,
   lookUpForNames,
   type YearBand,
-} from "../../lib/buildingTypes";
+} from "../../../lib/buildingTypes";
 
-export default function OgdSection({
+export default function RoofSection({
   configStore,
   expandedSections,
   toggleSection,
 }: {
-  configStore: ReturnType<typeof useStore>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
+  configStore: ReturnType<typeof useStore>;
 }) {
   const yearBands = configStore.general.generalYearBands as YearBand[];
 
@@ -45,19 +40,19 @@ export default function OgdSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: "grey.100",
             cursor: "pointer",
           }}
-          onClick={() => toggleSection("topFloor")}
+          onClick={() => toggleSection("roof")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.topFloor ? <ExpandMore /> : <ChevronRight />}
+            {expandedSections.roof ? <ExpandMore /> : <ChevronRight />}
             <Typography variant="h6" fontWeight="600">
-              Oberste Geschossdecke
+              Dach
             </Typography>
           </Box>
         </Box>
-        <Collapse in={expandedSections.topFloor}>
+        <Collapse in={expandedSections.roof}>
           <Box sx={{ p: 2 }}>
             <Typography variant="body1" fontWeight="600" mb={1.5}>
               Allgemeine Parameter
@@ -76,9 +71,12 @@ export default function OgdSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.topFloor.heatLossFactor}
+                value={configStore.roof.heatLossFactor}
                 onChange={(e) =>
-                  updateSimpleValue("topFloor.heatLossFactor", e.target.value)
+                  updateSimpleValue(
+                    "roof.heatLossFactor",
+                    parseFloat(e.target.value),
+                  )
                 }
               />
 
@@ -86,11 +84,11 @@ export default function OgdSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.topFloor.assumedInsulationThickness}
+                value={configStore.roof.assumedInsulationThickness}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "topFloor.assumedInsulationThickness",
-                    e.target.value,
+                    "roof.assumedInsulationThickness",
+                    parseFloat(e.target.value),
                   )
                 }
               />
@@ -101,65 +99,33 @@ export default function OgdSection({
               <TextField
                 size="small"
                 type="number"
-                value={configStore.topFloor.thermalConductivity}
+                value={configStore.roof.thermalConductivity}
                 onChange={(e) =>
                   updateSimpleValue(
-                    "topFloor.thermalConductivity",
-                    e.target.value,
+                    "roof.thermalConductivity",
+                    parseFloat(e.target.value),
+                  )
+                }
+              />
+
+              <Typography variant="body2">
+                Minderungsfaktor Zwischensparrendämmung
+              </Typography>
+              <TextField
+                size="small"
+                type="number"
+                value={configStore.roof.insulationReductionFactor}
+                onChange={(e) =>
+                  updateSimpleValue(
+                    "roof.insulationReductionFactor",
+                    parseFloat(e.target.value),
                   )
                 }
               />
             </Box>
-            <Typography variant="body1" fontWeight="600" mb={1}>
-              Standard‑Deckentyp nach Baujahr
-            </Typography>
 
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 10,
-                mb: 3,
-              }}
-            >
-              {configStore.topFloor.defaultTopFloorType.map(
-                (
-                  band: { from?: number; to?: number; value: string },
-                  bandIndex: number,
-                ) => (
-                  <Box
-                    key={bandIndex}
-                    sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                  >
-                    <Typography sx={{ minWidth: 120 }} variant="body2">
-                      Baujahr&nbsp;{formatBand(band)}
-                    </Typography>
-                    <TextField
-                      select
-                      size="small"
-                      value={band.value}
-                      onChange={(e) =>
-                        updateTopFloorDefaultType(bandIndex, e.target.value)
-                      }
-                      sx={{ flex: 1 }}
-                    >
-                      {configStore.topFloor.topFloorTypes.map(
-                        (type: {
-                          value: string;
-                          localization: { de: string };
-                        }) => (
-                          <MenuItem key={type.value} value={type.value}>
-                            {type.localization.de}
-                          </MenuItem>
-                        ),
-                      )}
-                    </TextField>
-                  </Box>
-                ),
-              )}
-            </Box>
             <Typography variant="body1" fontWeight="600" mb={1}>
-              Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
+              Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² · K)
             </Typography>
             <TableContainer sx={{ overflowX: "auto" }}>
               <Table size="small">
@@ -176,25 +142,27 @@ export default function OgdSection({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {configStore.topFloor.uValue.map(
+                  {configStore.roof.uValue.map(
                     (
-                      ceilingType: {
+                      construction: {
                         key: string;
                         value: { value: number }[];
                       },
-                      ceilingIndex: number,
+                      constructionIndex: number,
                     ) => (
-                      <TableRow key={ceilingType.key}>
-                        <TableCell>{lookUpForNames(ceilingType.key)}</TableCell>
+                      <TableRow key={construction.key}>
+                        <TableCell>
+                          {lookUpForNames(construction.key)}
+                        </TableCell>
                         {yearBands.map((_, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
                               size="small"
                               type="number"
-                              value={ceilingType.value[bandIndex]?.value ?? ""}
+                              value={construction.value[bandIndex]?.value ?? ""}
                               onChange={(e) =>
-                                updateTopFloorUValue(
-                                  ceilingIndex,
+                                updateRoofUValue(
+                                  constructionIndex,
                                   bandIndex,
                                   parseFloat(e.target.value),
                                 )
