@@ -10,11 +10,12 @@ import { atom } from "nanostores";
 export interface Foerderprogramm {
   id: string;
   name: string;
-  link: string;
-  description: string;
+  link?: string;
   promotionType: "percent" | "absolute";
   promotionAmount: number;
-  dependencies: string[];
+  maxPromotionAmount?: number;
+  isActive: boolean;
+  description: string;
 }
 
 export const foerderprogramme = atom<Foerderprogramm[]>([]);

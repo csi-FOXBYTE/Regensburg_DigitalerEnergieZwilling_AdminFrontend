@@ -1,3 +1,4 @@
+import theme from "@/theme/theme";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Box, Button, Divider, Tab, Tabs, Typography } from "@mui/material";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
@@ -138,7 +139,7 @@ export function AppHeader() {
               height: 68,
               minHeight: 68,
             },
-            "& .Mui-selected": { color: "#000" },
+            "& .Mui-selected": { color: theme.palette.error.dark },
           }}
         >
           {NAV_ITEMS.map((item) => (

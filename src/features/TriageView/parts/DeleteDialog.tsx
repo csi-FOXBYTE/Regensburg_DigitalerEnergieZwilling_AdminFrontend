@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 
 export function DeleteConfirmationDialog({
@@ -25,15 +26,25 @@ export function DeleteConfirmationDialog({
         paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
       }}
     >
-      <DialogTitle>Datensatz löschen</DialogTitle>
+      <DialogTitle>
+        <Typography variant="h4">Datensatz löschen</Typography>
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Sind Sie sicher, dass Sie diesen unplausiblen Datensatz löschen
-          möchten? Diese Aktion kann nicht rückgängig gemacht werden.
+          <Typography variant="body1">
+            Sind Sie sicher, dass Sie diesen unplausiblen Datensatz löschen
+            möchten? Diese Aktion kann nicht rückgängig gemacht werden.
+          </Typography>
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setRecordToDelete(null)}>Abbrechen</Button>
+        <Button
+          onClick={() => setRecordToDelete(null)}
+          color="error"
+          variant="outlined"
+        >
+          Abbrechen
+        </Button>
         <Button
           variant="contained"
           color="error"

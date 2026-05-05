@@ -1,4 +1,17 @@
 import {
+  BoldItalicUnderlineToggles,
+  ListsToggle,
+  MDXEditor,
+  UndoRedo,
+  headingsPlugin,
+  listsPlugin,
+  markdownShortcutPlugin,
+  quotePlugin,
+  thematicBreakPlugin,
+  toolbarPlugin,
+} from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
+import {
   ChevronRight,
   Delete,
   Edit,
@@ -6,7 +19,6 @@ import {
   OpenInNew,
 } from "@mui/icons-material";
 import {
-  Autocomplete,
   Box,
   Button,
   Chip,
@@ -16,11 +28,13 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormControlLabel,
   IconButton,
   InputLabel,
   MenuItem,
   Paper,
   Select,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -37,7 +51,6 @@ import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
 import {
   type Foerderprogramm,
   addFoerderprogramm,
-  config,
   deleteFoerderprogramm,
   foerderprogramme,
   updateFoerderprogramm,
@@ -46,11 +59,11 @@ import type { DeleteConfirmState } from "../ConfigOverview";
 
 const EMPTY_FORM: Omit<Foerderprogramm, "id"> = {
   name: "",
-  link: "",
-  description: "",
   promotionType: "absolute",
   promotionAmount: 0,
-  dependencies: [],
+  maxPromotionAmount: 0,
+  isActive: false,
+  description: "",
 };
 
 interface FormState extends Omit<Foerderprogramm, "id"> {}
@@ -58,7 +71,6 @@ interface FormState extends Omit<Foerderprogramm, "id"> {}
 interface FoerderprogrammDialogProps {
   open: boolean;
   initial?: Foerderprogramm;
-  heatingSystemOptions: { label: string; value: string }[];
   onClose: () => void;
   onSave: (data: FormState) => void;
 }
@@ -66,7 +78,6 @@ interface FoerderprogrammDialogProps {
 function FoerderprogrammDialog({
   open,
   initial,
-  heatingSystemOptions,
   onClose,
   onSave,
 }: FoerderprogrammDialogProps) {
@@ -97,10 +108,6 @@ function FoerderprogrammDialog({
     onSave(form);
     onClose();
   };
-
-  const selectedDeps = heatingSystemOptions.filter((o) =>
-    form.dependencies.includes(o.value),
-  );
 
   return (
     <Dialog
@@ -134,14 +141,6 @@ function FoerderprogrammDialog({
             fullWidth
             placeholder="https://..."
           />
-          <TextField
-            label="Beschreibung (optional)"
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-            fullWidth
-            multiline
-            minRows={2}
-          />
           <Box sx={{ display: "flex", gap: 2 }}>
             <FormControl sx={{ minWidth: 160 }}>
               <InputLabel>Förderart</InputLabel>
@@ -173,40 +172,84 @@ function FoerderprogrammDialog({
                 step: form.promotionType === "percent" ? 1 : 100,
               }}
             />
+            <TextField
+              label={
+                form.promotionType === "percent"
+                  ? "Max. Betrag (%)"
+                  : "Max. Betrag (€)"
+              }
+              type="number"
+              value={form.maxPromotionAmount}
+              onChange={(e) =>
+                set("maxPromotionAmount", parseFloat(e.target.value) || 0)
+              }
+              fullWidth
+              error={!!errors.maxPromotionAmount}
+              helperText={errors.maxPromotionAmount}
+              inputProps={{
+                min: 0,
+                step: form.promotionType === "percent" ? 1 : 100,
+              }}
+            />
           </Box>
-          <Autocomplete
-            multiple
-            options={heatingSystemOptions}
-            getOptionLabel={(o) => o.label}
-            value={selectedDeps}
-            onChange={(_, newValue) =>
-              set(
-                "dependencies",
-                newValue.map((v) => v.value),
-              )
-            }
-            renderTags={(value, getTagProps) =>
-              value.map((option, index) => (
-                <Chip
-                  label={option.label}
-                  size="small"
-                  {...getTagProps({ index })}
-                  key={option.value}
-                />
-              ))
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Abhängigkeiten (Komponenten)"
-                placeholder="Heizsystem wählen..."
+          <FormControlLabel
+            control={
+              <Switch
+                checked={form.isActive}
+                onChange={(e) => set("isActive", e.target.checked)}
               />
-            )}
+            }
+            label="Aktiv"
           />
+          <Box
+            sx={{
+              border: "1px solid rgba(0,0,0,0.23)",
+              borderRadius: 1,
+              overflow: "hidden",
+              "&:hover": { borderColor: "rgba(0,0,0,0.87)" },
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                px: 1.75,
+                pt: 0.75,
+                pb: 0,
+                display: "block",
+                color: "text.secondary",
+              }}
+            >
+              Beschreibung (optional)
+            </Typography>
+            <MDXEditor
+              key={`desc-${open}-${initial?.id ?? "new"}`}
+              markdown={form.description ?? ""}
+              onChange={(val) => set("description", val)}
+              contentEditableClassName="mdx-editor-content"
+              plugins={[
+                headingsPlugin(),
+                listsPlugin(),
+                quotePlugin(),
+                thematicBreakPlugin(),
+                markdownShortcutPlugin(),
+                toolbarPlugin({
+                  toolbarContents: () => (
+                    <>
+                      <UndoRedo />
+                      <BoldItalicUnderlineToggles />
+                      <ListsToggle />
+                    </>
+                  ),
+                }),
+              ]}
+            />
+          </Box>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Abbrechen</Button>
+        <Button onClick={onClose} variant="outlined" color="error">
+          Abbrechen
+        </Button>
         <Button onClick={handleSave} variant="contained" color="error">
           Speichern
         </Button>
@@ -229,7 +272,6 @@ export default function FoerderprogrammeSection({
   toggleSection: (section: string) => void;
 }) {
   const programs = useStore(foerderprogramme);
-  const configStore = useStore(config);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Foerderprogramm | undefined>();
@@ -237,13 +279,6 @@ export default function FoerderprogrammeSection({
     open: false,
     onConfirm: () => {},
   });
-
-  const heatingSystemOptions = configStore.heat.heatingSystemTypes.map(
-    (t: any) => ({
-      label: t.localization?.de ?? t.value,
-      value: t.value,
-    }),
-  );
 
   const openAdd = () => {
     setEditing(undefined);
@@ -326,11 +361,9 @@ export default function FoerderprogrammeSection({
                   <TableRow>
                     <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
                     <TableCell sx={{ fontWeight: 700 }}>Beschreibung</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
                     <TableCell sx={{ fontWeight: 700 }} align="right">
                       Förderung
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>
-                      Abhängigkeiten
                     </TableCell>
                     <TableCell sx={{ fontWeight: 700 }} align="right">
                       Aktionen
@@ -339,11 +372,6 @@ export default function FoerderprogrammeSection({
                 </TableHead>
                 <TableBody>
                   {programs.map((f) => {
-                    const depLabels = f.dependencies.map(
-                      (d) =>
-                        heatingSystemOptions.find((o) => o.value === d)
-                          ?.label ?? d,
-                    );
                     return (
                       <TableRow key={f.id} hover>
                         <TableCell sx={{ fontSize: "medium" }}>
@@ -368,14 +396,6 @@ export default function FoerderprogrammeSection({
                               </IconButton>
                             )}
                           </Box>
-                          {f.description && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {f.description}
-                            </Typography>
-                          )}
                         </TableCell>
                         <TableCell>
                           <Typography
@@ -386,30 +406,19 @@ export default function FoerderprogrammeSection({
                             {f.description || "—"}
                           </Typography>
                         </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={f.isActive ? "Aktiv" : "Inaktiv"}
+                            size="small"
+                            color={f.isActive ? "success" : "default"}
+                            variant="outlined"
+                          />
+                        </TableCell>
                         <TableCell
                           align="right"
                           sx={{ whiteSpace: "nowrap", fontWeight: 500 }}
                         >
                           {formatPromotion(f)}
-                        </TableCell>
-                        <TableCell>
-                          {depLabels.length === 0 ? (
-                            <Typography variant="body2" color="text.secondary">
-                              —
-                            </Typography>
-                          ) : (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: 0.5,
-                              }}
-                            >
-                              {depLabels.map((label) => (
-                                <Chip key={label} label={label} size="small" />
-                              ))}
-                            </Box>
-                          )}
                         </TableCell>
                         <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                           <IconButton size="small" onClick={() => openEdit(f)}>
@@ -435,7 +444,6 @@ export default function FoerderprogrammeSection({
       <FoerderprogrammDialog
         open={dialogOpen}
         initial={editing}
-        heatingSystemOptions={heatingSystemOptions}
         onClose={() => setDialogOpen(false)}
         onSave={handleSave}
       />

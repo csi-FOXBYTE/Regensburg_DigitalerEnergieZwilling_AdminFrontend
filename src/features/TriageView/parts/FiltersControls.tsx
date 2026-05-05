@@ -1,9 +1,7 @@
 import { SearchRounded, SortRounded } from "@mui/icons-material";
-import HistoryIcon from "@mui/icons-material/History";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import {
   Box,
-  Button,
   Checkbox,
   FormControlLabel,
   IconButton,
@@ -14,7 +12,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useDebounce } from "../../../hooks/useDebounce";
 
@@ -43,7 +40,6 @@ export function FiltersControls({
   myRecordsOn: boolean;
   setMyRecordsOn: (v: boolean) => void;
 }) {
-  const navigate = useNavigate();
   const [localAddressFilter, setLocalAddressFilter] = useState(addressFilter);
   const debouncedAddressFilter = useDebounce(localAddressFilter, 500);
 
@@ -126,17 +122,6 @@ export function FiltersControls({
             label="Nur meine"
             sx={{ ml: 0, whiteSpace: "nowrap" }}
           />
-
-          <Button
-            size="small"
-            color="error"
-            variant="outlined"
-            startIcon={<HistoryIcon />}
-            onClick={() => navigate({ to: "/audit" })}
-            sx={{ whiteSpace: "nowrap", ml: "auto" }}
-          >
-            Audit-Protokoll
-          </Button>
         </Box>
       </Box>
     </Paper>

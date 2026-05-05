@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -56,7 +57,9 @@ export function SaveDialog({
         paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
       }}
     >
-      <DialogTitle>Konfiguration speichern</DialogTitle>
+      <DialogTitle>
+        <Typography variant="h4">Konfiguration speichern</Typography>
+      </DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
@@ -75,12 +78,10 @@ export function SaveDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Abbrechen</Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          color="error"
-        >
+        <Button onClick={onClose} variant="outlined" color="error">
+          Abbrechen
+        </Button>
+        <Button onClick={handleSave} variant="contained" color="error">
           Speichern
         </Button>
       </DialogActions>

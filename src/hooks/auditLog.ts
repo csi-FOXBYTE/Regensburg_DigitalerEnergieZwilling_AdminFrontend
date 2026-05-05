@@ -20,19 +20,8 @@ export interface AuditLogEntry {
   details?: string;
 }
 
-const STORAGE_KEY = "auditLog";
-
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
-
-export function getAuditLog(): AuditLogEntry[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
 }
 
 export function addAuditEntry(
@@ -51,28 +40,11 @@ export function addAuditEntry(
     userName: user?.name ?? null,
     details,
   };
-  const log = getAuditLog();
-  log.unshift(entry);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(log, null, 2));
-}
-
-export function clearAuditLog(): void {
-  localStorage.removeItem(STORAGE_KEY);
-}
-
-export function downloadAuditLog(): void {
-  const log = getAuditLog();
-  const blob = new Blob([JSON.stringify(log, null, 2)], {
-    type: "application/json",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  fetch("/api/audit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(entry),
+  }).catch(() => {});
 }
 
 export const ACTION_LABELS: Record<AuditAction, string> = {

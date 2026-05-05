@@ -14,7 +14,6 @@ import { Route as MaintenancePageRouteImport } from './routes/maintenance/page'
 import { Route as LoginPageRouteImport } from './routes/login/page'
 import { Route as DashboardPageRouteImport } from './routes/dashboard/page'
 import { Route as ConfigPageRouteImport } from './routes/config/page'
-import { Route as AuditPageRouteImport } from './routes/audit/page'
 import { Route as RecordIdPageRouteImport } from './routes/record/$id/page'
 
 const PageRoute = PageRouteImport.update({
@@ -42,11 +41,6 @@ const ConfigPageRoute = ConfigPageRouteImport.update({
   path: '/config/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuditPageRoute = AuditPageRouteImport.update({
-  id: '/audit/',
-  path: '/audit/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RecordIdPageRoute = RecordIdPageRouteImport.update({
   id: '/record/$id/',
   path: '/record/$id/',
@@ -55,7 +49,6 @@ const RecordIdPageRoute = RecordIdPageRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PageRoute
-  '/audit/': typeof AuditPageRoute
   '/config/': typeof ConfigPageRoute
   '/dashboard/': typeof DashboardPageRoute
   '/login/': typeof LoginPageRoute
@@ -64,7 +57,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof PageRoute
-  '/audit': typeof AuditPageRoute
   '/config': typeof ConfigPageRoute
   '/dashboard': typeof DashboardPageRoute
   '/login': typeof LoginPageRoute
@@ -74,7 +66,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof PageRoute
-  '/audit/': typeof AuditPageRoute
   '/config/': typeof ConfigPageRoute
   '/dashboard/': typeof DashboardPageRoute
   '/login/': typeof LoginPageRoute
@@ -85,25 +76,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/audit/'
     | '/config/'
     | '/dashboard/'
     | '/login/'
     | '/maintenance/'
     | '/record/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/audit'
-    | '/config'
-    | '/dashboard'
-    | '/login'
-    | '/maintenance'
-    | '/record/$id'
+  to: '/' | '/config' | '/dashboard' | '/login' | '/maintenance' | '/record/$id'
   id:
     | '__root__'
     | '/'
-    | '/audit/'
     | '/config/'
     | '/dashboard/'
     | '/login/'
@@ -113,7 +95,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   PageRoute: typeof PageRoute
-  AuditPageRoute: typeof AuditPageRoute
   ConfigPageRoute: typeof ConfigPageRoute
   DashboardPageRoute: typeof DashboardPageRoute
   LoginPageRoute: typeof LoginPageRoute
@@ -158,13 +139,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfigPageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/audit/': {
-      id: '/audit/'
-      path: '/audit'
-      fullPath: '/audit/'
-      preLoaderRoute: typeof AuditPageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/record/$id/': {
       id: '/record/$id/'
       path: '/record/$id'
@@ -177,7 +151,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   PageRoute: PageRoute,
-  AuditPageRoute: AuditPageRoute,
   ConfigPageRoute: ConfigPageRoute,
   DashboardPageRoute: DashboardPageRoute,
   LoginPageRoute: LoginPageRoute,

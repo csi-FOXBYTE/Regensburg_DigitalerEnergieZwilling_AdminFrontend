@@ -4,6 +4,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 
 interface ConfirmDeleteDialogProps {
@@ -28,10 +29,16 @@ export function ConfirmDeleteDialog({
         paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
       }}
     >
-      <DialogTitle>Bestätigung erforderlich</DialogTitle>
-      <DialogContent>{title}</DialogContent>
+      <DialogTitle>
+        <Typography variant="h4">Bestätigung erforderlich</Typography>
+      </DialogTitle>
+      <DialogContent>
+        <Typography variant="body1">{title}</Typography>
+      </DialogContent>
       <DialogActions>
-        <Button onClick={onCancel}>Abbrechen</Button>
+        <Button onClick={onCancel} variant="outlined" color="error">
+          Abbrechen
+        </Button>
         <Button onClick={onConfirm} variant="contained" color="error">
           Löschen
         </Button>

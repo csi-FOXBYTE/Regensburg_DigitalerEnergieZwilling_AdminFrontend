@@ -221,12 +221,10 @@ export function EditDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Abbrechen</Button>
-        <Button
-          onClick={handleSave}
-          variant="contained"
-          color="error"
-        >
+        <Button onClick={onClose} variant="outlined" color="error">
+          Abbrechen
+        </Button>
+        <Button onClick={handleSave} variant="contained" color="error">
           Speichern
         </Button>
       </DialogActions>
