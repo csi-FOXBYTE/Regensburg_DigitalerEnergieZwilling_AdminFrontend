@@ -16,14 +16,13 @@ import {
 } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import { useContext } from "react";
-import { statusConfig } from "../../assets/types";
+import {
+  BUILDING_TYPE_LABELS,
+  STATUS_COLORS,
+  statusConfig,
+} from "../../assets/types";
 import { RecordsContext } from "../../components/RecordsContext";
-import BuildingMap, { STATUS_COLORS } from "./BuildingMap";
-
-const BUILDING_TYPE_LABELS: Record<string, string> = {
-  singleFamily: "Einfamilienhaus",
-  multiFamily: "Mehrfamilienhaus",
-};
+import BuildingMap from "./BuildingMap";
 
 export default function DashboardPage() {
   const { records } = useContext(RecordsContext)!;
@@ -255,7 +254,7 @@ export default function DashboardPage() {
                     { status: "NEU", label: "Neu" },
                     { status: "IN_PRUEFUNG", label: "In Prüfung" },
                     { status: "FREIGEGEBEN", label: "Freigegeben" },
-                    { status: "UNPLAUSIBEL", label: "Unplausibel" },
+                    { status: "ABGELEHNT", label: "Abgelehnt" },
                   ] as const
                 ).map(({ status, label }) => (
                   <Box

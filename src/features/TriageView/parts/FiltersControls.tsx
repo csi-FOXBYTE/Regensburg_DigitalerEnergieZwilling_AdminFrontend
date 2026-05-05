@@ -97,7 +97,7 @@ export function FiltersControls({
             <MenuItem value="NEU">Neu</MenuItem>
             <MenuItem value="IN_PRUEFUNG">In Prüfung</MenuItem>
             <MenuItem value="FREIGEGEBEN">Freigegeben</MenuItem>
-            <MenuItem value="UNPLAUSIBEL">Unplausibel</MenuItem>
+            <MenuItem value="ABGELEHNT">Abgelehnt</MenuItem>
           </TextField>
 
           <TextField

@@ -232,7 +232,7 @@ export const mockRecords: BuildingRecord[] = [
     id: "5",
     buildingAddress: "Donaustaufer Straße 28, 93055 Regensburg",
     receivedDate: "2026-03-22T16:30:00",
-    status: "UNPLAUSIBEL",
+    status: "ABGELEHNT",
     assignedTo: "Anna Schmidt",
     assignedAt: new Date("2026-03-22T16:30:00"),
     notes:
@@ -771,7 +771,7 @@ export const mockRecords: BuildingRecord[] = [
     id: "12a",
     buildingAddress: "Ludwigstraße 25, 93047 Regensburg",
     receivedDate: "2026-03-20T09:30:00",
-    status: "UNPLAUSIBEL",
+    status: "ABGELEHNT",
     assignedTo: "Michael Weber",
     assignedAt: new Date("2026-03-23T10:00:00"),
     notes: "Automatisch abgelehnt, da Einreichung B freigegeben wurde.",

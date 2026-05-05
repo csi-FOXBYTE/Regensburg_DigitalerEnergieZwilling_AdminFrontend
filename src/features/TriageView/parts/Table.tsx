@@ -220,7 +220,7 @@ function TableView({
                         Zuweisen
                       </Button>
                     )}
-                    {record.status === "UNPLAUSIBEL" && (
+                    {record.status === "ABGELEHNT" && (
                       <IconButton
                         size="small"
                         color="error"

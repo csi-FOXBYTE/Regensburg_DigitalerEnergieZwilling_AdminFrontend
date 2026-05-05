@@ -1,7 +1,11 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect, useRef } from "react";
-import { type BuildingRecord, type RecordStatus } from "../../assets/types";
+import {
+  STATUS_COLORS,
+  STATUS_LABELS,
+  type BuildingRecord,
+} from "../../assets/types";
 
 interface BuildingMapProps {
   buildings: BuildingRecord[];
@@ -9,21 +13,15 @@ interface BuildingMapProps {
   selectedBuildingId?: string;
 }
 
-export const STATUS_COLORS: Record<RecordStatus, string> = {
-  NEU: "#3b82f6",
-  IN_PRUEFUNG: "#f59e0b",
-  FREIGEGEBEN: "#22c55e",
-  UNPLAUSIBEL: "#C1272D",
-};
-
 const REGENSBURG_PLZ: Record<string, [number, number]> = {
   "93047": [49.0207, 12.0972], // Altstadt / Innenstadt
-  "93049": [49.022, 12.052],   // Westenviertel / Prüfening
-  "93051": [49.008, 12.115],   // Ostenviertel / Stadtamhof
-  "93053": [49.002, 12.107],   // Kumpfmühl / Galgenberg
-  "93055": [48.998, 12.138],   // Burgweinting / Harting
-  "93057": [49.044, 12.105],   // Reinhausen / Steinweg
-  "93059": [49.014, 12.068],   // Konradsiedlung / Weichs
+  "93049": [49.022, 12.052], // Westenviertel / Prüfening
+  "93051": [49.008, 12.115], // Ostenviertel / Stadtamhof
+  "93053": [49.002, 12.107], // Kumpfmühl / Galgenberg
+
+  "93055": [48.998, 12.138], // Burgweinting / Harting
+  "93057": [49.044, 12.105], // Reinhausen / Steinweg
+  "93059": [49.014, 12.068], // Konradsiedlung / Weichs
 };
 
 function coordsForRecord(record: BuildingRecord): [number, number] | null {
@@ -31,7 +29,13 @@ function coordsForRecord(record: BuildingRecord): [number, number] | null {
   if (plzMatch?.[1]) {
     const coords = REGENSBURG_PLZ[plzMatch[1]];
     if (coords) {
-      const jitter = (Math.abs(record.id.charCodeAt(0) * 31 + record.id.charCodeAt(record.id.length - 1)) % 100) / 10000;
+      const jitter =
+        (Math.abs(
+          record.id.charCodeAt(0) * 31 +
+            record.id.charCodeAt(record.id.length - 1),
+        ) %
+          100) /
+        10000;
       const sign = record.id.charCodeAt(0) % 2 === 0 ? 1 : -1;
       return [coords[0] + jitter * sign, coords[1] + jitter];
     }
@@ -88,20 +92,13 @@ export default function BuildingMap({
         iconAnchor: [size / 2, size / 2],
       });
 
-      const statusLabels: Record<RecordStatus, string> = {
-        NEU: "Neu",
-        IN_PRUEFUNG: "In Prüfung",
-        FREIGEGEBEN: "Freigegeben",
-        UNPLAUSIBEL: "Unplausibel",
-      };
-
       const marker = L.marker(coords, { icon })
         .addTo(mapInstanceRef.current!)
         .bindPopup(
           `<div style="font-family:system-ui,sans-serif;min-width:180px">
             <strong style="font-size:13px">${record.buildingAddress.split(",")[0]}</strong><br/>
             <span style="font-size:11px;color:#555">${record.buildingAddress.split(",").slice(1).join(",").trim()}</span><br/><br/>
-            <span style="font-size:12px;color:#333">Status: <strong>${statusLabels[record.status]}</strong></span><br/>
+            <span style="font-size:12px;color:#333">Status: <strong>${STATUS_LABELS[record.status]}</strong></span><br/>
             <span style="font-size:11px;color:#777">Eingereicht: ${new Date(record.receivedDate).toLocaleDateString("de-DE")}</span>
           </div>`,
         );

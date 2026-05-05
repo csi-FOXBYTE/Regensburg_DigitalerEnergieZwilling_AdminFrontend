@@ -17,13 +17,19 @@ export function RecordsProvider({ children }: { children: React.ReactNode }) {
 
   const updateRecord = (updatedRecord: BuildingRecord) => {
     setRecords((prev) => {
-      const next = prev.map((r) => (r.id === updatedRecord.id ? updatedRecord : r));
-      if (updatedRecord.status === "FREIGEGEBEN" && updatedRecord.variantGroup) {
+      const next = prev.map((r) =>
+        r.id === updatedRecord.id ? updatedRecord : r,
+      );
+      if (
+        updatedRecord.status === "FREIGEGEBEN" &&
+        updatedRecord.variantGroup
+      ) {
         return next.map((r) =>
-          r.variantGroup === updatedRecord.variantGroup && r.id !== updatedRecord.id
+          r.variantGroup === updatedRecord.variantGroup &&
+          r.id !== updatedRecord.id
             ? {
                 ...r,
-                status: "UNPLAUSIBEL" as const,
+                status: "ABGELEHNT" as const,
                 rejectedDueToApprovalOf: updatedRecord.id,
                 rejectedDueToApprovalOfLabel: updatedRecord.variantLabel,
                 resolvedAt: updatedRecord.resolvedAt,

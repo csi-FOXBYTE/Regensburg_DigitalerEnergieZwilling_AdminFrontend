@@ -34,6 +34,18 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import {
+  BOTTOM_FLOOR_LABELS,
+  BUILDING_TYPE_LABELS,
+  ENERGY_CARRIER_LABELS,
+  HEATING_SURFACE_LABELS,
+  HEATING_SYSTEM_LABELS,
+  OUTER_WALL_LABELS,
+  ROOF_CONSTRUCTION_LABELS,
+  ROOF_INSULATION_LABELS,
+  TOP_FLOOR_TYPE_LABELS,
+  WINDOW_TYPE_LABELS,
+} from "../../assets/types";
 
 export function RecordDetail({ id }: { id: string }) {
   const navigate = useNavigate();
@@ -138,7 +150,7 @@ export function RecordDetail({ id }: { id: string }) {
       return toast.error("Ein Kommentar ist bei Ablehnung erforderlich.");
     updateRecord({
       ...record,
-      status: "UNPLAUSIBEL",
+      status: "ABGELEHNT",
       notes,
       resolvedAt: new Date(),
       resolvedBy: currentUser?.name ?? null,
@@ -153,7 +165,7 @@ export function RecordDetail({ id }: { id: string }) {
       (s) =>
         s.id !== record.id &&
         s.status !== "FREIGEGEBEN" &&
-        s.status !== "UNPLAUSIBEL",
+        s.status !== "ABGELEHNT",
     );
     updateRecord({
       ...record,
@@ -667,7 +679,7 @@ export function RecordDetail({ id }: { id: string }) {
         </InfoCard>
 
         {/* Prüfung und Freigabe / Audit-Protokoll */}
-        {record.status === "FREIGEGEBEN" || record.status === "UNPLAUSIBEL" ? (
+        {record.status === "FREIGEGEBEN" || record.status === "ABGELEHNT" ? (
           <Card>
             <CardHeader
               title="Audit-Protokoll"
@@ -813,69 +825,6 @@ export function RecordDetail({ id }: { id: string }) {
     </Box>
   );
 }
-
-const ENERGY_CARRIER_LABELS: Record<string, string> = {
-  electricity: "Strom",
-  natural_gas: "Erdgas",
-  heating_oil_light: "Heizöl (leicht)",
-  wood_pellets: "Holzpellets",
-  district_heating: "Fernwärme",
-  renewable_electricity: "Erneuerbarer Strom",
-};
-
-const HEATING_SYSTEM_LABELS: Record<string, string> = {
-  air_source_heat_pump_lt_40: "Luftwärmepumpe (< 40°C)",
-  air_source_heat_pump_55_45: "Luftwärmepumpe (55/45°C)",
-  ground_source_heat_pump_lt_40: "Erdwärmepumpe (< 40°C)",
-  condensing_boiler_70_55: "Brennwertkessel (70/55°C)",
-  improved_condensing_boiler_55_45: "Verbesserter Brennwertkessel (55/45°C)",
-  standard_boiler_70_55: "Standard-Heizkessel (70/55°C)",
-  low_temperature_boiler_oil_gas_70_55:
-    "Niedertemperaturkessel Öl/Gas (70/55°C)",
-  district_heating_all_temperatures: "Fernwärme (alle Temperaturen)",
-};
-
-const HEATING_SURFACE_LABELS: Record<string, string> = {
-  radiant_surface_heating: "Fußbodenheizung",
-  free_heat_emitter: "Heizkörper",
-};
-
-const ROOF_CONSTRUCTION_LABELS: Record<string, string> = {
-  wood_construction: "Holzkonstruktion",
-  solid_construction: "Massivbauweise",
-};
-
-const ROOF_INSULATION_LABELS: Record<string, string> = {
-  betweenRafter: "Zwischen den Sparren",
-  aboveRafter: "Über den Sparren",
-};
-
-const BUILDING_TYPE_LABELS: Record<string, string> = {
-  singleFamily: "Einfamilienhaus",
-  multiFamily: "Mehrfamilienhaus",
-};
-
-const WINDOW_TYPE_LABELS: Record<string, string> = {
-  plastic_window_insulated_glazing: "Kunststofffenster (Isolierverglasung)",
-  wooden_window_double_glazing: "Holzfenster (Doppelverglasung)",
-  wooden_window_single_glazing: "Holzfenster (Einfachverglasung)",
-};
-
-const TOP_FLOOR_TYPE_LABELS: Record<string, string> = {
-  wood_beam_ceiling: "Holzbalkendecke",
-  solid_ceiling: "Massivdecke",
-};
-
-const OUTER_WALL_LABELS: Record<string, string> = {
-  solid_wall_with_thermal_insulation_composite_system: "Massivwand mit WDVS",
-  brick_wall: "Ziegelmauerwerk",
-  other_wall: "Sonstige",
-};
-
-const BOTTOM_FLOOR_LABELS: Record<string, string> = {
-  reinforced_concrete_on_ground: "Stahlbeton (erdberührt)",
-  reinforced_concrete_ceiling: "Stahlbetondecke",
-};
 
 function fmt(
   value: unknown,
