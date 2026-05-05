@@ -16,35 +16,20 @@ export const STATUS_COLORS: Record<RecordStatus, string> = {
   UNPLAUSIBEL: "#C1272D",
 };
 
-const BERLIN_PLZ: Record<string, [number, number]> = {
-  "10115": [52.5308, 13.3836],
-  "10117": [52.5155, 13.3885],
-  "10178": [52.5213, 13.4069],
-  "10243": [52.5127, 13.4469],
-  "10405": [52.5337, 13.4269],
-  "10435": [52.5408, 13.4174],
-  "10439": [52.5478, 13.4123],
-  "10623": [52.5087, 13.3231],
-  "10625": [52.5108, 13.308],
-  "10629": [52.5044, 13.3074],
-  "10709": [52.4972, 13.3194],
-  "10785": [52.5056, 13.3719],
-  "10961": [52.4946, 13.406],
-  "10967": [52.4893, 13.413],
-  "10997": [52.501, 13.4388],
-  "12057": [52.4767, 13.4338],
-  "12099": [52.4667, 13.3891],
-  "12439": [52.4418, 13.6025],
-  "12489": [52.4452, 13.5491],
-  "13353": [52.5441, 13.3558],
-  "14059": [52.5153, 13.2742],
-  "93047": [49.0207, 12.0972],
+const REGENSBURG_PLZ: Record<string, [number, number]> = {
+  "93047": [49.0207, 12.0972], // Altstadt / Innenstadt
+  "93049": [49.022, 12.052],   // Westenviertel / Prüfening
+  "93051": [49.008, 12.115],   // Ostenviertel / Stadtamhof
+  "93053": [49.002, 12.107],   // Kumpfmühl / Galgenberg
+  "93055": [48.998, 12.138],   // Burgweinting / Harting
+  "93057": [49.044, 12.105],   // Reinhausen / Steinweg
+  "93059": [49.014, 12.068],   // Konradsiedlung / Weichs
 };
 
 function coordsForRecord(record: BuildingRecord): [number, number] | null {
   const plzMatch = record.buildingAddress.match(/\b(\d{5})\b/);
   if (plzMatch?.[1]) {
-    const coords = BERLIN_PLZ[plzMatch[1]];
+    const coords = REGENSBURG_PLZ[plzMatch[1]];
     if (coords) {
       const jitter = (Math.abs(record.id.charCodeAt(0) * 31 + record.id.charCodeAt(record.id.length - 1)) % 100) / 10000;
       const sign = record.id.charCodeAt(0) % 2 === 0 ? 1 : -1;
@@ -68,8 +53,8 @@ export default function BuildingMap({
 
     if (!mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapRef.current).setView(
-        [52.52, 13.405],
-        11,
+        [49.0207, 12.0972],
+        13,
       );
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

@@ -23,6 +23,7 @@ export function PaginationView({
       <Button
         variant="outlined"
         size="small"
+        color="error"
         startIcon={<ChevronLeftIcon />}
         onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
         disabled={currentPage === 1}
@@ -35,6 +36,7 @@ export function PaginationView({
       <Button
         variant="outlined"
         size="small"
+        color="error"
         endIcon={<ChevronRightIcon />}
         onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
         disabled={currentPage === totalPages || totalPages === 0}

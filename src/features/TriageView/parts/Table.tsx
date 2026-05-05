@@ -76,7 +76,9 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              Adresse
+              <Typography variant="body1" fontWeight={"bold"}>
+                Adresse
+              </Typography>
               <SortIcon field="address" sortBy={sortBy} sortOrder={sortOrder} />
             </Box>
           </TableCell>
@@ -85,7 +87,9 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              Eingereicht am
+              <Typography variant="body1" fontWeight={"bold"}>
+                Eingereicht am
+              </Typography>
               <SortIcon field="date" sortBy={sortBy} sortOrder={sortOrder} />
             </Box>
           </TableCell>
@@ -94,7 +98,9 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              Status
+              <Typography variant="body1" fontWeight={"bold"}>
+                Status
+              </Typography>
               <SortIcon field="status" sortBy={sortBy} sortOrder={sortOrder} />
             </Box>
           </TableCell>
@@ -105,7 +111,10 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              Prüfer
+              <Typography variant="body1" fontWeight={"bold"}>
+                Prüfer
+              </Typography>
+
               <SortIcon
                 field="assignedTo"
                 sortBy={sortBy}
@@ -114,7 +123,9 @@ function TableView({
             </Box>
           </TableCell>
           <TableCell sx={{ fontWeight: 600 }} align="right">
-            Aktionen
+            <Typography variant="body1" fontWeight={"bold"}>
+              Aktionen
+            </Typography>
           </TableCell>
         </TableRow>
       </TableHead>
@@ -122,9 +133,7 @@ function TableView({
         {records.length === 0 ? (
           <TableRow>
             <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-              <Typography color="text.secondary">
-                Keine Datensätze gefunden.
-              </Typography>
+              <Typography>Keine Datensätze gefunden.</Typography>
             </TableCell>
           </TableRow>
         ) : (
@@ -205,6 +214,7 @@ function TableView({
                       <Button
                         size="small"
                         variant="outlined"
+                        color="error"
                         onClick={() => handleAssignToMe(record)}
                       >
                         Zuweisen

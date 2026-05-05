@@ -32,77 +32,117 @@ export function AppHeader() {
   return (
     <Box
       sx={{
-        bgcolor: "background.paper",
+        bgcolor: "white",
         borderBottom: 1,
         borderColor: "divider",
         position: "sticky",
         top: 0,
-        zIndex: 1100,
+        zIndex: 10,
       }}
     >
+      {/* Top section — 123 px */}
       <Box
         sx={{
           maxWidth: 1170,
           mx: "auto",
           px: 2,
+          height: 123,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          py: 1,
         }}
       >
         <Typography
-          variant="h4"
-          sx={{ color: "error.main", whiteSpace: "nowrap", my: 3 }}
+          variant="h2"
+          sx={{ color: "error.main", whiteSpace: "nowrap" }}
         >
           Digitaler Energie Zwilling
         </Typography>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Typography variant="body2" color="text.secondary">
-            {currentUser?.name}
-          </Typography>
-          <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
-          <Button
-            size="small"
-            variant="text"
-            endIcon={<LogoutIcon fontSize="small" />}
-            onClick={handleLogout}
-            sx={{ minWidth: 0, px: 1, color: "text.primary" }}
-          >
-            Abmelden
-          </Button>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+            height: "100%",
+            py: 1.5,
+          }}
+        >
+          {/* Utility links */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Typography
+              sx={{ fontSize: 14, lineHeight: "22px", color: "#757575" }}
+            >
+              {currentUser?.name}
+            </Typography>
+            <Divider orientation="vertical" flexItem />
+            <Button
+              size="small"
+              variant="text"
+              endIcon={<LogoutIcon sx={{ fontSize: "14px !important" }} />}
+              onClick={handleLogout}
+              sx={{
+                minWidth: 0,
+                px: 0,
+                fontSize: 14,
+                lineHeight: "22px",
+                color: "#757575",
+                textTransform: "none",
+                fontWeight: 400,
+              }}
+            >
+              Abmelden
+            </Button>
+          </Box>
+
+          {/* Logo */}
           <Box
             component="img"
             src="https://upload.wikimedia.org/wikipedia/de/thumb/6/6a/Regensburg_Logo.svg/960px-Regensburg_Logo.svg.png"
             alt="Stadt Regensburg"
-            sx={{ height: 44, width: "auto", ml: 1 }}
+            sx={{ height: 44, width: "auto" }}
           />
         </Box>
       </Box>
-      <Divider
-        orientation="horizontal"
-        flexItem
-        sx={{ width: "1170px", margin: "auto" }}
-      />
 
-      <Box sx={{ maxWidth: 1170, mx: "auto", px: 2 }}>
+      <Divider />
+
+      {/* Bottom nav section — 68 px */}
+      <Box
+        sx={{
+          maxWidth: 1170,
+          mx: "auto",
+          px: 2,
+          height: 68,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <Tabs
           value={tabValue}
           onChange={(_, v) => navigate({ to: NAV_ITEMS[v].path })}
           sx={{
-            "& .MuiTabs-indicator": { backgroundColor: "error.main" },
-            "& .Mui-selected": { color: "text.primary" },
+            height: 68,
+            minHeight: 68,
+            "& .MuiTabs-indicator": {
+              backgroundColor: "error.main",
+              height: 3,
+            },
+            "& .MuiTab-root": {
+              fontSize: 16,
+              lineHeight: "26px",
+              color: "#000",
+              textTransform: "none",
+              height: 68,
+              minHeight: 68,
+            },
+            "& .Mui-selected": { color: "#000" },
           }}
         >
           {NAV_ITEMS.map((item) => (
-            <Tab
-              key={item.path}
-              label={item.label}
-              sx={{
-                textTransform: "none",
-              }}
-            />
+            <Tab key={item.path} label={item.label} />
           ))}
         </Tabs>
       </Box>

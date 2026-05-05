@@ -12,17 +12,13 @@ const theme = createTheme({
     allVariants: {
       color: "#191919",
     },
-    h1: { fontSize: 48, fontWeight: 700, lineHeight: "58px" },
-    h2: { fontSize: 36, fontWeight: 700, lineHeight: "46px" },
-    h3: { fontSize: 24, fontWeight: 400, lineHeight: "32px" },
-    h4: { fontSize: 36, fontWeight: 700, lineHeight: "46px" },
-    h5: { fontSize: 24, fontWeight: 400, lineHeight: "32px" },
-    h6: { fontSize: 18, fontWeight: 700, lineHeight: "28px" },
-    subtitle1: { fontSize: 16, fontWeight: 400, lineHeight: "26px" },
-    subtitle2: { fontSize: 16, fontWeight: 400, lineHeight: "26px" },
-    body1: { fontSize: 16, fontWeight: 400, lineHeight: "26px" },
-    body2: { fontSize: 14, fontWeight: 400, lineHeight: "22px" },
-    caption: { fontSize: 14, fontWeight: 400, lineHeight: "22px" },
+    h1: { fontSize: 48, fontWeight: "bold", lineHeight: "58px" },
+    h2: { fontSize: 36, fontWeight: "bold", lineHeight: "46px" },
+    h3: { fontSize: 24, fontWeight: "normal", lineHeight: "32px" },
+    h4: { fontSize: 18, fontWeight: "bold", lineHeight: "28px" },
+    h5: { fontSize: 24, fontWeight: "normal", lineHeight: "30px" }, // Anleser
+    body1: { fontSize: 16, fontWeight: "normal", lineHeight: "26px" }, // Fließtext
+    body2: { fontSize: 14, fontWeight: "normal", lineHeight: "22px" }, // Fließtext klein
   },
   components: {
     MuiCssBaseline: {

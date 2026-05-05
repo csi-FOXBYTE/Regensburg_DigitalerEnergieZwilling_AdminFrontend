@@ -18,7 +18,7 @@ const noRoofWindows = {
 export const mockRecords: BuildingRecord[] = [
   {
     id: "1",
-    buildingAddress: "Hauptstraße 15, 10115 Berlin",
+    buildingAddress: "Pfauengasse 4, 93047 Regensburg",
     receivedDate: "2026-03-27T10:30:00",
     status: "NEU",
     assignedTo: null,
@@ -84,7 +84,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "2",
-    buildingAddress: "Alexanderplatz 5, 10178 Berlin",
+    buildingAddress: "Haidplatz 8, 93047 Regensburg",
     receivedDate: "2026-03-24T14:20:00",
     status: "IN_PRUEFUNG",
     assignedTo: "Anna Schmidt",
@@ -150,7 +150,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "3",
-    buildingAddress: "Berliner Allee 42, 10115 Berlin",
+    buildingAddress: "Gesandtenstraße 14, 93047 Regensburg",
     receivedDate: "2026-03-26T09:15:00",
     status: "NEU",
     assignedTo: null,
@@ -159,7 +159,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "4",
-    buildingAddress: "Friedrichstraße 123, 10117 Berlin",
+    buildingAddress: "Prüfeninger Straße 65, 93049 Regensburg",
     receivedDate: "2026-03-23T11:45:00",
     status: "FREIGEGEBEN",
     assignedTo: "Michael Weber",
@@ -230,7 +230,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "5",
-    buildingAddress: "Schillerstraße 89, 10625 Berlin",
+    buildingAddress: "Donaustaufer Straße 28, 93055 Regensburg",
     receivedDate: "2026-03-22T16:30:00",
     status: "UNPLAUSIBEL",
     assignedTo: "Anna Schmidt",
@@ -297,7 +297,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "6",
-    buildingAddress: "Kurfürstendamm 88, 10709 Berlin",
+    buildingAddress: "Landshuter Straße 42, 93053 Regensburg",
     receivedDate: "2026-03-26T08:00:00",
     status: "NEU",
     assignedTo: null,
@@ -363,7 +363,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "7",
-    buildingAddress: "Kastanienallee 34, 10435 Berlin",
+    buildingAddress: "Bajuwarenstraße 12, 93053 Regensburg",
     receivedDate: "2026-03-27T07:45:00",
     status: "NEU",
     assignedTo: null,
@@ -434,7 +434,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "8",
-    buildingAddress: "Sonnenallee 245, 12057 Berlin",
+    buildingAddress: "Frankenstraße 7, 93059 Regensburg",
     receivedDate: "2026-03-24T09:30:00",
     status: "FREIGEGEBEN",
     assignedTo: "Max Müller",
@@ -499,8 +499,8 @@ export const mockRecords: BuildingRecord[] = [
     },
   },
   {
-    id: "8",
-    buildingAddress: "Karl-Marx-Allee 90, 10243 Berlin",
+    id: "8b",
+    buildingAddress: "Kumpfmühler Straße 55, 93051 Regensburg",
     receivedDate: "2026-03-22T13:45:00",
     status: "FREIGEGEBEN",
     assignedTo: "Michael Weber",
@@ -566,7 +566,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "9",
-    buildingAddress: "Spandauer Damm 45, 14059 Berlin",
+    buildingAddress: "Römerstraße 19, 93055 Regensburg",
     receivedDate: "2026-03-27T09:00:00",
     status: "NEU",
     assignedTo: null,
@@ -632,7 +632,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "10",
-    buildingAddress: "Bornholmer Straße 78, 10439 Berlin",
+    buildingAddress: "Weinweg 3, 93051 Regensburg",
     receivedDate: "2026-03-24T15:00:00",
     status: "FREIGEGEBEN",
     assignedTo: "Anna Schmidt",
@@ -698,7 +698,7 @@ export const mockRecords: BuildingRecord[] = [
   },
   {
     id: "11",
-    buildingAddress: "Adlergestell 298, 12489 Berlin",
+    buildingAddress: "Gutenbergstraße 22, 93051 Regensburg",
     receivedDate: "2026-03-22T10:00:00",
     status: "FREIGEGEBEN",
     assignedTo: "Max Müller",

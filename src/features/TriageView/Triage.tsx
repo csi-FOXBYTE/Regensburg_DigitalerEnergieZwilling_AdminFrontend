@@ -1,7 +1,7 @@
 import type { BuildingRecord } from "@/assets/types";
 import { useAuth } from "@/components/AuthContext";
-import { addAuditEntry } from "@/hooks/auditLog";
 import { RecordsContext } from "@/components/RecordsContext";
+import { addAuditEntry } from "@/hooks/auditLog";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -13,7 +13,7 @@ import TableView from "./parts/Table";
 
 export function Dashboard() {
   const { records, updateRecord, setRecords } = useContext(RecordsContext)!;
-  const { currentUser, logout } = useAuth();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   const [addressFilter, setAddressFilter] = useState("");
@@ -159,7 +159,12 @@ export function Dashboard() {
             assignedAt: null,
             notes: "",
           });
-          addAuditEntry("auto_deassign", record, null, `72h Timeout (zugewiesen an ${record.assignedTo})`);
+          addAuditEntry(
+            "auto_deassign",
+            record,
+            null,
+            `72h Timeout (zugewiesen an ${record.assignedTo})`,
+          );
           toast.info(`Datensatz ${record.id} nach 72h zurückgesetzt.`);
         }
       });
@@ -178,7 +183,7 @@ export function Dashboard() {
         }}
       >
         <Box>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h2" gutterBottom>
             Gebäudeliste
           </Typography>
           <Typography variant="body1">

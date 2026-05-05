@@ -55,9 +55,7 @@ export function FiltersControls({
     <Paper sx={{ p: 2 }}>
       <Box>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="h5" fontWeight={"bold"}>
-            Filter & Suche
-          </Typography>
+          <Typography variant="h3">Filter und Suche</Typography>
         </Box>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Tooltip title="Aktualisieren">
@@ -93,7 +91,7 @@ export function FiltersControls({
             select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as string)}
-            sx={{ minWidth: 200 }}
+            sx={{ minWidth: 140 }}
           >
             <MenuItem value="all">Alle Status</MenuItem>
             <MenuItem value="NEU">Neu</MenuItem>
@@ -108,10 +106,12 @@ export function FiltersControls({
             label="Einträge"
             value={itemsPerPage}
             onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            sx={{ minWidth: 100 }}
+            sx={{ minWidth: 80 }}
           >
             {PAGE_SIZE_OPTIONS.map((n) => (
-              <MenuItem key={n} value={n}>{n}</MenuItem>
+              <MenuItem key={n} value={n}>
+                {n}
+              </MenuItem>
             ))}
           </TextField>
 
@@ -129,6 +129,7 @@ export function FiltersControls({
 
           <Button
             size="small"
+            color="error"
             variant="outlined"
             startIcon={<HistoryIcon />}
             onClick={() => navigate({ to: "/audit" })}

@@ -1,9 +1,9 @@
 import type { BuildingRecord } from "@/assets/types";
 import { statusConfig } from "@/assets/types";
 import { useAuth } from "@/components/AuthContext";
-import { addAuditEntry } from "@/hooks/auditLog";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { RecordsContext } from "@/components/RecordsContext";
+import { addAuditEntry } from "@/hooks/auditLog";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -150,7 +150,10 @@ export function RecordDetail({ id }: { id: string }) {
 
   const handleFreigeben = () => {
     const siblingsToAutoDecline = variantSiblings.filter(
-      (s) => s.id !== record.id && s.status !== "FREIGEGEBEN" && s.status !== "UNPLAUSIBEL",
+      (s) =>
+        s.id !== record.id &&
+        s.status !== "FREIGEGEBEN" &&
+        s.status !== "UNPLAUSIBEL",
     );
     updateRecord({
       ...record,
@@ -202,6 +205,7 @@ export function RecordDetail({ id }: { id: string }) {
             <Button
               variant="outlined"
               size="small"
+              color="error"
               startIcon={<ArrowBackIcon />}
               onClick={() => navigate({ to: "/dashboard" })}
               sx={{ mt: 0.5 }}
@@ -209,11 +213,11 @@ export function RecordDetail({ id }: { id: string }) {
               Zurück
             </Button>
             <Box>
-              <Typography variant="h5">{record.buildingAddress}</Typography>
+              <Typography variant="h4">{record.buildingAddress}</Typography>
               <Box
                 sx={{ display: "flex", alignItems: "center", gap: 2, mt: 0.5 }}
               >
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2">
                   Eingegangen:{" "}
                   {new Date(record.receivedDate).toLocaleString("de-DE", {
                     day: "2-digit",
@@ -223,12 +227,8 @@ export function RecordDetail({ id }: { id: string }) {
                     minute: "2-digit",
                   })}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  •
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  ID: {record.id}
-                </Typography>
+                <Typography variant="body2">•</Typography>
+                <Typography variant="body2">ID: {record.id}</Typography>
               </Box>
             </Box>
           </Box>
@@ -260,14 +260,14 @@ export function RecordDetail({ id }: { id: string }) {
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <LayersIcon sx={{ color: "text.secondary", fontSize: 20 }} />
-                  <Typography variant="h6">
+                  <LayersIcon sx={{ fontSize: 20 }} />
+                  <Typography variant="h4">
                     Einreichungen ({variantSiblings.length})
                   </Typography>
                 </Box>
                 <Box sx={{ textAlign: "right" }}>
                   <Typography
-                    variant="caption"
+                    variant="body2"
                     color="text.secondary"
                     display="block"
                     gutterBottom
@@ -301,11 +301,11 @@ export function RecordDetail({ id }: { id: string }) {
                   </Select>
                 </Box>
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 2 }}>
                 Wählen Sie eine Einreichung zur Detailansicht
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 1.5 }}>
+              <Typography variant="body1" fontWeight={600} sx={{ mb: 1.5 }}>
                 Status-Übersicht aller Einreichungen
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -320,10 +320,7 @@ export function RecordDetail({ id }: { id: string }) {
                       py: 1.25,
                       borderRadius: 1,
                       border: "1px solid",
-                      borderColor:
-                        s.id === record.id ? "primary.light" : "divider",
-                      bgcolor:
-                        s.id === record.id ? "primary.50" : "transparent",
+                      borderColor: s.id === record.id ? "#E30613" : "divider",
                     }}
                   >
                     <Typography
@@ -374,7 +371,7 @@ export function RecordDetail({ id }: { id: string }) {
               <Box sx={{ display: "flex", gap: 4 }}>
                 <Box>
                   <Typography
-                    variant="caption"
+                    variant="body1"
                     color="text.secondary"
                     display="block"
                   >
@@ -390,7 +387,7 @@ export function RecordDetail({ id }: { id: string }) {
                 {record.assignedAt && (
                   <Box>
                     <Typography
-                      variant="caption"
+                      variant="body2"
                       color="text.secondary"
                       display="block"
                     >
@@ -411,8 +408,8 @@ export function RecordDetail({ id }: { id: string }) {
               {(canAssign || canUnassign) && (
                 <Button
                   variant="outlined"
-                  color={canUnassign ? "warning" : "primary"}
                   onClick={canUnassign ? handleUnassign : handleAssignToMe}
+                  color="error"
                 >
                   {canUnassign ? "Zuweisung aufheben" : "Sich zuweisen"}
                 </Button>
@@ -425,7 +422,11 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={ApartmentIcon} title="Gebäudeinformationen" cols={2}>
           <InfoItem
             label="Gebäudetyp"
-            value={fmt(record.detInput?.general.type, undefined, BUILDING_TYPE_LABELS)}
+            value={fmt(
+              record.detInput?.general.type,
+              undefined,
+              BUILDING_TYPE_LABELS,
+            )}
           />
           <InfoItem
             label="Baujahr"
@@ -712,7 +713,7 @@ export function RecordDetail({ id }: { id: string }) {
               subheader="Bewerten Sie die Einreichung und treffen Sie eine Entscheidung"
             />
             <CardContent>
-              <Typography variant="body2" fontWeight={600} gutterBottom>
+              <Typography variant="h4" gutterBottom>
                 Kommentar (optional bei Freigabe, erforderlich bei Ablehnung)
               </Typography>
               <TextField
@@ -779,14 +780,14 @@ export function RecordDetail({ id }: { id: string }) {
         <Card>
           <CardContent>
             <Typography
-              variant="h6"
+              variant="h3"
               color="error"
               gutterBottom
               fontWeight={700}
             >
               Gefahrenzone
             </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Typography variant="body1" gutterBottom>
               Unwiderrufliche Aktionen - Vorsicht geboten
             </Typography>
             <Button

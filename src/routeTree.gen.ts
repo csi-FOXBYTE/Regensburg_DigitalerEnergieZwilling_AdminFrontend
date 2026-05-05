@@ -9,21 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as HelloWorldLayoutRouteImport } from './routes/hello-world/layout'
 import { Route as PageRouteImport } from './routes/page'
 import { Route as MaintenancePageRouteImport } from './routes/maintenance/page'
 import { Route as LoginPageRouteImport } from './routes/login/page'
-import { Route as HelloWorldPageRouteImport } from './routes/hello-world/page'
 import { Route as DashboardPageRouteImport } from './routes/dashboard/page'
 import { Route as ConfigPageRouteImport } from './routes/config/page'
 import { Route as AuditPageRouteImport } from './routes/audit/page'
 import { Route as RecordIdPageRouteImport } from './routes/record/$id/page'
 
-const HelloWorldLayoutRoute = HelloWorldLayoutRouteImport.update({
-  id: '/hello-world',
-  path: '/hello-world',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PageRoute = PageRouteImport.update({
   id: '/',
   path: '/',
@@ -38,11 +31,6 @@ const LoginPageRoute = LoginPageRouteImport.update({
   id: '/login/',
   path: '/login/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const HelloWorldPageRoute = HelloWorldPageRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => HelloWorldLayoutRoute,
 } as any)
 const DashboardPageRoute = DashboardPageRouteImport.update({
   id: '/dashboard/',
@@ -67,11 +55,9 @@ const RecordIdPageRoute = RecordIdPageRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PageRoute
-  '/hello-world': typeof HelloWorldLayoutRouteWithChildren
   '/audit/': typeof AuditPageRoute
   '/config/': typeof ConfigPageRoute
   '/dashboard/': typeof DashboardPageRoute
-  '/hello-world/': typeof HelloWorldPageRoute
   '/login/': typeof LoginPageRoute
   '/maintenance/': typeof MaintenancePageRoute
   '/record/$id/': typeof RecordIdPageRoute
@@ -81,7 +67,6 @@ export interface FileRoutesByTo {
   '/audit': typeof AuditPageRoute
   '/config': typeof ConfigPageRoute
   '/dashboard': typeof DashboardPageRoute
-  '/hello-world': typeof HelloWorldPageRoute
   '/login': typeof LoginPageRoute
   '/maintenance': typeof MaintenancePageRoute
   '/record/$id': typeof RecordIdPageRoute
@@ -89,11 +74,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof PageRoute
-  '/hello-world': typeof HelloWorldLayoutRouteWithChildren
   '/audit/': typeof AuditPageRoute
   '/config/': typeof ConfigPageRoute
   '/dashboard/': typeof DashboardPageRoute
-  '/hello-world/': typeof HelloWorldPageRoute
   '/login/': typeof LoginPageRoute
   '/maintenance/': typeof MaintenancePageRoute
   '/record/$id/': typeof RecordIdPageRoute
@@ -102,11 +85,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/hello-world'
     | '/audit/'
     | '/config/'
     | '/dashboard/'
-    | '/hello-world/'
     | '/login/'
     | '/maintenance/'
     | '/record/$id/'
@@ -116,18 +97,15 @@ export interface FileRouteTypes {
     | '/audit'
     | '/config'
     | '/dashboard'
-    | '/hello-world'
     | '/login'
     | '/maintenance'
     | '/record/$id'
   id:
     | '__root__'
     | '/'
-    | '/hello-world'
     | '/audit/'
     | '/config/'
     | '/dashboard/'
-    | '/hello-world/'
     | '/login/'
     | '/maintenance/'
     | '/record/$id/'
@@ -135,7 +113,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   PageRoute: typeof PageRoute
-  HelloWorldLayoutRoute: typeof HelloWorldLayoutRouteWithChildren
   AuditPageRoute: typeof AuditPageRoute
   ConfigPageRoute: typeof ConfigPageRoute
   DashboardPageRoute: typeof DashboardPageRoute
@@ -146,13 +123,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/hello-world': {
-      id: '/hello-world'
-      path: '/hello-world'
-      fullPath: '/hello-world'
-      preLoaderRoute: typeof HelloWorldLayoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -173,13 +143,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/login/'
       preLoaderRoute: typeof LoginPageRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/hello-world/': {
-      id: '/hello-world/'
-      path: '/'
-      fullPath: '/hello-world/'
-      preLoaderRoute: typeof HelloWorldPageRouteImport
-      parentRoute: typeof HelloWorldLayoutRoute
     }
     '/dashboard/': {
       id: '/dashboard/'
@@ -212,20 +175,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface HelloWorldLayoutRouteChildren {
-  HelloWorldPageRoute: typeof HelloWorldPageRoute
-}
-
-const HelloWorldLayoutRouteChildren: HelloWorldLayoutRouteChildren = {
-  HelloWorldPageRoute: HelloWorldPageRoute,
-}
-
-const HelloWorldLayoutRouteWithChildren =
-  HelloWorldLayoutRoute._addFileChildren(HelloWorldLayoutRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   PageRoute: PageRoute,
-  HelloWorldLayoutRoute: HelloWorldLayoutRouteWithChildren,
   AuditPageRoute: AuditPageRoute,
   ConfigPageRoute: ConfigPageRoute,
   DashboardPageRoute: DashboardPageRoute,

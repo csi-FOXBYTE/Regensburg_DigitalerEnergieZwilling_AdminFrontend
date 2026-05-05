@@ -36,3 +36,6 @@ coverage/
 
 # cache from pnpm 
 .pnpm-store
+
+# temp stuff
+.tanstack/tmp/
