@@ -87,7 +87,7 @@ export default function DashboardPage() {
         }}
       >
         <Box>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h2" gutterBottom>
             Dashboard
           </Typography>
           <Typography variant="body1">
@@ -117,9 +117,7 @@ export default function DashboardPage() {
                   p: 3,
                 }}
               >
-                <Typography variant="body2" color="text.secondary">
-                  {stat.title}
-                </Typography>
+                <Typography variant="body1">{stat.title}</Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Box
                     sx={{
@@ -133,9 +131,7 @@ export default function DashboardPage() {
                   >
                     {stat.icon}
                   </Box>
-                  <Typography variant="h4" fontWeight={700}>
-                    {stat.value}
-                  </Typography>
+                  <Typography variant="h3">{stat.value}</Typography>
                 </Box>
               </CardContent>
             </Card>
@@ -152,10 +148,10 @@ export default function DashboardPage() {
           {/* Newest Data */}
           <Card elevation={2}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" mb={0.5}>
+              <Typography variant="h5" gutterBottom>
                 Neueste Einreichungen
               </Typography>
-              <Typography variant="body2" color="text.secondary" mb={2}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
                 Zuletzt übermittelte Gebäudedaten
               </Typography>
               <List disablePadding>
@@ -172,7 +168,7 @@ export default function DashboardPage() {
                               params: { id: record.id },
                             })
                           }
-                          sx={{ px: 0, py: 1.5 }}
+                          sx={{ p: 1.5 }}
                         >
                           <ListItemText
                             primary={
@@ -184,7 +180,7 @@ export default function DashboardPage() {
                                   gap: 1,
                                 }}
                               >
-                                <Typography variant="body2" fontWeight={700}>
+                                <Typography variant="body1">
                                   {record.buildingAddress.split(",")[0]}
                                 </Typography>
                                 <Chip
@@ -197,11 +193,7 @@ export default function DashboardPage() {
                             }
                             secondary={
                               <Box component="span">
-                                <Typography
-                                  component="span"
-                                  variant="caption"
-                                  color="text.secondary"
-                                >
+                                <Typography component="span" variant="body2">
                                   {BUILDING_TYPE_LABELS[
                                     record.detInput?.general.type ?? ""
                                   ] ??
@@ -218,7 +210,7 @@ export default function DashboardPage() {
                                 <Typography
                                   component="span"
                                   variant="caption"
-                                  color="text.disabled"
+                                  color="#757575"
                                 >
                                   {new Date(
                                     record.receivedDate,
@@ -248,7 +240,7 @@ export default function DashboardPage() {
               sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}
             >
               <Box>
-                <Typography variant="h6" mb={0.5}>
+                <Typography variant="h5" mb={0.5}>
                   Gebäudekarte
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -288,6 +280,7 @@ export default function DashboardPage() {
 
               {/* Map */}
               <Box sx={{ height: 360, borderRadius: 1, overflow: "hidden" }}>
+                {/* }   <MapWithControls /> */}
                 <BuildingMap
                   buildings={records}
                   onBuildingClick={(r) =>
@@ -309,13 +302,11 @@ export default function DashboardPage() {
               >
                 <Box>
                   <Box>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="body2" color="text.secondary">
                       Gesamtabdeckung aller Gebäude
                     </Typography>
-                    <Typography variant="h6" fontWeight={700}>
-                      Kommt bald
-                    </Typography>
-                    <Typography variant="caption" color="text.disabled">
+                    <Typography variant="h4">Kommt bald</Typography>
+                    <Typography variant="body2" color="text.secondary">
                       %
                     </Typography>
                   </Box>
