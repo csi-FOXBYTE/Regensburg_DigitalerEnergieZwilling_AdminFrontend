@@ -1,4 +1,3 @@
-import type { BuildingRecord } from "@/assets/types";
 import { statusConfig } from "@/assets/types";
 import { useAuth } from "@/components/AuthContext";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
@@ -25,55 +24,48 @@ import {
   CardContent,
   CardHeader,
   Chip,
-  Divider,
-  MenuItem,
-  Select,
   TextField,
   Typography,
 } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useStore } from "@nanostores/react";
 import { toast } from "sonner";
 import {
-  BOTTOM_FLOOR_LABELS,
-  BUILDING_TYPE_LABELS,
-  ENERGY_CARRIER_LABELS,
-  HEATING_SURFACE_LABELS,
-  HEATING_SYSTEM_LABELS,
-  OUTER_WALL_LABELS,
-  ROOF_CONSTRUCTION_LABELS,
-  ROOF_INSULATION_LABELS,
-  TOP_FLOOR_TYPE_LABELS,
-  WINDOW_TYPE_LABELS,
-} from "../../assets/types";
+  BUILDING_TYPE_SELECTIONS,
+  ROOF_INSULATION_SELECTIONS,
+  resolveLabel,
+  type LocalizableSelection,
+} from "../../assets/labelResolver";
+import { config } from "../../hooks/store";
 
 export function RecordDetail({ id }: { id: string }) {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { records, updateRecord, setRecords } = useContext(RecordsContext)!;
-  const [record, setRecord] = useState<BuildingRecord | null>(null);
-  const [notes, setNotes] = useState("");
+  const cfg = useStore(config);
+  const record = useMemo(
+    () => records.find((r) => r.id === id) ?? null,
+    [id, records],
+  );
+  // key={id} on this component ensures a fresh mount per record, so lazy init is safe
+  const [notes, setNotes] = useState(() => record?.notes ?? "");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const hasChangesRef = useRef(false);
 
-  // Kept fresh on every render so the unmount cleanup sees current values
   const updateRecordRef = useRef(updateRecord);
-  updateRecordRef.current = updateRecord;
   const snapshotRef = useRef({ record, notes, currentUser });
-  snapshotRef.current = { record, notes, currentUser };
+
+  // Kept fresh after every render so the unmount cleanup sees current values
+  useEffect(() => {
+    updateRecordRef.current = updateRecord;
+    snapshotRef.current = { record, notes, currentUser };
+  });
 
   const variantSiblings = useMemo(() => {
     if (!record?.variantGroup) return [];
     return records.filter((r) => r.variantGroup === record.variantGroup);
   }, [record, records]);
-
-  useEffect(() => {
-    const foundRecord = records.find((r) => r.id === id);
-    if (foundRecord) {
-      setRecord(foundRecord);
-      if (!hasChangesRef.current) setNotes(foundRecord.notes);
-    }
-  }, [id, records]);
 
   // Auto-save notes when navigating away, and log the action
   useEffect(() => {
@@ -97,12 +89,12 @@ export function RecordDetail({ id }: { id: string }) {
         }}
       >
         <Box sx={{ textAlign: "center" }}>
-          <Typography color="text.secondary" gutterBottom>
+          <Typography variant="h3" gutterBottom>
             Datensatz nicht gefunden
           </Typography>
           <Button
             variant="outlined"
-            onClick={() => navigate({ to: "/dashboard" })}
+            onClick={() => navigate({ to: "/maintenance" })}
           >
             Zurück zur Übersicht
           </Button>
@@ -195,11 +187,12 @@ export function RecordDetail({ id }: { id: string }) {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "grey.100", p: 3 }}>
+    <Box sx={{ width: "full" }}>
       <Box
         sx={{
-          maxWidth: 960,
+          maxWidth: 1170,
           mx: "auto",
+          py: 3,
           display: "flex",
           flexDirection: "column",
           gap: 3,
@@ -219,17 +212,17 @@ export function RecordDetail({ id }: { id: string }) {
               size="small"
               color="error"
               startIcon={<ArrowBackIcon />}
-              onClick={() => navigate({ to: "/dashboard" })}
+              onClick={() => navigate({ to: "/maintenance" })}
               sx={{ mt: 0.5 }}
             >
               Zurück
             </Button>
             <Box>
-              <Typography variant="h4">{record.buildingAddress}</Typography>
+              <Typography variant="h2">{record.buildingAddress}</Typography>
               <Box
                 sx={{ display: "flex", alignItems: "center", gap: 2, mt: 0.5 }}
               >
-                <Typography variant="body2">
+                <Typography variant="h4">
                   Eingegangen:{" "}
                   {new Date(record.receivedDate).toLocaleString("de-DE", {
                     day: "2-digit",
@@ -239,8 +232,8 @@ export function RecordDetail({ id }: { id: string }) {
                     minute: "2-digit",
                   })}
                 </Typography>
-                <Typography variant="body2">•</Typography>
-                <Typography variant="body2">ID: {record.id}</Typography>
+                <Typography variant="h4">•</Typography>
+                <Typography variant="h4">ID: {record.id}</Typography>
               </Box>
             </Box>
           </Box>
@@ -264,66 +257,20 @@ export function RecordDetail({ id }: { id: string }) {
           <Card>
             <CardContent>
               <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  mb: 0.5,
-                }}
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <LayersIcon sx={{ fontSize: 20 }} />
-                  <Typography variant="h4">
-                    Einreichungen ({variantSiblings.length})
-                  </Typography>
-                </Box>
-                <Box sx={{ textAlign: "right" }}>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    display="block"
-                    gutterBottom
-                  >
-                    Einreichung auswählen
-                  </Typography>
-                  <Select
-                    size="small"
-                    value={record.id}
-                    onChange={(e) =>
-                      navigate({
-                        to: "/record/$id",
-                        params: { id: e.target.value },
-                      })
-                    }
-                    sx={{ minWidth: 280 }}
-                  >
-                    {variantSiblings.map((s) => (
-                      <MenuItem key={s.id} value={s.id}>
-                        {s.variantLabel} -{" "}
-                        {new Date(s.receivedDate).toLocaleString("de-DE", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        Uhr{s.status === "FREIGEGEBEN" ? " ✓" : ""}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Box>
+                <LayersIcon sx={{ fontSize: 20 }} />
+                <Typography variant="h3">
+                  Einreichungen ({variantSiblings.length})
+                </Typography>
               </Box>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Wählen Sie eine Einreichung zur Detailansicht
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="body1" fontWeight={600} sx={{ mb: 1.5 }}>
-                Status-Übersicht aller Einreichungen
-              </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 {variantSiblings.map((s) => (
                   <Box
                     key={s.id}
+                    onClick={() =>
+                      navigate({ to: "/record/$id", params: { id: s.id } })
+                    }
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
@@ -333,10 +280,12 @@ export function RecordDetail({ id }: { id: string }) {
                       borderRadius: 1,
                       border: "1px solid",
                       borderColor: s.id === record.id ? "#E30613" : "divider",
+                      cursor: "pointer",
+                      "&:hover": { bgcolor: "action.hover" },
                     }}
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       fontWeight={s.id === record.id ? 600 : 400}
                     >
                       {s.variantLabel}
@@ -382,15 +331,11 @@ export function RecordDetail({ id }: { id: string }) {
             >
               <Box sx={{ display: "flex", gap: 4 }}>
                 <Box>
-                  <Typography
-                    variant="body1"
-                    color="text.secondary"
-                    display="block"
-                  >
+                  <Typography variant="h4" display="block">
                     Zugewiesen an
                   </Typography>
                   <Typography
-                    variant="body2"
+                    variant="body1"
                     fontWeight={isAssignedToMe ? 600 : 400}
                   >
                     {record.assignedTo ?? "Nicht zugewiesen"}
@@ -398,14 +343,10 @@ export function RecordDetail({ id }: { id: string }) {
                 </Box>
                 {record.assignedAt && (
                   <Box>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      display="block"
-                    >
+                    <Typography variant="h4" display="block">
                       Zugewiesen am
                     </Typography>
-                    <Typography variant="body2">
+                    <Typography variant="body1">
                       {new Date(record.assignedAt).toLocaleString("de-DE", {
                         day: "2-digit",
                         month: "2-digit",
@@ -423,7 +364,7 @@ export function RecordDetail({ id }: { id: string }) {
                   onClick={canUnassign ? handleUnassign : handleAssignToMe}
                   color="error"
                 >
-                  {canUnassign ? "Zuweisung aufheben" : "Sich zuweisen"}
+                  {canUnassign ? "Zuweisung aufheben" : "Mir zuweisen"}
                 </Button>
               )}
             </Box>
@@ -437,12 +378,12 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(
               record.detInput?.general.type,
               undefined,
-              BUILDING_TYPE_LABELS,
+              BUILDING_TYPE_SELECTIONS,
             )}
           />
           <InfoItem
             label="Baujahr"
-            value={record.detInput?.general.buildingYear ?? "Nicht angegeben"}
+            value={fmt(record.detInput?.general.buildingYear)}
           />
           <InfoItem
             label="Wohnfläche"
@@ -471,7 +412,7 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(
               record.detInput?.roof.constructionType,
               undefined,
-              ROOF_CONSTRUCTION_LABELS,
+              cfg.roof.constructionTypes,
             )}
           />
           <InfoItem
@@ -487,39 +428,7 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(
               record.detInput?.roof.insulationType,
               undefined,
-              ROOF_INSULATION_LABELS,
-            )}
-          />
-        </InfoCard>
-
-        {/* Heizung */}
-        <InfoCard icon={LocalFireDepartmentIcon} title="Heizung" cols={2}>
-          <InfoItem
-            label="Baujahr Heizungssystem"
-            value={fmt(record.detInput?.heat.heatingSystemConstructionYear)}
-          />
-          <InfoItem
-            label="Primärenergieträger"
-            value={fmt(
-              record.detInput?.heat.primaryEnergyCarrier,
-              undefined,
-              ENERGY_CARRIER_LABELS,
-            )}
-          />
-          <InfoItem
-            label="Heizungstyp"
-            value={fmt(
-              record.detInput?.heat.heatingSystemType,
-              undefined,
-              HEATING_SYSTEM_LABELS,
-            )}
-          />
-          <InfoItem
-            label="Wärmeabgabesystem"
-            value={fmt(
-              record.detInput?.heat.heatingSurfaceType,
-              undefined,
-              HEATING_SURFACE_LABELS,
+              ROOF_INSULATION_SELECTIONS,
             )}
           />
         </InfoCard>
@@ -540,7 +449,7 @@ export function RecordDetail({ id }: { id: string }) {
               value={fmt(
                 record.detInput?.roofWindows?.windowType,
                 undefined,
-                WINDOW_TYPE_LABELS,
+                cfg.windows.windowTypes,
               )}
             />
             <InfoItem
@@ -549,6 +458,34 @@ export function RecordDetail({ id }: { id: string }) {
             />
           </InfoCard>
         )}
+
+        {/* Außenwand */}
+        <InfoCard icon={BuildIcon} title="Außenwand" cols={3}>
+          <InfoItem
+            label="Fläche"
+            value={fmt(record.detInput?.outerWall.area, "m²")}
+          />
+          <InfoItem
+            label="Baujahr / Letzte Sanierung"
+            value={fmt(record.detInput?.outerWall.year)}
+          />
+          <InfoItem
+            label="Konstruktionstyp"
+            value={fmt(
+              record.detInput?.outerWall.constructionType,
+              undefined,
+              cfg.outerWall.constructionTypes,
+            )}
+          />
+          <InfoItem
+            label="Gedämmt"
+            value={fmt(record.detInput?.outerWall.hasInsulation)}
+          />
+          <InfoItem
+            label="Dämmdicke"
+            value={fmt(record.detInput?.outerWall.insulationThickness, "cm")}
+          />
+        </InfoCard>
 
         {/* Außenwandfenster */}
         <InfoCard icon={WindowIcon} title="Außenwandfenster" cols={2}>
@@ -565,7 +502,7 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(
               record.detInput?.exteriorWallWindows.windowType,
               undefined,
-              WINDOW_TYPE_LABELS,
+              cfg.windows.windowTypes,
             )}
           />
           <InfoItem
@@ -589,7 +526,7 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(
               record.detInput?.topFloor.topFloorType,
               undefined,
-              TOP_FLOOR_TYPE_LABELS,
+              cfg.topFloor.topFloorTypes,
             )}
           />
           <InfoItem
@@ -610,36 +547,8 @@ export function RecordDetail({ id }: { id: string }) {
           />
         </InfoCard>
 
-        {/* Außenwand */}
-        <InfoCard icon={BuildIcon} title="Außenwand" cols={3}>
-          <InfoItem
-            label="Fläche"
-            value={fmt(record.detInput?.outerWall.area, "m²")}
-          />
-          <InfoItem
-            label="Baujahr / Letzte Sanierung"
-            value={fmt(record.detInput?.outerWall.year)}
-          />
-          <InfoItem
-            label="Konstruktionstyp"
-            value={fmt(
-              record.detInput?.outerWall.constructionType,
-              undefined,
-              OUTER_WALL_LABELS,
-            )}
-          />
-          <InfoItem
-            label="Gedämmt"
-            value={fmt(record.detInput?.outerWall.hasInsulation)}
-          />
-          <InfoItem
-            label="Dämmdicke"
-            value={fmt(record.detInput?.outerWall.insulationThickness, "cm")}
-          />
-        </InfoCard>
-
-        {/* Bodenplatte / Keller */}
-        <InfoCard icon={FoundationIcon} title="Bodenplatte / Keller" cols={3}>
+        {/* Untere Geschossdecke */}
+        <InfoCard icon={FoundationIcon} title="Untere Geschossdecke" cols={3}>
           <InfoItem
             label="Fläche"
             value={fmt(record.detInput?.bottomFloor.area, "m²")}
@@ -653,7 +562,7 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(
               record.detInput?.bottomFloor.constructionType,
               undefined,
-              BOTTOM_FLOOR_LABELS,
+              cfg.bottomFloor.constructionTypes,
             )}
           />
           <InfoItem
@@ -678,12 +587,48 @@ export function RecordDetail({ id }: { id: string }) {
           />
         </InfoCard>
 
+        {/* Heizung */}
+        <InfoCard icon={LocalFireDepartmentIcon} title="Heizung" cols={2}>
+          <InfoItem
+            label="Baujahr Heizungssystem"
+            value={fmt(record.detInput?.heat.heatingSystemConstructionYear)}
+          />
+          <InfoItem
+            label="Primärenergieträger"
+            value={fmt(
+              record.detInput?.heat.primaryEnergyCarrier,
+              undefined,
+              cfg.heat.primaryEnergyCarriers,
+            )}
+          />
+          <InfoItem
+            label="Heizungstyp"
+            value={fmt(
+              record.detInput?.heat.heatingSystemType,
+              undefined,
+              cfg.heat.heatingSystemTypes,
+            )}
+          />
+          <InfoItem
+            label="Wärmeabgabesystem"
+            value={fmt(
+              record.detInput?.heat.heatingSurfaceType,
+              undefined,
+              cfg.heat.heatingSurfaceTypes,
+            )}
+          />
+        </InfoCard>
+
         {/* Prüfung und Freigabe / Audit-Protokoll */}
         {record.status === "FREIGEGEBEN" || record.status === "ABGELEHNT" ? (
           <Card>
             <CardHeader
-              title="Audit-Protokoll"
-              subheader="Nachvollziehbare Historie aller Änderungen"
+              title={<Typography variant="h4">Audit-Protokoll</Typography>}
+              subheader={
+                <Typography variant="body1" color="text.secondary">
+                  Nachvollziehbare Historie aller Änderungen
+                </Typography>
+              }
             />
             <CardContent>
               <Box
@@ -721,8 +666,16 @@ export function RecordDetail({ id }: { id: string }) {
         ) : (
           <Card>
             <CardHeader
-              title="Prüfung und Freigabe"
-              subheader="Bewerten Sie die Einreichung und treffen Sie eine Entscheidung"
+              title={
+                <Typography variant="h3" gutterBottom>
+                  Prüfung und Freigabe
+                </Typography>
+              }
+              subheader={
+                <Typography variant="body1">
+                  Bewerten Sie die Einreichung und treffen Sie eine Entscheidung
+                </Typography>
+              }
             />
             <CardContent>
               <Typography variant="h4" gutterBottom>
@@ -791,12 +744,7 @@ export function RecordDetail({ id }: { id: string }) {
         {/* Danger zone */}
         <Card>
           <CardContent>
-            <Typography
-              variant="h3"
-              color="error"
-              gutterBottom
-              fontWeight={700}
-            >
+            <Typography variant="h3" color="error" gutterBottom>
               Gefahrenzone
             </Typography>
             <Typography variant="body1" gutterBottom>
@@ -829,12 +777,19 @@ export function RecordDetail({ id }: { id: string }) {
 function fmt(
   value: unknown,
   suffix?: string,
-  map?: Record<string, string>,
+  selections?: LocalizableSelection[],
 ): string {
   if (value === null || value === undefined) return "Nicht angegeben";
   if (typeof value === "boolean") return value ? "Ja" : "Nein";
+  if (typeof value === "object") {
+    const { from, to } = value as { from?: number; to?: number };
+    if (from != null && to != null) return `${from} – ${to}`;
+    if (from != null) return `ab ${from}`;
+    if (to != null) return `bis ${to}`;
+    return "Nicht angegeben";
+  }
   const str = String(value);
-  const translated = map ? (map[str] ?? str) : str;
+  const translated = selections ? (resolveLabel(selections, str) ?? str) : str;
   return suffix ? `${translated} ${suffix}` : translated;
 }
 
@@ -852,8 +807,8 @@ function InfoCard({
   return (
     <Card>
       <CardHeader
-        avatar={<Icon sx={{ fontSize: 22, color: "error.main" }} />}
-        title={title}
+        avatar={<Icon sx={{ fontSize: 26, color: "error.main" }} />}
+        title={<Typography variant="h3">{title}</Typography>}
       />
       <CardContent>
         {cols ? (
@@ -877,10 +832,10 @@ function InfoCard({
 function InfoItem({ label, value }: { label: string; value: string | number }) {
   return (
     <Box>
-      <Typography variant="caption" color="text.secondary" display="block">
+      <Typography variant="body1" color="text.secondary" display="block">
         {label}
       </Typography>
-      <Typography variant="body2">{value}</Typography>
+      <Typography variant="body1">{value}</Typography>
     </Box>
   );
 }

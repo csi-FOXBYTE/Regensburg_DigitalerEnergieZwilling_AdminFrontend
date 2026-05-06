@@ -45,7 +45,8 @@ export default function SurfaceTempResistenceSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "#F4F4F4",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
           }}
           onClick={() => toggleSection("surfaceTempResistence")}
         >

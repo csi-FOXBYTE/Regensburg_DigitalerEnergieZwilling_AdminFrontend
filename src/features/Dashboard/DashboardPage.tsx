@@ -17,7 +17,10 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useContext } from "react";
 import {
-  BUILDING_TYPE_LABELS,
+  BUILDING_TYPE_SELECTIONS,
+  resolveLabel,
+} from "../../assets/labelResolver";
+import {
   STATUS_COLORS,
   statusConfig,
 } from "../../assets/types";
@@ -73,16 +76,16 @@ export default function DashboardPage() {
     .slice(0, 5);
 
   return (
-    <Box sx={{ width: "full", bgcolor: "grey.100" }}>
+    <Box sx={{ width: "full" }}>
       <Box
         sx={{
           maxWidth: 1170,
           mx: "auto",
-          bgcolor: "grey.100",
-          p: 3,
+          py: 3,
           display: "flex",
           flexDirection: "column",
           gap: 3,
+          fontFamily: "sans-serif",
         }}
       >
         <Box>
@@ -116,7 +119,7 @@ export default function DashboardPage() {
                   p: 3,
                 }}
               >
-                <Typography variant="body1">{stat.title}</Typography>
+                <Typography variant="h4">{stat.title}</Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Box
                     sx={{
@@ -147,10 +150,10 @@ export default function DashboardPage() {
           {/* Newest Data */}
           <Card elevation={2}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h5" gutterBottom>
+              <Typography variant="h3" gutterBottom>
                 Neueste Einreichungen
               </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography variant="body2" gutterBottom>
                 Zuletzt übermittelte Gebäudedaten
               </Typography>
               <List disablePadding>
@@ -193,9 +196,7 @@ export default function DashboardPage() {
                             secondary={
                               <Box component="span">
                                 <Typography component="span" variant="body2">
-                                  {BUILDING_TYPE_LABELS[
-                                    record.detInput?.general.type ?? ""
-                                  ] ??
+                                  {resolveLabel(BUILDING_TYPE_SELECTIONS, record.detInput?.general.type) ??
                                     record.detInput?.general.type ??
                                     "Unbekannt"}{" "}
                                   • Baujahr{" "}
@@ -239,10 +240,10 @@ export default function DashboardPage() {
               sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}
             >
               <Box>
-                <Typography variant="h5" mb={0.5}>
+                <Typography variant="h3" mb={0.5}>
                   Gebäudekarte
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2">
                   Standorte aller eingereichten Gebäude
                 </Typography>
               </Box>
@@ -286,30 +287,6 @@ export default function DashboardPage() {
                     navigate({ to: "/record/$id", params: { id: r.id } })
                   }
                 />
-              </Box>
-
-              {/* Map stats */}
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: 2,
-                  pt: 2,
-                  borderTop: "1px solid",
-                  borderColor: "divider",
-                }}
-              >
-                <Box>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      Gesamtabdeckung aller Gebäude
-                    </Typography>
-                    <Typography variant="h4">Kommt bald</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      %
-                    </Typography>
-                  </Box>
-                </Box>
               </Box>
             </CardContent>
           </Card>

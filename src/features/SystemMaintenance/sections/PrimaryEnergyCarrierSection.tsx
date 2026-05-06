@@ -1,4 +1,4 @@
-import { ChevronRight, Delete, ExpandMore } from "@mui/icons-material";
+import { ChevronRight, Delete, Edit, ExpandMore } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -6,6 +6,7 @@ import {
   Collapse,
   FormControlLabel,
   IconButton,
+  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -27,8 +28,12 @@ import {
   deleteAllowedHeatingSystemType,
   deletePrimaryEnergyCarrier,
   updateCO2Factor,
+  updateConfig,
+  updateDefaultHeatingSystemType,
+  updatePrimaryEnergyCarrier,
   updatePrimaryEnergyCarrierData,
   updatePrimaryEnergyCarrierEfficiencyFactor,
+  updateSimpleValue,
 } from "../../../hooks/store";
 import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
@@ -75,6 +80,13 @@ export function PrimaryEnergyCarrierSection({
       title: "Neuer Energieträger hinzufügen",
       fields: [
         {
+          key: "value",
+          label: "Key (technischer Bezeichner)",
+          value: "",
+          type: "text",
+          required: true,
+        },
+        {
           key: "de",
           label: "Bezeichnung (Deutsch)",
           value: "",
@@ -83,12 +95,77 @@ export function PrimaryEnergyCarrierSection({
         },
       ],
       onSave: (values) => {
-        const key = values.de.toLowerCase().replace(/\s+/g, "_");
         addPrimaryEnergyCarrier({
-          value: key,
-          localization: { de: values.de, en: values.de },
+          value: values.value as string,
+          localization: { de: values.de as string, en: values.de as string },
         });
         toast.success("Energieträger hinzugefügt");
+      },
+    });
+  };
+
+  const handleEditPrimaryEnergyCarrier = (item: {
+    value: string;
+    localization: Record<string, string>;
+  }) => {
+    setEditState({
+      open: true,
+      title: "Energieträger bearbeiten",
+      fields: [
+        {
+          key: "value",
+          label: "Key (technischer Bezeichner)",
+          value: item.value,
+          type: "text",
+          required: true,
+        },
+        {
+          key: "de",
+          label: "Bezeichnung (Deutsch)",
+          value: item.localization.de ?? "",
+          type: "text",
+          required: true,
+        },
+      ],
+      onSave: (values) => {
+        const oldKey = item.value;
+        const newKey = String(values.value).trim();
+        if (newKey !== oldKey) {
+          updateConfig((draft) => {
+            const carrier = draft.heat.primaryEnergyCarriers.find(
+              (c) => c.value === oldKey,
+            );
+            if (carrier) {
+              carrier.value = newKey;
+              carrier.localization.de = String(values.de);
+              carrier.localization.en = String(values.de);
+            }
+            const data = draft.heat.primaryEnergyCarrierData.find(
+              (d) => d.key === oldKey,
+            );
+            if (data) data.key = newKey;
+            const allowed = draft.heat.allowedHeatingSystemTypesByCarrier.find(
+              (c) => c.key === oldKey,
+            );
+            if (allowed) allowed.key = newKey;
+            if (draft.heat.defaultPrimaryEnergyCarrier === oldKey)
+              draft.heat.defaultPrimaryEnergyCarrier = newKey;
+            const defaultHeat = draft.heat.defaultHeatingSystemType.find(
+              (e) => e.key === oldKey,
+            );
+            if (defaultHeat) defaultHeat.key = newKey;
+          });
+        } else {
+          const idx = configStore.heat.primaryEnergyCarriers.findIndex(
+            (c) => c.value === oldKey,
+          );
+          if (idx >= 0) {
+            updatePrimaryEnergyCarrier(idx, (draft) => {
+              draft.localization.de = values.de as string;
+            });
+          }
+        }
+        toast.success("Energieträger aktualisiert");
       },
     });
   };
@@ -119,7 +196,8 @@ export function PrimaryEnergyCarrierSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "grey.100",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("energyCarriers")}
@@ -148,6 +226,29 @@ export function PrimaryEnergyCarrierSection({
         </Box>
 
         <Collapse in={expandedSections.energyCarriers}>
+          <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+            <Box sx={{ ...gridSx }}>
+              <Typography variant="body2">Standard-Energieträger</Typography>
+              <TextField
+                select
+                size="small"
+                value={configStore.heat.defaultPrimaryEnergyCarrier}
+                onChange={(e) =>
+                  updateSimpleValue(
+                    "heat.defaultPrimaryEnergyCarrier",
+                    e.target.value,
+                  )
+                }
+                sx={{ gridColumn: "span 2" }}
+              >
+                {configStore.heat.primaryEnergyCarriers.map((c) => (
+                  <MenuItem key={c.value} value={c.value}>
+                    {labelOverrides[c.value] ?? c.localization.de}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Box>
+          </Box>
           <TableContainer>
             <Table size="small">
               <TableHead>
@@ -185,6 +286,12 @@ export function PrimaryEnergyCarrierSection({
                       <TableCell align="right">
                         <IconButton
                           size="small"
+                          onClick={() => handleEditPrimaryEnergyCarrier(item)}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
                           onClick={() =>
                             handleDeleteConfirm(() => {
                               deletePrimaryEnergyCarrier(item.value);
@@ -216,9 +323,9 @@ export function PrimaryEnergyCarrierSection({
                                 size="small"
                                 type="number"
                                 value={
-                                  configStore.heat.primaryEnergyCarrierEfficiencyFactor.find(
+                                  configStore.heat.primaryEnergyCarrierData.find(
                                     (c) => c.key === item.value,
-                                  )?.value ?? ""
+                                  )?.value.primaryEnergyFactor ?? ""
                                 }
                                 onChange={(e) =>
                                   updatePrimaryEnergyCarrierEfficiencyFactor(
@@ -239,9 +346,9 @@ export function PrimaryEnergyCarrierSection({
                                 size="small"
                                 type="number"
                                 value={
-                                  configStore.heat.co2Factor.find(
+                                  configStore.heat.primaryEnergyCarrierData.find(
                                     (c) => c.key === item.value,
-                                  )?.value ?? ""
+                                  )?.value.co2Factor ?? ""
                                 }
                                 onChange={(e) =>
                                   updateCO2Factor(
@@ -386,6 +493,42 @@ export function PrimaryEnergyCarrierSection({
                                   );
                                 },
                               )}
+                            </Box>
+
+                            <Box sx={{ ...gridSx, mt: 1.5 }}>
+                              <Typography variant="body2">
+                                Standard-Heizsystem
+                              </Typography>
+                              <TextField
+                                select
+                                size="small"
+                                value={
+                                  configStore.heat.defaultHeatingSystemType.find(
+                                    (e) => e.key === item.value,
+                                  )?.value ?? ""
+                                }
+                                onChange={(e) =>
+                                  updateDefaultHeatingSystemType(
+                                    item.value,
+                                    e.target.value,
+                                  )
+                                }
+                                sx={{ gridColumn: "span 2" }}
+                              >
+                                {configStore.heat.allowedHeatingSystemTypesByCarrier
+                                  .find((c) => c.key === item.value)
+                                  ?.allowedValues.map((v: string) => {
+                                    const sys =
+                                      configStore.heat.heatingSystemTypes.find(
+                                        (s) => s.value === v,
+                                      );
+                                    return (
+                                      <MenuItem key={v} value={v}>
+                                        {sys?.localization.de ?? v}
+                                      </MenuItem>
+                                    );
+                                  })}
+                              </TextField>
                             </Box>
                           </Box>
                         </Collapse>

@@ -19,5 +19,5 @@ function RecordDetailPage() {
   }, [isAuthenticated, isLoading, navigate]);
 
   if (isLoading || !isAuthenticated) return null;
-  return <RecordDetail id={id} />;
+  return <RecordDetail key={id} id={id} />;
 }

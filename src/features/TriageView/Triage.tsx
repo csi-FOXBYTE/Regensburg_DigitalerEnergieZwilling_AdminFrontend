@@ -171,12 +171,12 @@ export function Dashboard() {
   }, [records, updateRecord]);
 
   return (
-    <Box sx={{ bgcolor: "grey.100", width: "full" }}>
+    <Box sx={{ width: "full" }}>
       <Box
         sx={{
           maxWidth: 1170,
           mx: "auto",
-          p: 3,
+          py: 3,
           display: "flex",
           flexDirection: "column",
           gap: 3,

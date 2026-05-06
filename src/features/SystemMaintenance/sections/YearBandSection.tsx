@@ -70,8 +70,8 @@ export function YearBandSection({
       ],
       onSave: (values) => {
         updateYearBand(index, (draft) => {
-          draft.from = values.from || undefined;
-          draft.to = values.to || undefined;
+          draft.from = values.from as number;
+          draft.to = values.to as number;
         });
         toast.success("Jahresband aktualisiert");
       },
@@ -88,8 +88,8 @@ export function YearBandSection({
       ],
       onSave: (values) => {
         addYearBand({
-          from: values.from || undefined,
-          to: values.to || undefined,
+          from: values.from as number,
+          to: values.to as number,
         });
         toast.success("Jahresband hinzugefügt");
       },
@@ -105,7 +105,8 @@ export function YearBandSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "grey.100",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("yearBand")}

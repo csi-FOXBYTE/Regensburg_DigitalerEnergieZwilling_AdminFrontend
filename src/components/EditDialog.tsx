@@ -17,13 +17,13 @@ interface EditDialogProps {
   fields: Array<{
     key: string;
     label: string;
-    value: any;
-    type?: "text" | "number" | "select" | "color";
+    value: string | number;
+    type?: "text" | "number" | "select" | "color" | "string";
     required?: boolean;
-    options?: Array<{ label: string; value: any }>;
+    options?: Array<{ label: string; value: string }>;
   }>;
   onClose: () => void;
-  onSave: (values: Record<string, any>) => void;
+  onSave: (values: Record<string, string | number>) => void;
 }
 
 export function EditDialog({
@@ -33,7 +33,7 @@ export function EditDialog({
   onClose,
   onSave,
 }: EditDialogProps) {
-  const [values, setValues] = useState<Record<string, any>>(
+  const [values, setValues] = useState<Record<string, string | number>>(
     fields.reduce((acc, field) => ({ ...acc, [field.key]: field.value }), {}),
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -59,7 +59,7 @@ export function EditDialog({
       if (
         field.type === "number" &&
         values[field.key] !== "" &&
-        isNaN(values[field.key])
+        isNaN(Number(values[field.key]))
       ) {
         newErrors[field.key] = `${field.label} muss eine Zahl sein`;
       }
