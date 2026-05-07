@@ -42,3 +42,6 @@ coverage/
 
 # TanStack Router (auto-generated, do not edit)
 src/routeTree.gen.ts
+
+# Audit log dummy for testing
+public/audit-log.json
