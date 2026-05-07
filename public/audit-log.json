@@ -1,1 +1,75 @@
-[]
+[
+  {
+    "id": "1778065366933-pnb1jbb",
+    "timestamp": "2026-05-06T11:02:46.933Z",
+    "action": "auto_decline",
+    "recordId": "13a",
+    "buildingAddress": "Maximilianstraße 12, 93047 Regensburg",
+    "userId": null,
+    "userName": null,
+    "details": "Automatisch abgelehnt durch Freigabe von Einreichung B"
+  },
+  {
+    "id": "1778065366933-usl40ht",
+    "timestamp": "2026-05-06T11:02:46.933Z",
+    "action": "approve",
+    "recordId": "13b",
+    "buildingAddress": "Maximilianstraße 12, 93047 Regensburg",
+    "userId": "u2",
+    "userName": "Anna Schmidt"
+  },
+  {
+    "id": "1778065357824-anw4y50",
+    "timestamp": "2026-05-06T11:02:37.824Z",
+    "action": "assign",
+    "recordId": "13b",
+    "buildingAddress": "Maximilianstraße 12, 93047 Regensburg",
+    "userId": "u2",
+    "userName": "Anna Schmidt"
+  },
+  {
+    "id": "1777986768445-kjq4mt3",
+    "timestamp": "2026-05-05T13:12:48.445Z",
+    "action": "delete_record",
+    "recordId": "5",
+    "buildingAddress": "Donaustaufer Straße 28, 93055 Regensburg",
+    "userId": "u2",
+    "userName": "Anna Schmidt"
+  },
+  {
+    "id": "1777986738853-z3qqbn4",
+    "timestamp": "2026-05-05T13:12:18.853Z",
+    "action": "delete_building",
+    "recordId": "9",
+    "buildingAddress": "Römerstraße 19, 93055 Regensburg",
+    "userId": "u2",
+    "userName": "Anna Schmidt"
+  },
+  {
+    "id": "1777986727955-zsc8t1g",
+    "timestamp": "2026-05-05T13:12:07.955Z",
+    "action": "approve",
+    "recordId": "9",
+    "buildingAddress": "Römerstraße 19, 93055 Regensburg",
+    "userId": "u2",
+    "userName": "Anna Schmidt"
+  },
+  {
+    "id": "1777986724578-n6h0an6",
+    "timestamp": "2026-05-05T13:12:04.578Z",
+    "action": "assign",
+    "recordId": "9",
+    "buildingAddress": "Römerstraße 19, 93055 Regensburg",
+    "userId": "u2",
+    "userName": "Anna Schmidt"
+  },
+  {
+    "id": "1777986701059-pnugmog",
+    "timestamp": "2026-05-05T13:11:41.059Z",
+    "action": "assign",
+    "recordId": "1",
+    "buildingAddress": "Pfauengasse 4, 93047 Regensburg",
+    "userId": "u2",
+    "userName": "Anna Schmidt"
+  }
+]

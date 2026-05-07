@@ -27,7 +27,8 @@ export default function ComunityParameterSection({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          bgcolor: " #F4F4F4",
+          bgcolor: " white",
+          borderBottom: "2px solid #e30613",
           cursor: "pointer",
         }}
         onClick={() => toggleSection("communityParams")}

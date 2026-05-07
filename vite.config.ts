@@ -2,10 +2,12 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
+import { auditPlugin } from "./audit-plugin";
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    auditPlugin(),
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,

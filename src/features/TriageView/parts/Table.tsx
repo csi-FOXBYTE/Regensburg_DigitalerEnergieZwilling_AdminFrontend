@@ -16,6 +16,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import type { UseNavigateResult } from "@tanstack/react-router";
 import React from "react";
 import type { BuildingRecord } from "../../../assets/types";
 import { statusConfig } from "../../../assets/types";
@@ -53,7 +54,7 @@ function TableView({
 }: {
   records: BuildingRecord[];
   currentUserName?: string | null;
-  navigate: any;
+  navigate: UseNavigateResult<string>;
   handleAssignToMe: (record: BuildingRecord) => void;
   setRecordToDelete: (id: string | null) => void;
   sortBy: SortField;
@@ -76,9 +77,7 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              <Typography variant="body1" fontWeight={"bold"}>
-                Adresse
-              </Typography>
+              <Typography variant="h4">Adresse</Typography>
               <SortIcon field="address" sortBy={sortBy} sortOrder={sortOrder} />
             </Box>
           </TableCell>
@@ -87,9 +86,7 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              <Typography variant="body1" fontWeight={"bold"}>
-                Eingereicht am
-              </Typography>
+              <Typography variant="h4">Eingereicht am</Typography>
               <SortIcon field="date" sortBy={sortBy} sortOrder={sortOrder} />
             </Box>
           </TableCell>
@@ -98,9 +95,7 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              <Typography variant="body1" fontWeight={"bold"}>
-                Status
-              </Typography>
+              <Typography variant="h4">Status</Typography>
               <SortIcon field="status" sortBy={sortBy} sortOrder={sortOrder} />
             </Box>
           </TableCell>
@@ -111,9 +106,7 @@ function TableView({
             <Box
               sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}
             >
-              <Typography variant="body1" fontWeight={"bold"}>
-                Prüfer
-              </Typography>
+              <Typography variant="h4">Prüfer</Typography>
 
               <SortIcon
                 field="assignedTo"
@@ -123,9 +116,7 @@ function TableView({
             </Box>
           </TableCell>
           <TableCell sx={{ fontWeight: 600 }} align="right">
-            <Typography variant="body1" fontWeight={"bold"}>
-              Aktionen
-            </Typography>
+            <Typography variant="h4">Aktionen</Typography>
           </TableCell>
         </TableRow>
       </TableHead>
@@ -152,7 +143,9 @@ function TableView({
               >
                 <TableCell>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    {record.buildingAddress}
+                    <Typography variant="body1">
+                      {record.buildingAddress}
+                    </Typography>
                     {record.variantGroup &&
                       (variantGroupCounts.get(record.variantGroup) ?? 0) >
                         1 && (
@@ -161,19 +154,25 @@ function TableView({
                           size="small"
                           color="info"
                           variant="outlined"
-                          sx={{ p: 1.7 }}
+                          sx={{
+                            p: 1.7,
+                            borderColor: "#e30613",
+                            color: "#e30613",
+                          }}
                         />
                       )}
                   </Box>
                 </TableCell>
                 <TableCell>
-                  {new Date(record.receivedDate).toLocaleString("de-DE", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  <Typography variant="body1">
+                    {new Date(record.receivedDate).toLocaleString("de-DE", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Typography>
                 </TableCell>
                 <TableCell>
                   <Chip
@@ -185,7 +184,7 @@ function TableView({
                 </TableCell>
                 <TableCell>
                   <Typography
-                    variant="body2"
+                    variant="body1"
                     sx={{
                       fontWeight:
                         record.assignedTo === currentUserName ? 600 : 400,

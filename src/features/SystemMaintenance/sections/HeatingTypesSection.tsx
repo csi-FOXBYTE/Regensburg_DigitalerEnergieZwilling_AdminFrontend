@@ -8,8 +8,11 @@ import {
 import {
   Box,
   Button,
+  Checkbox,
   Collapse,
+  FormControlLabel,
   IconButton,
+  TextField as MuiTextField,
   Paper,
   Table,
   TableBody,
@@ -35,6 +38,11 @@ import {
   deleteHeatingSystemType,
   deleteTemperatureControlColumn,
   deleteTemperatureControlRow,
+  type PerfFactorEntry,
+  type TempControlEntry,
+  updateConfig,
+  updateElectricalRatio,
+  updateHasInternalGains,
   updateHeatingPerformanceFactor,
   updateHeatingPerformanceFactorYearBand,
   updateHeatingSystemType,
@@ -213,7 +221,7 @@ const headerCellSx = {
 
 const colDividerSx = { borderRight: "1px solid", borderColor: "divider" };
 
-function buildYearBand(values: Record<string, any>): {
+function buildYearBand(values: Record<string, string>): {
   from?: number;
   to?: number;
 } {
@@ -275,6 +283,13 @@ export default function HeatingTypesSection({
       title: "Neue Heizungserzeugerart hinzufügen",
       fields: [
         {
+          key: "value",
+          label: "Key (technischer Bezeichner)",
+          value: "",
+          type: "text",
+          required: true,
+        },
+        {
           key: "de",
           label: "Bezeichnung (Deutsch)",
           value: "",
@@ -284,8 +299,8 @@ export default function HeatingTypesSection({
       ],
       onSave: (values) => {
         addHeatingSystemType({
-          value: values.de.toLowerCase().replace(/\s+/g, "_"),
-          localization: { de: values.de, en: values.de },
+          value: values.value as string,
+          localization: { de: values.de as string, en: values.de as string },
         });
         toast.success("Heizungserzeugerart hinzugefügt");
       },
@@ -300,6 +315,13 @@ export default function HeatingTypesSection({
       title: "Heizungstyp bearbeiten",
       fields: [
         {
+          key: "value",
+          label: "Key (technischer Bezeichner)",
+          value: item.value,
+          type: "text",
+          required: true,
+        },
+        {
           key: "de",
           label: "Bezeichnung",
           value: getLabel(item),
@@ -308,10 +330,48 @@ export default function HeatingTypesSection({
         },
       ],
       onSave: (values) => {
-        updateHeatingSystemType(index, (draft) => {
-          draft.localization.de = values.de;
-          draft.localization.en = values.de;
-        });
+        const oldKey = item.value;
+        const newKey = String(values.value).trim();
+        if (newKey !== oldKey) {
+          updateConfig((draft) => {
+            const type = draft.heat.heatingSystemTypes.find(
+              (t) => t.value === oldKey,
+            );
+            if (type) {
+              type.value = newKey;
+              type.localization.de = String(values.de);
+              type.localization.en = String(values.de);
+            }
+            const perf = (
+              draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
+            ).find((e) => e.key === oldKey);
+            if (perf) perf.key = newKey;
+            const temp = (
+              draft.heat
+                .temperatureControlPerformanceFactor as TempControlEntry[]
+            ).find((e) => e.key === oldKey);
+            if (temp) temp.key = newKey;
+            draft.heat.allowedHeatingSystemTypesByCarrier.forEach((carrier) => {
+              const idx = carrier.allowedValues.indexOf(oldKey);
+              if (idx >= 0) carrier.allowedValues[idx] = newKey;
+            });
+            const ratio = draft.heat.electricalRatio.find(
+              (e) => e.key === oldKey,
+            );
+            if (ratio) ratio.key = newKey;
+            const gains = draft.heat.hasInternalGains.find(
+              (e) => e.key === oldKey,
+            );
+            if (gains) gains.key = newKey;
+            draft.heat.defaultHeatingSystemType.forEach((entry) => {
+              if (entry.value === oldKey) entry.value = newKey;
+            });
+          });
+        } else {
+          updateHeatingSystemType(index, (draft) => {
+            draft.localization.de = values.de as string;
+          });
+        }
         toast.success("Heizungstyp aktualisiert");
       },
     });
@@ -336,7 +396,7 @@ export default function HeatingTypesSection({
         },
       ],
       onSave: (values) => {
-        const band = buildYearBand(values);
+        const band = buildYearBand(values as Record<string, string>);
         if (isPerf) addHeatingPerformanceFactorRow(itemValue, band);
         else addTemperatureControlRow(itemValue, band);
       },
@@ -352,7 +412,10 @@ export default function HeatingTypesSection({
         { key: "to", label: "Bis kW (optional)", value: "", type: "number" },
       ],
       onSave: (values) => {
-        addHeatingPerformanceFactorColumn(itemValue, buildYearBand(values));
+        addHeatingPerformanceFactorColumn(
+          itemValue,
+          buildYearBand(values as Record<string, string>),
+        );
       },
     });
   };
@@ -372,14 +435,13 @@ export default function HeatingTypesSection({
         {
           key: "controlKey",
           label: "Heizfläche",
-          value: available[0].value,
+          value: available[0]?.value ?? "",
           type: "select",
-          options: available,
           required: true,
         },
       ],
       onSave: (values) => {
-        addTemperatureControlColumn(itemValue, values.controlKey);
+        addTemperatureControlColumn(itemValue, String(values));
       },
     });
   };
@@ -393,7 +455,8 @@ export default function HeatingTypesSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "grey.100",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("heatingSystemTypes")}
@@ -464,7 +527,12 @@ export default function HeatingTypesSection({
                   };
 
                   const controlTypes: { key: string; value: number }[] =
-                    tempEntry ? (tempEntry.value[0].value as any) : [];
+                    tempEntry
+                      ? ((tempEntry.value[0]?.value as {
+                          key: string;
+                          value: number;
+                        }[]) ?? [])
+                      : [];
 
                   return (
                     <Fragment key={index}>
@@ -915,6 +983,67 @@ export default function HeatingTypesSection({
                                 >
                                   Zeile hinzufügen
                                 </Button>
+                              </Box>
+
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 3,
+                                  mt: 2,
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                  }}
+                                >
+                                  <Typography variant="body2">
+                                    Stromanteil
+                                  </Typography>
+                                  <MuiTextField
+                                    size="small"
+                                    type="number"
+                                    value={
+                                      configStore.heat.electricalRatio.find(
+                                        (e) => e.key === item.value,
+                                      )?.value ?? 0
+                                    }
+                                    onChange={(e) =>
+                                      updateElectricalRatio(
+                                        item.value,
+                                        parseFloat(e.target.value),
+                                      )
+                                    }
+                                    inputProps={{ min: 0, max: 1, step: 0.01 }}
+                                    sx={{ width: 100 }}
+                                  />
+                                </Box>
+                                <FormControlLabel
+                                  control={
+                                    <Checkbox
+                                      size="small"
+                                      checked={
+                                        !!configStore.heat.hasInternalGains.find(
+                                          (e) => e.key === item.value,
+                                        )?.value
+                                      }
+                                      onChange={(e) =>
+                                        updateHasInternalGains(
+                                          item.value,
+                                          e.target.checked,
+                                        )
+                                      }
+                                    />
+                                  }
+                                  label={
+                                    <Typography variant="body2">
+                                      Interne Wärmegewinne
+                                    </Typography>
+                                  }
+                                />
                               </Box>
                             </Box>
                           </Collapse>

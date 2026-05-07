@@ -1,11 +1,25 @@
 import type {
+  CarrierSelection,
   DETConfig,
+  ElectricityTypeData,
   EnergyEfficiencyClass,
   HeatFlowDirection,
+  PrimaryEnergyCarrierData,
+  RangeKey,
+  Selection,
 } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { DEFAULT_CONFIG } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { produce } from "immer";
 import { atom } from "nanostores";
+
+export type PerfFactorEntry = {
+  key: string;
+  value: Array<RangeKey & { value: Array<RangeKey & { value: number }> }>;
+};
+export type TempControlEntry = {
+  key: string;
+  value: Array<RangeKey & { value: Array<{ key: string; value: number }> }>;
+};
 
 export interface Foerderprogramm {
   id: string;
@@ -41,9 +55,9 @@ export const deleteFoerderprogramm = (id: string) => {
 };
 
 export interface EnergyEfficiencyEntry {
-  to?: number;
-  from?: number;
-  value: EnergyEfficiencyClass;
+  to?: number | string;
+  from?: number | string;
+  value?: EnergyEfficiencyClass;
   color?: string;
 }
 
@@ -66,9 +80,10 @@ const DEFAULT_ENERGY_CLASS_COLORS: Record<string, string> = {
 
 const withDefaultColors = (cfg: DETConfig): DETConfig =>
   produce(cfg, (draft) => {
-    draft.general.energyEfficiencyClasses.forEach((entry: any) => {
-      if (!entry.color) {
-        entry.color = DEFAULT_ENERGY_CLASS_COLORS[entry.value] ?? "#6b7280";
+    draft.general.energyEfficiencyClasses.forEach((entry) => {
+      const e = entry as EnergyEfficiencyEntry;
+      if (!e.color) {
+        e.color = DEFAULT_ENERGY_CLASS_COLORS[e.value ?? 0] ?? "#6b7280";
       }
     });
   });
@@ -117,10 +132,11 @@ export const deleteYearBand = (index: number) => {
 
 export const updateCorrectionFactor = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: RangeKey & { value: number }) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.general.heatedAirVolumeCorrectionFactor[index]);
+    const item = draft.general.heatedAirVolumeCorrectionFactor[index];
+    if (item) updater(item as RangeKey & { value: number });
   });
 };
 
@@ -133,10 +149,11 @@ export const deleteCorrectionFactor = (index: number) => {
 // Heat Config Updates
 export const updatePrimaryEnergyCarrier = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: CarrierSelection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.heat.primaryEnergyCarriers[index]);
+    const item = draft.heat.primaryEnergyCarriers[index];
+    if (item) updater(item as CarrierSelection);
   });
 };
 
@@ -146,28 +163,22 @@ export const deletePrimaryEnergyCarrier = (value: string) => {
       (c) => c.value === value,
     );
     if (idx >= 0) draft.heat.primaryEnergyCarriers.splice(idx, 1);
-    draft.heat.primaryEnergyCarrierEfficiencyFactor =
-      draft.heat.primaryEnergyCarrierEfficiencyFactor.filter(
-        (c: any) => c.key !== value,
-      );
-    draft.heat.co2Factor = draft.heat.co2Factor.filter(
-      (c: any) => c.key !== value,
-    );
     draft.heat.primaryEnergyCarrierData =
-      draft.heat.primaryEnergyCarrierData.filter((c: any) => c.key !== value);
+      draft.heat.primaryEnergyCarrierData.filter((c) => c.key !== value);
     draft.heat.allowedHeatingSystemTypesByCarrier =
       draft.heat.allowedHeatingSystemTypesByCarrier.filter(
-        (c: any) => c.key !== value,
+        (c) => c.key !== value,
       );
   });
 };
 
 export const updateHeatingSystemType = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: Selection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.heat.heatingSystemTypes[index]);
+    const item = draft.heat.heatingSystemTypes[index];
+    if (item) updater(item as Selection);
   });
 };
 
@@ -197,10 +208,11 @@ export const updateallowedHeatingSystemType = (
 
 export const updateHeatingSurfaceType = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: Selection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.heat.heatingSurfaceTypes[index]);
+    const item = draft.heat.heatingSurfaceTypes[index];
+    if (item) updater(item as Selection);
   });
 };
 
@@ -211,12 +223,12 @@ export const deleteHeatingSurfaceType = (index: number) => {
 };
 
 // Simple value updates (using path notation)
-export const updateSimpleValue = (path: string, value: any) => {
+export const updateSimpleValue = (path: string, value: unknown) => {
   updateConfig((draft) => {
     const keys = path.split(".");
-    let current: any = draft;
+    let current = draft as Record<string, unknown>;
     for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]!];
+      current = current[keys[i]!] as Record<string, unknown>;
     }
     current[keys[keys.length - 1]!] = value;
   });
@@ -225,10 +237,11 @@ export const updateSimpleValue = (path: string, value: any) => {
 // Roof Config Updates
 export const updateRoofConstructionType = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: Selection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.roof.constructionTypes[index]);
+    const item = draft.roof.constructionTypes[index];
+    if (item) updater(item as Selection);
   });
 };
 
@@ -241,10 +254,11 @@ export const deleteRoofConstructionType = (index: number) => {
 // Top Floor Config Updates
 export const updateTopFloorType = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: Selection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.topFloor.topFloorTypes[index]);
+    const item = draft.topFloor.topFloorTypes[index];
+    if (item) updater(item as Selection);
   });
 };
 
@@ -257,10 +271,11 @@ export const deleteTopFloorType = (index: number) => {
 // Outer Wall Config Updates
 export const updateOuterWallConstructionType = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: Selection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.outerWall.constructionTypes[index]);
+    const item = draft.outerWall.constructionTypes[index];
+    if (item) updater(item as Selection);
   });
 };
 
@@ -273,10 +288,11 @@ export const deleteOuterWallConstructionType = (index: number) => {
 // Bottom Floor Config Updates
 export const updateBottomFloorConstructionType = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: Selection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.bottomFloor.constructionTypes[index]);
+    const item = draft.bottomFloor.constructionTypes[index];
+    if (item) updater(item as Selection);
   });
 };
 
@@ -289,10 +305,11 @@ export const deleteBottomFloorConstructionType = (index: number) => {
 // Windows Config Updates
 export const updateWindowType = (
   index: number,
-  updater: (draft: any) => void,
+  updater: (draft: Selection) => void,
 ) => {
   updateConfig((draft) => {
-    updater(draft.windows.windowTypes[index]);
+    const item = draft.windows.windowTypes[index];
+    if (item) updater(item as Selection);
   });
 };
 
@@ -305,27 +322,31 @@ export const deleteWindowType = (index: number) => {
 // Add functions
 export const addEnergyEfficiencyClass = (entry: EnergyEfficiencyEntry) => {
   updateConfig((draft) => {
-    draft.general.energyEfficiencyClasses.push(entry as any);
+    (
+      draft.general.energyEfficiencyClasses as Array<EnergyEfficiencyEntry>
+    ).push(entry);
   });
 };
 
 export const addYearBand = (entry: YearBandEntry) => {
   updateConfig((draft) => {
-    draft.general.generalYearBands.push(entry as any);
+    (draft.general.generalYearBands as Array<YearBandEntry>).push(entry);
   });
 };
 
-export const addPrimaryEnergyCarrier = (entry: any) => {
+export const addPrimaryEnergyCarrier = (entry: CarrierSelection) => {
   updateConfig((draft) => {
     draft.heat.primaryEnergyCarriers.push(entry);
-    draft.heat.primaryEnergyCarrierEfficiencyFactor.push({
-      key: entry.value,
-      value: 0,
-    });
-    draft.heat.co2Factor.push({ key: entry.value, value: 0 });
     draft.heat.primaryEnergyCarrierData.push({
       key: entry.value,
-      value: { energyPerUnit: 0, unitRate: 0, baseRate: 0 },
+      value: {
+        energyPerUnit: 0,
+        unit: "",
+        unitRate: 0,
+        baseRate: 0,
+        co2Factor: 0,
+        primaryEnergyFactor: 0,
+      },
     });
     draft.heat.allowedHeatingSystemTypesByCarrier.push({
       key: entry.value,
@@ -334,74 +355,82 @@ export const addPrimaryEnergyCarrier = (entry: any) => {
   });
 };
 
-export const addHeatingSystemType = (entry: any) => {
+export const addHeatingSystemType = (entry: Selection) => {
   updateConfig((draft) => {
     draft.heat.heatingSystemTypes.push(entry);
 
-    const surfaceTypeKeys = draft.heat.heatingSurfaceTypes.map(
-      (s: any) => s.value,
-    );
-    const existingPerf = (draft.heat.heatingPerformanceFactor as any[])[0];
+    const surfaceTypeKeys = draft.heat.heatingSurfaceTypes.map((s) => s.value);
+    const existingPerf = (
+      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
+    )[0];
     const existingTemp = (
-      draft.heat.temperatureControlPerformanceFactor as any[]
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
     )[0];
 
     const perfYearBands = existingPerf
-      ? existingPerf.value.map((yearBand: any) => ({
+      ? existingPerf.value.map((yearBand: RangeKey) => ({
           ...yearBand,
           value: [{ value: 0 }],
         }))
       : [{ value: [{ value: 0 }] }];
 
     const tempYearBands = existingTemp
-      ? existingTemp.value.map((yearBand: any) => ({
+      ? existingTemp.value.map((yearBand: RangeKey) => ({
           ...yearBand,
-          value: surfaceTypeKeys.map((key: string) => ({ key, value: 0 })),
+          value: surfaceTypeKeys.map((key) => ({ key, value: 0 })),
         }))
-      : [{ value: surfaceTypeKeys.map((key: string) => ({ key, value: 0 })) }];
+      : [{ value: surfaceTypeKeys.map((key) => ({ key, value: 0 })) }];
 
-    (draft.heat.heatingPerformanceFactor as any[]).push({
+    (draft.heat.heatingPerformanceFactor as PerfFactorEntry[]).push({
       key: entry.value,
       value: perfYearBands,
     });
-    (draft.heat.temperatureControlPerformanceFactor as any[]).push({
-      key: entry.value,
-      value: tempYearBands,
-    });
+    (draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]).push(
+      {
+        key: entry.value,
+        value: tempYearBands,
+      },
+    );
+    draft.heat.electricalRatio.push({ key: entry.value, value: 0 });
+    draft.heat.hasInternalGains.push({ key: entry.value, value: false });
   });
 };
 
-export const addHeatingSurfaceType = (entry: any) => {
+export const addHeatingSurfaceType = (entry: Selection) => {
   updateConfig((draft) => {
     draft.heat.heatingSurfaceTypes.push(entry);
   });
 };
 
-export const addCorrectionFactor = (entry: any) => {
+export const addCorrectionFactor = (entry: RangeKey & { value: number }) => {
   updateConfig((draft) => {
-    draft.general.heatedAirVolumeCorrectionFactor.push(entry);
+    (
+      draft.general.heatedAirVolumeCorrectionFactor as Array<
+        RangeKey & { value: number }
+      >
+    ).push(entry);
   });
 };
 
-export const addRoofConstructionType = (entry: any) => {
+export const addRoofConstructionType = (entry: Selection) => {
   updateConfig((draft) => {
     draft.roof.constructionTypes.push(entry);
   });
 };
 
-export const addOuterWallConstructionType = (entry: any) => {
+export const addOuterWallConstructionType = (entry: Selection) => {
   updateConfig((draft) => {
     draft.outerWall.constructionTypes.push(entry);
   });
 };
 
-export const addBottomFloorConstructionType = (entry: any) => {
+export const addBottomFloorConstructionType = (entry: Selection) => {
   updateConfig((draft) => {
     draft.bottomFloor.constructionTypes.push(entry);
   });
 };
 
-export const addWindowType = (entry: any) => {
+export const addWindowType = (entry: Selection) => {
   updateConfig((draft) => {
     draft.windows.windowTypes.push(entry);
   });
@@ -410,7 +439,7 @@ export const addWindowType = (entry: any) => {
 // Nested Updates for primary energy carriers
 export const updatePrimaryEnergyCarrierData = (
   carrierKey: string,
-  updater: (draft: any) => void,
+  updater: (draft: PrimaryEnergyCarrierData) => void,
 ) => {
   updateConfig((draft) => {
     const data = draft.heat.primaryEnergyCarrierData.find(
@@ -427,21 +456,19 @@ export const updatePrimaryEnergyCarrierEfficiencyFactor = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    const factor = draft.heat.primaryEnergyCarrierEfficiencyFactor.find(
-      (f) => f.key === carrierKey,
+    const data = draft.heat.primaryEnergyCarrierData.find(
+      (d) => d.key === carrierKey,
     );
-    if (factor) {
-      factor.value = value;
-    }
+    if (data) data.value.primaryEnergyFactor = value;
   });
 };
 
 export const updateCO2Factor = (carrierKey: string, value: number) => {
   updateConfig((draft) => {
-    const factor = draft.heat.co2Factor.find((f) => f.key === carrierKey);
-    if (factor) {
-      factor.value = value;
-    }
+    const data = draft.heat.primaryEnergyCarrierData.find(
+      (d) => d.key === carrierKey,
+    );
+    if (data) data.value.co2Factor = value;
   });
 };
 
@@ -529,23 +556,29 @@ export const deleteHeatingSystemType = (index: number) => {
     const value = draft.heat.heatingSystemTypes[index]?.value;
     draft.heat.heatingSystemTypes.splice(index, 1);
     if (!value) return;
-    (draft.heat.heatingPerformanceFactor as any[]).splice(
-      (draft.heat.heatingPerformanceFactor as any[]).findIndex(
+    (draft.heat.heatingPerformanceFactor as PerfFactorEntry[]).splice(
+      (draft.heat.heatingPerformanceFactor as PerfFactorEntry[]).findIndex(
         (e) => e.key === value,
       ),
       1,
     );
-    (draft.heat.temperatureControlPerformanceFactor as any[]).splice(
-      (draft.heat.temperatureControlPerformanceFactor as any[]).findIndex(
-        (e) => e.key === value,
-      ),
+    (
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
+    ).splice(
+      (
+        draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
+      ).findIndex((e) => e.key === value),
       1,
     );
-    draft.heat.allowedHeatingSystemTypesByCarrier.forEach((carrier: any) => {
-      carrier.allowedValues = carrier.allowedValues.filter(
-        (v: string) => v !== value,
-      );
+    draft.heat.allowedHeatingSystemTypesByCarrier.forEach((carrier) => {
+      carrier.allowedValues = carrier.allowedValues.filter((v) => v !== value);
     });
+    draft.heat.electricalRatio = draft.heat.electricalRatio.filter(
+      (e) => e.key !== value,
+    );
+    draft.heat.hasInternalGains = draft.heat.hasInternalGains.filter(
+      (e) => e.key !== value,
+    );
   });
 };
 
@@ -623,10 +656,10 @@ export const updateHeatingPerformanceFactor = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
-      (e) => e.key === key,
-    );
-    if (entry) entry.value[yearIndex].value[powerIndex].value = value;
+    const entry = (
+      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
+    ).find((e) => e.key === key);
+    if (entry) entry.value[yearIndex]!.value[powerIndex]!.value = value;
   });
 };
 
@@ -638,11 +671,11 @@ export const updateTemperatureControlPerformanceFactor = (
 ) => {
   updateConfig((draft) => {
     const entry = (
-      draft.heat.temperatureControlPerformanceFactor as any[]
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
     ).find((e) => e.key === key);
     if (!entry) return;
     const cell = entry.value[yearIndex]?.value?.find(
-      (v: any) => v.key === controlKey,
+      (v) => v.key === controlKey,
     );
     if (cell) cell.value = value;
   });
@@ -655,9 +688,9 @@ export const updateHeatingPerformanceFactorYearBand = (
   to?: number,
 ) => {
   updateConfig((draft) => {
-    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
-      (e) => e.key === key,
-    );
+    const entry = (
+      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
+    ).find((e) => e.key === key);
     if (!entry) return;
     const row = entry.value[yearIndex];
     if (!row) return;
@@ -676,7 +709,7 @@ export const updateTemperatureControlYearBand = (
 ) => {
   updateConfig((draft) => {
     const entry = (
-      draft.heat.temperatureControlPerformanceFactor as any[]
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
     ).find((e) => e.key === key);
     if (!entry) return;
     const row = entry.value[yearIndex];
@@ -693,12 +726,12 @@ export const addHeatingPerformanceFactorRow = (
   yearBand: { from?: number; to?: number },
 ) => {
   updateConfig((draft) => {
-    let entry = (draft.heat.heatingPerformanceFactor as any[]).find(
+    let entry = (draft.heat.heatingPerformanceFactor as PerfFactorEntry[]).find(
       (e) => e.key === key,
     );
     if (!entry) {
       entry = { key, value: [] };
-      (draft.heat.heatingPerformanceFactor as any[]).push(entry);
+      (draft.heat.heatingPerformanceFactor as PerfFactorEntry[]).push(entry);
     }
     const numCols = entry.value[0]?.value.length ?? 1;
     entry.value.push({
@@ -713,9 +746,9 @@ export const deleteHeatingPerformanceFactorRow = (
   yearIndex: number,
 ) => {
   updateConfig((draft) => {
-    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
-      (e) => e.key === key,
-    );
+    const entry = (
+      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
+    ).find((e) => e.key === key);
     if (entry) entry.value.splice(yearIndex, 1);
   });
 };
@@ -725,11 +758,11 @@ export const addHeatingPerformanceFactorColumn = (
   powerBand: { from?: number; to?: number },
 ) => {
   updateConfig((draft) => {
-    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
-      (e) => e.key === key,
-    );
+    const entry = (
+      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
+    ).find((e) => e.key === key);
     if (!entry) return;
-    entry.value.forEach((yearRow: any) =>
+    entry.value.forEach((yearRow) =>
       yearRow.value.push({ ...powerBand, value: 0 }),
     );
   });
@@ -740,11 +773,11 @@ export const deleteHeatingPerformanceFactorColumn = (
   colIndex: number,
 ) => {
   updateConfig((draft) => {
-    const entry = (draft.heat.heatingPerformanceFactor as any[]).find(
-      (e) => e.key === key,
-    );
+    const entry = (
+      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
+    ).find((e) => e.key === key);
     if (!entry) return;
-    entry.value.forEach((yearRow: any) => yearRow.value.splice(colIndex, 1));
+    entry.value.forEach((yearRow) => yearRow.value.splice(colIndex, 1));
   });
 };
 
@@ -753,15 +786,16 @@ export const addTemperatureControlRow = (
   yearBand: { from?: number; to?: number },
 ) => {
   updateConfig((draft) => {
-    let entry = (draft.heat.temperatureControlPerformanceFactor as any[]).find(
-      (e) => e.key === key,
-    );
+    let entry = (
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
+    ).find((e) => e.key === key);
     if (!entry) {
       entry = { key, value: [] };
-      (draft.heat.temperatureControlPerformanceFactor as any[]).push(entry);
+      (
+        draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
+      ).push(entry);
     }
-    const controlKeys: string[] =
-      entry.value[0]?.value.map((v: any) => v.key) ?? [];
+    const controlKeys: string[] = entry.value[0]?.value.map((v) => v.key) ?? [];
     entry.value.push({
       ...yearBand,
       value: controlKeys.map((k) => ({ key: k, value: 0 })),
@@ -772,7 +806,7 @@ export const addTemperatureControlRow = (
 export const deleteTemperatureControlRow = (key: string, yearIndex: number) => {
   updateConfig((draft) => {
     const entry = (
-      draft.heat.temperatureControlPerformanceFactor as any[]
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
     ).find((e) => e.key === key);
     if (entry) entry.value.splice(yearIndex, 1);
   });
@@ -784,10 +818,10 @@ export const addTemperatureControlColumn = (
 ) => {
   updateConfig((draft) => {
     const entry = (
-      draft.heat.temperatureControlPerformanceFactor as any[]
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
     ).find((e) => e.key === key);
     if (!entry) return;
-    entry.value.forEach((yearRow: any) =>
+    entry.value.forEach((yearRow) =>
       yearRow.value.push({ key: controlKey, value: 0 }),
     );
   });
@@ -799,17 +833,17 @@ export const deleteTemperatureControlColumn = (
 ) => {
   updateConfig((draft) => {
     const entry = (
-      draft.heat.temperatureControlPerformanceFactor as any[]
+      draft.heat.temperatureControlPerformanceFactor as TempControlEntry[]
     ).find((e) => e.key === key);
     if (!entry) return;
-    entry.value.forEach((yearRow: any) => {
-      yearRow.value = yearRow.value.filter((v: any) => v.key !== controlKey);
+    entry.value.forEach((yearRow) => {
+      yearRow.value = yearRow.value.filter((v) => v.key !== controlKey);
     });
   });
 };
 
 // Add top floor type (was missing unlike the other addX functions)
-export const addTopFloorType = (entry: any) => {
+export const addTopFloorType = (entry: Selection) => {
   updateConfig((draft) => {
     draft.topFloor.topFloorTypes.push(entry);
   });
@@ -825,7 +859,9 @@ export const updateTopFloorDefaultType = (index: number, value: string) => {
 
 export const updateWindowDefaultType = (index: number, value: string) => {
   updateConfig((draft) => {
-    const entry = (draft.windows.defaultWindowType as any[])[index];
+    const entry = (
+      draft.windows.defaultWindowType as Array<RangeKey & { value: string }>
+    )[index];
     if (entry) entry.value = value;
   });
 };
@@ -836,9 +872,8 @@ export const toggleAllowedBottomFloorConstructionType = (
   checked: boolean,
 ) => {
   updateConfig((draft) => {
-    const group = (
-      draft.bottomFloor.allowedConstructionTypesByHeatedCellar as any[]
-    )[groupIndex];
+    const group =
+      draft.bottomFloor.allowedConstructionTypesByHeatedCellar[groupIndex];
     if (!group) return;
     if (checked) {
       if (!group.allowedValues.includes(value)) group.allowedValues.push(value);
@@ -856,9 +891,7 @@ export const updateBottomFloorDefaultConstructionType = (
   value: string,
 ) => {
   updateConfig((draft) => {
-    const group = (draft.bottomFloor.defaultConstructionType as any[])[
-      groupIndex
-    ];
+    const group = draft.bottomFloor.defaultConstructionType[groupIndex];
     if (group?.value?.[bandIndex]) group.value[bandIndex].value = value;
   });
 };
@@ -868,7 +901,97 @@ export const updateOuterWallDefaultConstructionType = (
   value: string,
 ) => {
   updateConfig((draft) => {
-    const entry = (draft.outerWall.defaultConstructionType as any[])[index];
+    const entry = (
+      draft.outerWall.defaultConstructionType as Array<
+        RangeKey & { value: string }
+      >
+    )[index];
+    if (entry) entry.value = value;
+  });
+};
+
+// Electricity types
+export const addElectricityType = (entry: Selection) => {
+  updateConfig((draft) => {
+    draft.heat.electricityTypes.push(entry);
+    draft.heat.electricityTypeData.push({
+      key: entry.value,
+      value: { co2Factor: 0, unitRate: 0, baseRate: 0, primaryEnergyFactor: 0 },
+    });
+  });
+};
+
+export const updateElectricityType = (
+  index: number,
+  updater: (draft: Selection) => void,
+) => {
+  updateConfig((draft) => {
+    const item = draft.heat.electricityTypes[index];
+    if (item) updater(item as Selection);
+  });
+};
+
+export const deleteElectricityType = (value: string) => {
+  updateConfig((draft) => {
+    const idx = draft.heat.electricityTypes.findIndex((t) => t.value === value);
+    if (idx >= 0) draft.heat.electricityTypes.splice(idx, 1);
+    draft.heat.electricityTypeData = draft.heat.electricityTypeData.filter(
+      (d) => d.key !== value,
+    );
+    if (draft.heat.defaultElectricityType === value) {
+      draft.heat.defaultElectricityType =
+        draft.heat.electricityTypes[0]?.value ?? "";
+    }
+  });
+};
+
+export const updateElectricityTypeData = (
+  key: string,
+  updater: (draft: ElectricityTypeData) => void,
+) => {
+  updateConfig((draft) => {
+    const data = draft.heat.electricityTypeData.find((d) => d.key === key);
+    if (data) updater(data.value);
+  });
+};
+
+// Electrical ratio and internal gains per heating system type
+export const updateElectricalRatio = (key: string, value: number) => {
+  updateConfig((draft) => {
+    const entry = draft.heat.electricalRatio.find((e) => e.key === key);
+    if (entry) entry.value = value;
+  });
+};
+
+export const updateHasInternalGains = (key: string, value: boolean) => {
+  updateConfig((draft) => {
+    const entry = draft.heat.hasInternalGains.find((e) => e.key === key);
+    if (entry) entry.value = value;
+  });
+};
+
+// Internal gains factor per building type
+export const updateInternalGainsFactorByBuildingType = (
+  key: string,
+  value: number,
+) => {
+  updateConfig((draft) => {
+    const entry = draft.heat.internalGainsFactorByBuildingType.find(
+      (e) => e.key === key,
+    );
+    if (entry) entry.value = value;
+  });
+};
+
+// Default selections
+export const updateDefaultHeatingSystemType = (
+  carrierKey: string,
+  value: string,
+) => {
+  updateConfig((draft) => {
+    const entry = draft.heat.defaultHeatingSystemType.find(
+      (e) => e.key === carrierKey,
+    );
     if (entry) entry.value = value;
   });
 };

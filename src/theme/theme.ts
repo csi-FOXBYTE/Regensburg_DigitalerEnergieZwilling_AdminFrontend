@@ -3,8 +3,8 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     error: {
-      main: "#C1272D",
-      dark: "#9B1F24",
+      main: "#e30613",
+      dark: "#8b2412",
     },
   },
   typography: {
@@ -23,7 +23,6 @@ const theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: `
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap');
         body { font-family: "Open Sans", sans-serif; color: #191919; }
       `,
     },
@@ -35,6 +34,16 @@ const theme = createTheme({
           paddingLeft: "8px",
           paddingRight: "8px",
           fontSize: "0.875rem",
+        },
+      },
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: {
+          color: "#e30613",
+          "&.Mui-checked": {
+            color: "#e30613",
+          },
         },
       },
     },

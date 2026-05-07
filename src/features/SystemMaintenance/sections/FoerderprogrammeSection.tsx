@@ -66,13 +66,11 @@ const EMPTY_FORM: Omit<Foerderprogramm, "id"> = {
   description: "",
 };
 
-interface FormState extends Omit<Foerderprogramm, "id"> {}
-
 interface FoerderprogrammDialogProps {
   open: boolean;
   initial?: Foerderprogramm;
   onClose: () => void;
-  onSave: (data: FormState) => void;
+  onSave: (data: Omit<Foerderprogramm, "id">) => void;
 }
 
 function FoerderprogrammDialog({
@@ -81,7 +79,7 @@ function FoerderprogrammDialog({
   onClose,
   onSave,
 }: FoerderprogrammDialogProps) {
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<Omit<Foerderprogramm, "id">>(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -91,7 +89,10 @@ function FoerderprogrammDialog({
     }
   }, [open, initial]);
 
-  const set = (key: keyof FormState, value: any) => {
+  const set = (
+    key: keyof Omit<Foerderprogramm, "id">,
+    value: Omit<Foerderprogramm, "id">[keyof Omit<Foerderprogramm, "id">],
+  ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
@@ -173,11 +174,7 @@ function FoerderprogrammDialog({
               }}
             />
             <TextField
-              label={
-                form.promotionType === "percent"
-                  ? "Max. Betrag (%)"
-                  : "Max. Betrag (€)"
-              }
+              label={"Max. Betrag (€)"}
               type="number"
               value={form.maxPromotionAmount}
               onChange={(e) =>
@@ -290,7 +287,7 @@ export default function FoerderprogrammeSection({
     setDialogOpen(true);
   };
 
-  const handleSave = (data: FormState) => {
+  const handleSave = (data: Omit<Foerderprogramm, "id">) => {
     if (editing) {
       updateFoerderprogramm(editing.id, (draft) => Object.assign(draft, data));
       toast.success("Förderprogramm aktualisiert");
@@ -320,7 +317,8 @@ export default function FoerderprogrammeSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "grey.100",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("foerderprogramme")}

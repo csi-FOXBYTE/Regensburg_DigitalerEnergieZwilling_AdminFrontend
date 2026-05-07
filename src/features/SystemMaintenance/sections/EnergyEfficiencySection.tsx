@@ -1,3 +1,4 @@
+import type { EnergyEfficiencyClass } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { ChevronRight, Delete, Edit, ExpandMore } from "@mui/icons-material";
 import {
   Box,
@@ -74,7 +75,7 @@ export function EnergyEfficiencySection({
         {
           key: "value",
           label: "Klasse",
-          value: item.value,
+          value: item.value as EnergyEfficiencyClass,
           type: "text",
           required: true,
         },
@@ -90,8 +91,8 @@ export function EnergyEfficiencySection({
         updateEnergyEfficiencyClass(index, (draft) => {
           draft.from = values.from || undefined;
           draft.to = values.to || undefined;
-          draft.value = values.value;
-          (draft as EnergyEfficiencyEntry).color = values.color;
+          draft.value = values.value as EnergyEfficiencyClass;
+          draft.color = values.color as "color";
         });
         toast.success("Energieeffizienzklasse aktualisiert");
       },
@@ -124,8 +125,8 @@ export function EnergyEfficiencySection({
         addEnergyEfficiencyClass({
           from: values.from || undefined,
           to: values.to || undefined,
-          value: values.value,
-          color: values.color,
+          value: values.value as EnergyEfficiencyClass,
+          color: values.color as "color",
         });
         toast.success("Energieeffizienzklasse hinzugefügt");
       },
@@ -141,7 +142,8 @@ export function EnergyEfficiencySection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "grey.100",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("energyEfficiency")}
@@ -196,7 +198,7 @@ export function EnergyEfficiencySection({
               </TableHead>
               <TableBody>
                 {configStore.general.energyEfficiencyClasses.map(
-                  (item, index) => (
+                  (item: EnergyEfficiencyEntry, index: number) => (
                     <TableRow key={index} hover>
                       <TableCell>
                         <Chip
@@ -204,9 +206,7 @@ export function EnergyEfficiencySection({
                           size="small"
                           sx={{
                             minWidth: 50,
-                            bgcolor:
-                              (item as EnergyEfficiencyEntry).color ??
-                              "#6b7280",
+                            bgcolor: item.color ?? "#6b7280",
                             color: "white",
                             fontWeight: "600",
                           }}
@@ -221,14 +221,12 @@ export function EnergyEfficiencySection({
                               width: 20,
                               height: 20,
                               borderRadius: 0.5,
-                              bgcolor:
-                                (item as EnergyEfficiencyEntry).color ??
-                                "#6b7280",
+                              bgcolor: item.color ?? "#6b7280",
                               border: "1px solid rgba(0,0,0,0.15)",
                             }}
                           />
                           <Typography variant="body1">
-                            {(item as EnergyEfficiencyEntry).color ?? "#6b7280"}
+                            {item.color ?? "#6b7280"}
                           </Typography>
                         </Box>
                       </TableCell>

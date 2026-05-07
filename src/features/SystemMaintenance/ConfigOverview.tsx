@@ -1,4 +1,5 @@
 import ComunityParameterSection from "@/features/SystemMaintenance/sections/ComunityParameterSection";
+import ElectricityTypesSection from "@/features/SystemMaintenance/sections/ElectricityTypesSection";
 import FoerderprogrammeSection from "@/features/SystemMaintenance/sections/FoerderprogrammeSection";
 import HeatingSurfaceTypesSection from "@/features/SystemMaintenance/sections/HeatingSurfaceTypesSection";
 import HeatingTypesSection from "@/features/SystemMaintenance/sections/HeatingTypesSection";
@@ -27,11 +28,11 @@ export interface EditState {
   fields: Array<{
     key: string;
     label: string;
-    value: any;
-    type?: "text" | "number";
+    value: string | number;
+    type?: "text" | "number" | "string" | "color" | "select";
     required?: boolean;
   }>;
-  onSave: (values: Record<string, any>) => void;
+  onSave: (values: Record<string, string | number>) => void;
 }
 
 export interface DeleteConfirmState {
@@ -103,12 +104,12 @@ export function ConfigOverview() {
   );
 
   return (
-    <Box sx={{ bgcolor: "grey.100", width: "full" }}>
+    <Box sx={{ width: "full" }}>
       <Box
         sx={{
           maxWidth: 1170,
           mx: "auto",
-          p: 3,
+          py: 3,
           display: "flex",
           flexDirection: "column",
           gap: 3,
@@ -151,7 +152,6 @@ export function ConfigOverview() {
         <Box
           sx={{
             bgcolor: "white",
-            p: 3,
             display: "flex",
             flexDirection: "column",
             gap: 1,
@@ -181,6 +181,15 @@ export function ConfigOverview() {
             toggleSection={toggleSection}
           />
           <PrimaryEnergyCarrierSection
+            configStore={configStore}
+            editState={editState}
+            setEditState={setEditState}
+            deleteConfirm={deleteConfirm}
+            setDeleteConfirm={setDeleteConfirm}
+            expandedSections={expandedSections}
+            toggleSection={toggleSection}
+          />
+          <ElectricityTypesSection
             configStore={configStore}
             editState={editState}
             setEditState={setEditState}
@@ -256,19 +265,33 @@ export function ConfigOverview() {
       <Box
         sx={{
           position: "fixed",
-          bottom: 32,
-          right: "max(128px, calc((100vw - 1170px) / 2 + 32px))",
+          bottom: 0,
+          left: 0,
+          right: 0,
           zIndex: 1200,
+          borderTop: "1px solid",
+          borderColor: "divider",
+          bgcolor: "#191919",
+          py: 1.5,
         }}
       >
-        <Button
-          variant="contained"
-          color="error"
-          onClick={() => setSaveDialogOpen(true)}
-          sx={{ boxShadow: 4 }}
+        <Box
+          sx={{
+            maxWidth: 1170,
+
+            mx: "auto",
+            display: "flex",
+            justifyContent: "flex-end",
+          }}
         >
-          Speichern
-        </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => setSaveDialogOpen(true)}
+          >
+            Speichern
+          </Button>
+        </Box>
       </Box>
 
       <SaveDialog

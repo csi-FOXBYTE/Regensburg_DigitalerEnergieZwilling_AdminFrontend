@@ -22,6 +22,7 @@ import {
   addCorrectionFactor,
   deleteCorrectionFactor,
   updateCorrectionFactor,
+  updateInternalGainsFactorByBuildingType,
   updateNetFloorAreaFromUsableFloorAreaFactor,
   updateSimpleValue,
 } from "../../../hooks/store";
@@ -67,15 +68,15 @@ export function GeneralParametersSection({
       open: true,
       title: "Korrekturfaktor bearbeiten",
       fields: [
-        { key: "from", label: "Von", value: item.from ?? "", type: "number" },
-        { key: "to", label: "Bis", value: item.to ?? "", type: "number" },
+        { key: "from", label: "Von", value: item.from, type: "number" },
+        { key: "to", label: "Bis", value: item.to, type: "number" },
         { key: "value", label: "Faktor", value: item.value, type: "number" },
       ],
       onSave: (values) => {
         updateCorrectionFactor(index, (draft) => {
-          draft.from = values.from || undefined;
-          draft.to = values.to || undefined;
-          draft.value = values.value;
+          draft.from = values.from as number;
+          draft.to = values.to as number;
+          draft.value = values.value as number;
         });
         toast.success("Korrekturfaktor aktualisiert");
       },
@@ -93,9 +94,9 @@ export function GeneralParametersSection({
       ],
       onSave: (values) => {
         addCorrectionFactor({
-          from: values.from || undefined,
-          to: values.to || undefined,
-          value: values.value,
+          from: values.from as number,
+          to: values.to as number,
+          value: values.value as number,
         });
         toast.success("Korrekturfaktor hinzugefügt");
       },
@@ -118,7 +119,8 @@ export function GeneralParametersSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "grey.100",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("generalParams")}
@@ -207,6 +209,32 @@ export function GeneralParametersSection({
                 }
               />
               <Box />
+              <Typography>Heizgradtage [Kd]</Typography>
+              <TextField
+                size="small"
+                type="number"
+                value={configStore.heat.heatingDegreeDays}
+                onChange={(e) =>
+                  updateSimpleValue(
+                    "heat.heatingDegreeDays",
+                    parseFloat(e.target.value),
+                  )
+                }
+              />
+
+              <Typography>Brauchwasserbedarf je Fläche [kWh/m²]</Typography>
+              <TextField
+                size="small"
+                type="number"
+                value={configStore.heat.hotWaterEnergyDemandFromAreaFactor}
+                onChange={(e) =>
+                  updateSimpleValue(
+                    "heat.hotWaterEnergyDemandFromAreaFactor",
+                    parseFloat(e.target.value),
+                  )
+                }
+              />
+              <Box />
               <Box />
               <Box />
             </Box>
@@ -258,6 +286,35 @@ export function GeneralParametersSection({
                       </Fragment>
                     );
                   },
+                )}
+              </Box>
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle1" fontWeight="600" mb={1}>
+                Faktor interne Wärmegewinne je Gebäudetyp
+              </Typography>
+              <Box sx={gridSx}>
+                {configStore.heat.internalGainsFactorByBuildingType.map(
+                  (entry: { key: string; value: number }) => (
+                    <Fragment key={entry.key}>
+                      <Typography>{lookUpForNames(entry.key)}</Typography>
+                      <TextField
+                        size="small"
+                        type="number"
+                        value={entry.value}
+                        onChange={(e) =>
+                          updateInternalGainsFactorByBuildingType(
+                            entry.key,
+                            parseFloat(e.target.value),
+                          )
+                        }
+                      />
+                      <Box />
+                      <Box />
+                      <Box />
+                    </Fragment>
+                  ),
                 )}
               </Box>
             </Box>

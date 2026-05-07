@@ -38,6 +38,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "electricity",
         heatingSystemType: "air_source_heat_pump_lt_40",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: true,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 4200,
       },
       roof: {
         area: 85,
@@ -46,6 +53,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.BETWEEN_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 16,
+        uValue: 0.22,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -62,6 +70,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 18,
         hasAttic: false,
+        uValue: 0.20,
       },
       outerWall: {
         area: 210,
@@ -69,6 +78,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 14,
+        uValue: 0.22,
       },
       bottomFloor: {
         area: 80,
@@ -79,6 +89,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 8,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.33,
       },
     },
   },
@@ -104,6 +115,14 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "natural_gas",
         heatingSystemType: "condensing_boiler_70_55",
         heatingSurfaceType: "free_heat_emitter",
+        hasGasSupply: true,
+        hasBioGas: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 8500,
       },
       roof: {
         area: 190,
@@ -112,6 +131,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: null,
         constructionType: "solid_construction",
         insulationThickness: null,
+        uValue: 1.5,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -128,6 +148,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: false,
         insulationThickness: null,
         hasAttic: true,
+        uValue: 1.0,
       },
       outerWall: {
         area: 520,
@@ -135,6 +156,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: false,
         constructionType: "brick_wall",
         insulationThickness: null,
+        uValue: 1.2,
       },
       bottomFloor: {
         area: 185,
@@ -145,6 +167,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: null,
         hasBasement: true,
         isBasementHeated: false,
+        uValue: 1.8,
       },
     },
   },
@@ -179,6 +202,14 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "natural_gas",
         heatingSystemType: "improved_condensing_boiler_55_45",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: true,
+        hasBioGas: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 3000,
       },
       roof: {
         area: 110,
@@ -187,6 +218,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.ABOVE_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 20,
+        uValue: 0.18,
       },
       roofWindows: {
         area: 3.0,
@@ -208,6 +240,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 24,
         hasAttic: false,
+        uValue: 0.15,
       },
       outerWall: {
         area: 260,
@@ -215,6 +248,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 16,
+        uValue: 0.20,
       },
       bottomFloor: {
         area: 100,
@@ -225,6 +259,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 12,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.24,
       },
     },
   },
@@ -251,6 +286,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "heating_oil_light",
         heatingSystemType: "standard_boiler_70_55",
         heatingSurfaceType: "free_heat_emitter",
+        hasGasSupply: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 2500,
       },
       roof: {
         area: 85,
@@ -259,6 +301,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: null,
         constructionType: "wood_construction",
         insulationThickness: null,
+        uValue: 1.8,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -275,6 +318,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: false,
         insulationThickness: null,
         hasAttic: false,
+        uValue: 0.9,
       },
       outerWall: {
         area: 210,
@@ -282,6 +326,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: false,
         constructionType: "other_wall",
         insulationThickness: null,
+        uValue: 1.5,
       },
       bottomFloor: {
         area: 80,
@@ -292,6 +337,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: null,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 1.5,
       },
     },
   },
@@ -317,6 +363,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "wood_pellets",
         heatingSystemType: "standard_boiler_70_55",
         heatingSurfaceType: "free_heat_emitter",
+        hasGasSupply: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 6200,
       },
       roof: {
         area: 170,
@@ -325,6 +378,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.ABOVE_RAFTER,
         constructionType: "solid_construction",
         insulationThickness: 14,
+        uValue: 0.24,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -341,6 +395,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 16,
         hasAttic: true,
+        uValue: 0.22,
       },
       outerWall: {
         area: 480,
@@ -348,6 +403,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 12,
+        uValue: 0.25,
       },
       bottomFloor: {
         area: 165,
@@ -358,6 +414,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: null,
         hasBasement: true,
         isBasementHeated: false,
+        uValue: 1.8,
       },
     },
   },
@@ -383,6 +440,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "electricity",
         heatingSystemType: "air_source_heat_pump_lt_40",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: true,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 4500,
       },
       roof: {
         area: 95,
@@ -391,6 +455,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.BETWEEN_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 20,
+        uValue: 0.18,
       },
       roofWindows: {
         area: 1.8,
@@ -412,6 +477,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 22,
         hasAttic: false,
+        uValue: 0.17,
       },
       outerWall: {
         area: 240,
@@ -419,6 +485,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 10,
+        uValue: 0.28,
       },
       bottomFloor: {
         area: 90,
@@ -429,6 +496,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 10,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.28,
       },
     },
   },
@@ -454,6 +522,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "electricity",
         heatingSystemType: "air_source_heat_pump_lt_40",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: true,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 4800,
       },
       roof: {
         area: 90,
@@ -462,6 +537,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.BETWEEN_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 18,
+        uValue: 0.20,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -478,6 +554,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 20,
         hasAttic: false,
+        uValue: 0.18,
       },
       outerWall: {
         area: 225,
@@ -485,6 +562,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 12,
+        uValue: 0.25,
       },
       bottomFloor: {
         area: 85,
@@ -495,6 +573,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 8,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.33,
       },
     },
   },
@@ -520,6 +599,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "district_heating",
         heatingSystemType: "district_heating_all_temperatures",
         heatingSurfaceType: "free_heat_emitter",
+        hasGasSupply: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 11000,
       },
       roof: {
         area: 210,
@@ -528,6 +614,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: null,
         constructionType: "solid_construction",
         insulationThickness: null,
+        uValue: 1.5,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -544,6 +631,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: false,
         insulationThickness: null,
         hasAttic: true,
+        uValue: 1.0,
       },
       outerWall: {
         area: 640,
@@ -551,6 +639,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "brick_wall",
         insulationThickness: 6,
+        uValue: 0.40,
       },
       bottomFloor: {
         area: 200,
@@ -561,6 +650,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: null,
         hasBasement: true,
         isBasementHeated: false,
+        uValue: 1.8,
       },
     },
   },
@@ -586,6 +676,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "wood_pellets",
         heatingSystemType: "standard_boiler_70_55",
         heatingSurfaceType: "free_heat_emitter",
+        hasGasSupply: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 2800,
       },
       roof: {
         area: 115,
@@ -594,6 +691,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.BETWEEN_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 16,
+        uValue: 0.22,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -610,6 +708,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 18,
         hasAttic: false,
+        uValue: 0.20,
       },
       outerWall: {
         area: 275,
@@ -617,6 +716,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 10,
+        uValue: 0.28,
       },
       bottomFloor: {
         area: 105,
@@ -627,6 +727,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: null,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 1.5,
       },
     },
   },
@@ -652,6 +753,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "electricity",
         heatingSystemType: "air_source_heat_pump_55_45",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: true,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 4200,
       },
       roof: {
         area: 92,
@@ -660,6 +768,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.ABOVE_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 18,
+        uValue: 0.20,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -676,6 +785,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 20,
         hasAttic: false,
+        uValue: 0.18,
       },
       outerWall: {
         area: 230,
@@ -683,6 +793,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 10,
+        uValue: 0.28,
       },
       bottomFloor: {
         area: 88,
@@ -693,6 +804,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 8,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.33,
       },
     },
   },
@@ -718,6 +830,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "electricity",
         heatingSystemType: "air_source_heat_pump_lt_40",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: true,
+      },
+      electricity: {
+        electricityType: "renewable",
+        electricityUnitRate: null,
+        userElectricityConsumption: 3500,
       },
       roof: {
         area: 100,
@@ -726,6 +845,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.ABOVE_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 26,
+        uValue: 0.14,
       },
       roofWindows: {
         area: 4.0,
@@ -747,6 +867,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 28,
         hasAttic: false,
+        uValue: 0.13,
       },
       outerWall: {
         area: 255,
@@ -754,6 +875,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 18,
+        uValue: 0.18,
       },
       bottomFloor: {
         area: 95,
@@ -764,6 +886,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 14,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.21,
       },
     },
   },
@@ -793,6 +916,14 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "natural_gas",
         heatingSystemType: "low_temperature_boiler_oil_gas_70_55",
         heatingSurfaceType: "free_heat_emitter",
+        hasGasSupply: true,
+        hasBioGas: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 9500,
       },
       roof: {
         area: 130,
@@ -801,6 +932,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: null,
         constructionType: "solid_construction",
         insulationThickness: null,
+        uValue: 1.5,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -817,6 +949,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: false,
         insulationThickness: null,
         hasAttic: true,
+        uValue: 1.0,
       },
       outerWall: {
         area: 380,
@@ -824,6 +957,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: false,
         constructionType: "brick_wall",
         insulationThickness: null,
+        uValue: 1.2,
       },
       bottomFloor: {
         area: 120,
@@ -834,6 +968,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: null,
         hasBasement: true,
         isBasementHeated: false,
+        uValue: 1.8,
       },
     },
   },
@@ -861,6 +996,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "district_heating",
         heatingSystemType: "district_heating_all_temperatures",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: false,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 10200,
       },
       roof: {
         area: 130,
@@ -869,6 +1011,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.BETWEEN_RAFTER,
         constructionType: "solid_construction",
         insulationThickness: 12,
+        uValue: 0.28,
       },
       roofWindows: noRoofWindows,
       exteriorWallWindows: {
@@ -885,6 +1028,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 14,
         hasAttic: true,
+        uValue: 0.25,
       },
       outerWall: {
         area: 380,
@@ -892,6 +1036,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 10,
+        uValue: 0.28,
       },
       bottomFloor: {
         area: 120,
@@ -902,6 +1047,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: null,
         hasBasement: true,
         isBasementHeated: false,
+        uValue: 1.8,
       },
     },
   },
@@ -929,6 +1075,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "electricity",
         heatingSystemType: "air_source_heat_pump_lt_40",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: true,
+      },
+      electricity: {
+        electricityType: "grid",
+        electricityUnitRate: null,
+        userElectricityConsumption: 3800,
       },
       roof: {
         area: 92,
@@ -937,6 +1090,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.ABOVE_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 22,
+        uValue: 0.17,
       },
       roofWindows: {
         area: 2.5,
@@ -958,6 +1112,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 22,
         hasAttic: false,
+        uValue: 0.17,
       },
       outerWall: {
         area: 210,
@@ -965,6 +1120,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 12,
+        uValue: 0.25,
       },
       bottomFloor: {
         area: 80,
@@ -975,6 +1131,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 10,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.28,
       },
     },
   },
@@ -1002,6 +1159,13 @@ export const mockRecords: BuildingRecord[] = [
         primaryEnergyCarrier: "renewable_electricity",
         heatingSystemType: "ground_source_heat_pump_lt_40",
         heatingSurfaceType: "radiant_surface_heating",
+        hasGasSupply: false,
+        hasStorage: true,
+      },
+      electricity: {
+        electricityType: "renewable",
+        electricityUnitRate: null,
+        userElectricityConsumption: 4000,
       },
       roof: {
         area: 95,
@@ -1010,6 +1174,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationType: RoofInsulationType.ABOVE_RAFTER,
         constructionType: "wood_construction",
         insulationThickness: 26,
+        uValue: 0.14,
       },
       roofWindows: {
         area: 3.0,
@@ -1031,6 +1196,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         insulationThickness: 26,
         hasAttic: false,
+        uValue: 0.14,
       },
       outerWall: {
         area: 215,
@@ -1038,6 +1204,7 @@ export const mockRecords: BuildingRecord[] = [
         hasInsulation: true,
         constructionType: "solid_wall_with_thermal_insulation_composite_system",
         insulationThickness: 16,
+        uValue: 0.20,
       },
       bottomFloor: {
         area: 82,
@@ -1048,6 +1215,7 @@ export const mockRecords: BuildingRecord[] = [
         insulationThickness: 12,
         hasBasement: false,
         isBasementHeated: null,
+        uValue: 0.24,
       },
     },
   },

@@ -40,7 +40,8 @@ export default function RoofSection({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            bgcolor: "grey.100",
+            bgcolor: " white",
+            borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("roof")}

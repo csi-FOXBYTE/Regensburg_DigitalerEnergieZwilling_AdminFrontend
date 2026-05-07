@@ -39,6 +39,7 @@ export function AppHeader() {
         position: "sticky",
         top: 0,
         zIndex: 10,
+        boxShadow: "0px 1px 5px rgba(0,0,0,0.08)",
       }}
     >
       {/* Top section — 123 px */}
@@ -46,16 +47,21 @@ export function AppHeader() {
         sx={{
           maxWidth: 1170,
           mx: "auto",
-          px: 2,
+          pl: 0,
           height: 123,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          borderBottom: "1px solid #191919",
         }}
       >
         <Typography
-          variant="h2"
-          sx={{ color: "error.main", whiteSpace: "nowrap" }}
+          variant="h3"
+          sx={{
+            color: theme.palette.error.main,
+            whiteSpace: "nowrap",
+            fontWeight: 700,
+          }}
         >
           Digitaler Energie Zwilling
         </Typography>
@@ -102,19 +108,16 @@ export function AppHeader() {
             component="img"
             src="https://upload.wikimedia.org/wikipedia/de/thumb/6/6a/Regensburg_Logo.svg/960px-Regensburg_Logo.svg.png"
             alt="Stadt Regensburg"
-            sx={{ height: 44, width: "auto" }}
+            sx={{ height: 60, width: "auto" }}
           />
         </Box>
       </Box>
-
-      <Divider />
 
       {/* Bottom nav section — 68 px */}
       <Box
         sx={{
           maxWidth: 1170,
           mx: "auto",
-          px: 2,
           height: 68,
           display: "flex",
           alignItems: "center",
@@ -123,7 +126,8 @@ export function AppHeader() {
       >
         <Tabs
           value={tabValue}
-          onChange={(_, v) => navigate({ to: NAV_ITEMS[v].path })}
+          onChange={(_, v) => navigate({ to: NAV_ITEMS[v]?.path })}
+          TabIndicatorProps={{ style: { display: "none" } }}
           sx={{
             height: 68,
             minHeight: 68,
@@ -134,12 +138,12 @@ export function AppHeader() {
             "& .MuiTab-root": {
               fontSize: 16,
               lineHeight: "26px",
-              color: "#000",
+              color: "#191919",
               textTransform: "none",
               height: 68,
               minHeight: 68,
             },
-            "& .Mui-selected": { color: theme.palette.error.dark },
+            "& .MuiTab-root.Mui-selected": { color: "#e30613" },
           }}
         >
           {NAV_ITEMS.map((item) => (
