@@ -55,7 +55,6 @@ export function EnergyEfficiencySection({
 
   const handleEditEnergyClass = (index: number) => {
     const item = configStore.general.energyEfficiencyClasses[index];
-    if (item === undefined) return;
     setEditState({
       open: true,
       title: "Energieeffizienzklasse bearbeiten",
@@ -89,8 +88,8 @@ export function EnergyEfficiencySection({
       ],
       onSave: (values) => {
         updateEnergyEfficiencyClass(index, (draft) => {
-          draft.from = values.from || undefined;
-          draft.to = values.to || undefined;
+          draft.from = values.from as number;
+          draft.to = values.to as number;
           draft.value = values.value as EnergyEfficiencyClass;
           draft.color = values.color as "color";
         });
@@ -123,8 +122,8 @@ export function EnergyEfficiencySection({
       ],
       onSave: (values) => {
         addEnergyEfficiencyClass({
-          from: values.from || undefined,
-          to: values.to || undefined,
+          from: values.from as number,
+          to: values.to as number,
           value: values.value as EnergyEfficiencyClass,
           color: values.color as "color",
         });
@@ -141,8 +140,6 @@ export function EnergyEfficiencySection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -154,9 +151,7 @@ export function EnergyEfficiencySection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h6" fontWeight="600">
-              Energieeffizienzklassen
-            </Typography>
+            <Typography variant="h3">Energieeffizienzklassen</Typography>
           </Box>
           <Button
             variant="outlined"
@@ -175,24 +170,18 @@ export function EnergyEfficiencySection({
               <TableHead>
                 <TableRow>
                   <TableCell>
-                    <Typography variant="subtitle1" fontWeight={"bold"}>
-                      Klasse
-                    </Typography>
+                    <Typography fontWeight={"bold"}>Klasse</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="subtitle1" fontWeight={"bold"}>
-                      Hex-Wert Farbe
-                    </Typography>
+                    <Typography fontWeight={"bold"}>Hex-Wert Farbe</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="subtitle1" fontWeight={"bold"}>
+                    <Typography fontWeight={"bold"}>
                       Primärenergiebedarf
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Typography variant="subtitle1" fontWeight={"bold"}>
-                      Aktionen
-                    </Typography>
+                    <Typography fontWeight={"bold"}>Aktionen</Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>

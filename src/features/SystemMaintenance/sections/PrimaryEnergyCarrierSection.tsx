@@ -195,8 +195,6 @@ export function PrimaryEnergyCarrierSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -208,7 +206,7 @@ export function PrimaryEnergyCarrierSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h6" fontWeight="600">
+            <Typography variant="h3">
               Primäre Energieträger (
               {configStore.heat.primaryEnergyCarriers.length})
             </Typography>
@@ -228,7 +226,7 @@ export function PrimaryEnergyCarrierSection({
         <Collapse in={expandedSections.energyCarriers}>
           <Box sx={{ px: 2, pt: 2, pb: 1 }}>
             <Box sx={{ ...gridSx }}>
-              <Typography variant="body2">Standard-Energieträger</Typography>
+              <Typography variant="body1">Standard-Energieträger</Typography>
               <TextField
                 select
                 size="small"
@@ -311,7 +309,11 @@ export function PrimaryEnergyCarrierSection({
                           unmountOnExit
                         >
                           <Box sx={{ p: 2 }}>
-                            <Typography variant="body2" fontWeight="600" mb={1}>
+                            <Typography
+                              variant="body2"
+                              fontWeight={"bold"}
+                              mb={1}
+                            >
                               Daten zum Energieträger
                             </Typography>
 
@@ -359,7 +361,11 @@ export function PrimaryEnergyCarrierSection({
                               />
                             </Box>
 
-                            <Typography variant="body2" fontWeight="600" mb={1}>
+                            <Typography
+                              variant="body2"
+                              fontWeight={"bold"}
+                              mb={1}
+                            >
                               Brennstoffdaten gemäß GEG/EnEV
                             </Typography>
                             <Box sx={{ ...gridSx, mb: 2 }}>
@@ -440,9 +446,9 @@ export function PrimaryEnergyCarrierSection({
                             </Box>
 
                             <Typography
-                              variant="subtitle2"
-                              fontWeight="600"
-                              mb={0.5}
+                              variant="body2"
+                              fontWeight={"bold"}
+                              mb={1}
                             >
                               Erlaubte Heizsysteme
                             </Typography>

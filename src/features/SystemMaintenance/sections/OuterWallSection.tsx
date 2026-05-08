@@ -44,8 +44,6 @@ export default function OuterWallSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -53,15 +51,13 @@ export default function OuterWallSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.outerWall ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h6" fontWeight="600">
-              Außenwand
-            </Typography>
+            <Typography variant="h3">Außenwand</Typography>
           </Box>
         </Box>
 
         <Collapse in={expandedSections.outerWall}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -113,7 +109,7 @@ export default function OuterWallSection({
               />
             </Box>
 
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Standard‑Konstruktion nach Baujahr
             </Typography>
 
@@ -166,7 +162,7 @@ export default function OuterWallSection({
               )}
             </Box>
 
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Pauschalwerte für den Wärmedurchgangskoeffizienten [W/m²K]
             </Typography>
 

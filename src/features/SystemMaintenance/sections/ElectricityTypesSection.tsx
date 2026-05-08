@@ -162,8 +162,6 @@ export default function ElectricityTypesSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -175,7 +173,7 @@ export default function ElectricityTypesSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h6" fontWeight="600">
+            <Typography variant="h3">
               Stromtypen ({configStore.heat.electricityTypes.length})
             </Typography>
           </Box>
@@ -194,7 +192,7 @@ export default function ElectricityTypesSection({
         <Collapse in={expandedSections.electricityTypes}>
           <Box sx={{ px: 2, pt: 2, pb: 1 }}>
             <Box sx={{ ...gridSx, mb: 1 }}>
-              <Typography variant="body2">Standard-Stromtyp</Typography>
+              <Typography variant="body1">Standard-Stromtyp</Typography>
               <TextField
                 select
                 size="small"

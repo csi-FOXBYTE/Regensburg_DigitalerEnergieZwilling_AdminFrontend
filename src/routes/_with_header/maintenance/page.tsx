@@ -3,7 +3,7 @@ import { Dashboard } from "@/features/TriageView/Triage";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-export const Route = createFileRoute("/maintenance/")({
+export const Route = createFileRoute("/_with_header/maintenance/")({
   component: MaintenancePage,
 });
 

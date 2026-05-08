@@ -106,7 +106,7 @@ export function AppHeader() {
           {/* Logo */}
           <Box
             component="img"
-            src="https://upload.wikimedia.org/wikipedia/de/thumb/6/6a/Regensburg_Logo.svg/960px-Regensburg_Logo.svg.png"
+            src="/logo.png"
             alt="Stadt Regensburg"
             sx={{ height: 60, width: "auto" }}
           />
@@ -120,8 +120,6 @@ export function AppHeader() {
           mx: "auto",
           height: 68,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
         }}
       >
         <Tabs
@@ -142,6 +140,8 @@ export function AppHeader() {
               textTransform: "none",
               height: 68,
               minHeight: 68,
+              paddingLeft: 0,
+              paddingRight: "24px",
             },
             "& .MuiTab-root.Mui-selected": { color: "#e30613" },
           }}

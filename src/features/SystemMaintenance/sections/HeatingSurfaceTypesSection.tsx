@@ -143,8 +143,6 @@ export default function HeatingSurfaceTypesSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -156,7 +154,7 @@ export default function HeatingSurfaceTypesSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h6" fontWeight="600">
+            <Typography variant="h3">
               Heizflächenarten ({configStore.heat.heatingSurfaceTypes.length})
             </Typography>
           </Box>
@@ -183,7 +181,7 @@ export default function HeatingSurfaceTypesSection({
                 mb: 1,
               }}
             >
-              <Typography variant="body2">Standard-Heizfläche</Typography>
+              <Typography variant="body1">Standard-Heizfläche</Typography>
               <TextField
                 select
                 size="small"

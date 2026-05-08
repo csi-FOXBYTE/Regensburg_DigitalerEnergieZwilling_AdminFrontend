@@ -44,8 +44,6 @@ export default function OgdSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -53,14 +51,12 @@ export default function OgdSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.topFloor ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h6" fontWeight="600">
-              Oberste Geschossdecke
-            </Typography>
+            <Typography variant="h3">Oberste Geschossdecke</Typography>
           </Box>
         </Box>
         <Collapse in={expandedSections.topFloor}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="body1" fontWeight="600" mb={1.5}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1.5}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -111,7 +107,7 @@ export default function OgdSection({
                 }
               />
             </Box>
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Standard‑Deckentyp nach Baujahr
             </Typography>
 
@@ -159,7 +155,7 @@ export default function OgdSection({
                 ),
               )}
             </Box>
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
             </Typography>
             <TableContainer sx={{ overflowX: "auto" }}>

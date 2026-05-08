@@ -9,21 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as With_headerLayoutRouteImport } from './routes/_with_header/layout'
 import { Route as PageRouteImport } from './routes/page'
-import { Route as MaintenancePageRouteImport } from './routes/maintenance/page'
 import { Route as LoginPageRouteImport } from './routes/login/page'
-import { Route as DashboardPageRouteImport } from './routes/dashboard/page'
-import { Route as ConfigPageRouteImport } from './routes/config/page'
-import { Route as RecordIdPageRouteImport } from './routes/record/$id/page'
+import { Route as With_headerMaintenancePageRouteImport } from './routes/_with_header/maintenance/page'
+import { Route as With_headerDashboardPageRouteImport } from './routes/_with_header/dashboard/page'
+import { Route as With_headerConfigPageRouteImport } from './routes/_with_header/config/page'
+import { Route as With_headerIdPageRouteImport } from './routes/_with_header/$id/page'
 
+const With_headerLayoutRoute = With_headerLayoutRouteImport.update({
+  id: '/_with_header',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PageRoute = PageRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MaintenancePageRoute = MaintenancePageRouteImport.update({
-  id: '/maintenance/',
-  path: '/maintenance/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginPageRoute = LoginPageRouteImport.update({
@@ -31,91 +31,97 @@ const LoginPageRoute = LoginPageRouteImport.update({
   path: '/login/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardPageRoute = DashboardPageRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConfigPageRoute = ConfigPageRouteImport.update({
+const With_headerMaintenancePageRoute =
+  With_headerMaintenancePageRouteImport.update({
+    id: '/maintenance/',
+    path: '/maintenance/',
+    getParentRoute: () => With_headerLayoutRoute,
+  } as any)
+const With_headerDashboardPageRoute =
+  With_headerDashboardPageRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => With_headerLayoutRoute,
+  } as any)
+const With_headerConfigPageRoute = With_headerConfigPageRouteImport.update({
   id: '/config/',
   path: '/config/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => With_headerLayoutRoute,
 } as any)
-const RecordIdPageRoute = RecordIdPageRouteImport.update({
-  id: '/record/$id/',
-  path: '/record/$id/',
-  getParentRoute: () => rootRouteImport,
+const With_headerIdPageRoute = With_headerIdPageRouteImport.update({
+  id: '/$id/',
+  path: '/$id/',
+  getParentRoute: () => With_headerLayoutRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PageRoute
-  '/config/': typeof ConfigPageRoute
-  '/dashboard/': typeof DashboardPageRoute
   '/login/': typeof LoginPageRoute
-  '/maintenance/': typeof MaintenancePageRoute
-  '/record/$id/': typeof RecordIdPageRoute
+  '/$id/': typeof With_headerIdPageRoute
+  '/config/': typeof With_headerConfigPageRoute
+  '/dashboard/': typeof With_headerDashboardPageRoute
+  '/maintenance/': typeof With_headerMaintenancePageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PageRoute
-  '/config': typeof ConfigPageRoute
-  '/dashboard': typeof DashboardPageRoute
   '/login': typeof LoginPageRoute
-  '/maintenance': typeof MaintenancePageRoute
-  '/record/$id': typeof RecordIdPageRoute
+  '/$id': typeof With_headerIdPageRoute
+  '/config': typeof With_headerConfigPageRoute
+  '/dashboard': typeof With_headerDashboardPageRoute
+  '/maintenance': typeof With_headerMaintenancePageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof PageRoute
-  '/config/': typeof ConfigPageRoute
-  '/dashboard/': typeof DashboardPageRoute
+  '/_with_header': typeof With_headerLayoutRouteWithChildren
   '/login/': typeof LoginPageRoute
-  '/maintenance/': typeof MaintenancePageRoute
-  '/record/$id/': typeof RecordIdPageRoute
+  '/_with_header/$id/': typeof With_headerIdPageRoute
+  '/_with_header/config/': typeof With_headerConfigPageRoute
+  '/_with_header/dashboard/': typeof With_headerDashboardPageRoute
+  '/_with_header/maintenance/': typeof With_headerMaintenancePageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login/'
+    | '/$id/'
     | '/config/'
     | '/dashboard/'
-    | '/login/'
     | '/maintenance/'
-    | '/record/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/config' | '/dashboard' | '/login' | '/maintenance' | '/record/$id'
+  to: '/' | '/login' | '/$id' | '/config' | '/dashboard' | '/maintenance'
   id:
     | '__root__'
     | '/'
-    | '/config/'
-    | '/dashboard/'
+    | '/_with_header'
     | '/login/'
-    | '/maintenance/'
-    | '/record/$id/'
+    | '/_with_header/$id/'
+    | '/_with_header/config/'
+    | '/_with_header/dashboard/'
+    | '/_with_header/maintenance/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   PageRoute: typeof PageRoute
-  ConfigPageRoute: typeof ConfigPageRoute
-  DashboardPageRoute: typeof DashboardPageRoute
+  With_headerLayoutRoute: typeof With_headerLayoutRouteWithChildren
   LoginPageRoute: typeof LoginPageRoute
-  MaintenancePageRoute: typeof MaintenancePageRoute
-  RecordIdPageRoute: typeof RecordIdPageRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_with_header': {
+      id: '/_with_header'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof With_headerLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof PageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/maintenance/': {
-      id: '/maintenance/'
-      path: '/maintenance'
-      fullPath: '/maintenance/'
-      preLoaderRoute: typeof MaintenancePageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login/': {
@@ -125,37 +131,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginPageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
+    '/_with_header/maintenance/': {
+      id: '/_with_header/maintenance/'
+      path: '/maintenance'
+      fullPath: '/maintenance/'
+      preLoaderRoute: typeof With_headerMaintenancePageRouteImport
+      parentRoute: typeof With_headerLayoutRoute
+    }
+    '/_with_header/dashboard/': {
+      id: '/_with_header/dashboard/'
       path: '/dashboard'
       fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardPageRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof With_headerDashboardPageRouteImport
+      parentRoute: typeof With_headerLayoutRoute
     }
-    '/config/': {
-      id: '/config/'
+    '/_with_header/config/': {
+      id: '/_with_header/config/'
       path: '/config'
       fullPath: '/config/'
-      preLoaderRoute: typeof ConfigPageRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof With_headerConfigPageRouteImport
+      parentRoute: typeof With_headerLayoutRoute
     }
-    '/record/$id/': {
-      id: '/record/$id/'
-      path: '/record/$id'
-      fullPath: '/record/$id/'
-      preLoaderRoute: typeof RecordIdPageRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_with_header/$id/': {
+      id: '/_with_header/$id/'
+      path: '/$id'
+      fullPath: '/$id/'
+      preLoaderRoute: typeof With_headerIdPageRouteImport
+      parentRoute: typeof With_headerLayoutRoute
     }
   }
 }
 
+interface With_headerLayoutRouteChildren {
+  With_headerIdPageRoute: typeof With_headerIdPageRoute
+  With_headerConfigPageRoute: typeof With_headerConfigPageRoute
+  With_headerDashboardPageRoute: typeof With_headerDashboardPageRoute
+  With_headerMaintenancePageRoute: typeof With_headerMaintenancePageRoute
+}
+
+const With_headerLayoutRouteChildren: With_headerLayoutRouteChildren = {
+  With_headerIdPageRoute: With_headerIdPageRoute,
+  With_headerConfigPageRoute: With_headerConfigPageRoute,
+  With_headerDashboardPageRoute: With_headerDashboardPageRoute,
+  With_headerMaintenancePageRoute: With_headerMaintenancePageRoute,
+}
+
+const With_headerLayoutRouteWithChildren =
+  With_headerLayoutRoute._addFileChildren(With_headerLayoutRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   PageRoute: PageRoute,
-  ConfigPageRoute: ConfigPageRoute,
-  DashboardPageRoute: DashboardPageRoute,
+  With_headerLayoutRoute: With_headerLayoutRouteWithChildren,
   LoginPageRoute: LoginPageRoute,
-  MaintenancePageRoute: MaintenancePageRoute,
-  RecordIdPageRoute: RecordIdPageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

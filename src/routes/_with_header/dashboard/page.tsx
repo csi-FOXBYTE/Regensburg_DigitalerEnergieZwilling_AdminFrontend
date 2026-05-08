@@ -1,13 +1,13 @@
 import { useAuth } from "@/components/AuthContext";
-import { ConfigOverview } from "@/features/SystemMaintenance/ConfigOverview";
+import DashboardPage from "@/features/Dashboard/DashboardPage";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-export const Route = createFileRoute("/config/")({
-  component: ConfigPage,
+export const Route = createFileRoute("/_with_header/dashboard/")({
+  component: DashboardRoute,
 });
 
-function ConfigPage() {
+function DashboardRoute() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -18,5 +18,5 @@ function ConfigPage() {
   }, [isAuthenticated, isLoading, navigate]);
 
   if (isLoading || !isAuthenticated) return null;
-  return <ConfigOverview />;
+  return <DashboardPage />;
 }

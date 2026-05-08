@@ -52,10 +52,7 @@ export function YearBandSection({
   };
 
   const handleEditYearBand = (index: number) => {
-    const item = configStore.general.generalYearBands[index] as
-      | YearBandEntry
-      | undefined;
-    if (item === undefined) return;
+    const item = configStore.general.generalYearBands[index] as YearBandEntry;
     setEditState({
       open: true,
       title: "Jahresband bearbeiten",
@@ -104,8 +101,6 @@ export function YearBandSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -113,9 +108,7 @@ export function YearBandSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.yearBand ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h6" fontWeight="600">
-              Jahresbänder
-            </Typography>
+            <Typography variant="h3">Jahresbänder</Typography>
           </Box>
           <Button
             variant="outlined"
@@ -133,14 +126,11 @@ export function YearBandSection({
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontSize: "16px", fontWeight: "bold" }}>
-                    Zeitraum
+                  <TableCell>
+                    <Typography fontWeight={"bold"}>Zeitraum</Typography>
                   </TableCell>
-                  <TableCell
-                    align="right"
-                    sx={{ fontSize: "16px", fontWeight: "bold" }}
-                  >
-                    Aktionen
+                  <TableCell align="right">
+                    <Typography fontWeight={"bold"}>Aktionen</Typography>
                   </TableCell>
                 </TableRow>
               </TableHead>

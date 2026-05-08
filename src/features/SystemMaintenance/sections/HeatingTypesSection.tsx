@@ -251,21 +251,6 @@ export default function HeatingTypesSection({
 }) {
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
-  const labelOverrides: Record<string, string> = {
-    standard_boiler_70_55: "Standardkessel (Öl, Gas, Holz) 70/55°C",
-    low_temperature_boiler_oil_gas_70_55:
-      "Niedertemperaturkessel (Öl, Gas) 70/55°C",
-    condensing_boiler_70_55: "Brennwertkessel (Öl, Gas) 70/55°C",
-    improved_condensing_boiler_55_45:
-      "Brennwertkessel (verbessert, Öl, Gas) 55/45°C",
-    district_heating_all_temperatures: "Fernwärme (alle Heizkreistemperaturen)",
-  };
-
-  const getLabel = (item: {
-    value: string;
-    localization: Record<string, string>;
-  }) => labelOverrides[item.value] ?? item.localization.de ?? "";
-
   const toggleRow = (index: number) =>
     setExpandedRows((prev) => ({ ...prev, [index]: !prev[index] }));
 
@@ -324,7 +309,7 @@ export default function HeatingTypesSection({
         {
           key: "de",
           label: "Bezeichnung",
-          value: getLabel(item),
+          value: item.localization.de ?? "",
           type: "text",
           required: true,
         },
@@ -454,8 +439,6 @@ export default function HeatingTypesSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -467,7 +450,7 @@ export default function HeatingTypesSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h6" fontWeight="600">
+            <Typography variant="h3">
               Heizungserzeugerart ({configStore.heat.heatingSystemTypes.length})
             </Typography>
           </Box>
@@ -544,7 +527,7 @@ export default function HeatingTypesSection({
                           >
                             {isOpen ? <ExpandMore /> : <ChevronRight />}
                           </IconButton>
-                          {getLabel(item)}
+                          {item.localization.de}
                         </TableCell>
                         <TableCell align="right">
                           <IconButton
@@ -574,9 +557,8 @@ export default function HeatingTypesSection({
                         >
                           <Collapse in={isOpen} timeout="auto" unmountOnExit>
                             <Box sx={{ p: 2 }}>
-                              {/* Heizleistungsfaktoren */}
                               <Typography
-                                sx={{ mb: 1 }}
+                                sx={{ mb: 1.5 }}
                                 fontWeight="bold"
                                 variant="body2"
                               >
@@ -760,7 +742,6 @@ export default function HeatingTypesSection({
                                 sx={{
                                   display: "flex",
                                   justifyContent: "flex-end",
-                                  mb: 2.5,
                                 }}
                               >
                                 <Button
@@ -778,7 +759,7 @@ export default function HeatingTypesSection({
                                 </Button>
                               </Box>
                               <Typography
-                                sx={{ mb: 1 }}
+                                sx={{ mb: 1.5 }}
                                 fontWeight="bold"
                                 variant="body2"
                               >
@@ -990,7 +971,6 @@ export default function HeatingTypesSection({
                                   display: "flex",
                                   alignItems: "center",
                                   gap: 3,
-                                  mt: 2,
                                 }}
                               >
                                 <Box

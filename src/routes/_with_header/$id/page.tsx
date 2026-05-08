@@ -1,15 +1,16 @@
 import { useAuth } from "@/components/AuthContext";
-import DashboardPage from "@/features/Dashboard/DashboardPage";
+import { RecordDetail } from "@/features/TriageView/RecordDetail";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-export const Route = createFileRoute("/dashboard/")({
-  component: DashboardRoute,
+export const Route = createFileRoute("/_with_header/$id/")({
+  component: RecordDetailPage,
 });
 
-function DashboardRoute() {
+function RecordDetailPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { id } = Route.useParams();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -18,5 +19,5 @@ function DashboardRoute() {
   }, [isAuthenticated, isLoading, navigate]);
 
   if (isLoading || !isAuthenticated) return null;
-  return <DashboardPage />;
+  return <RecordDetail key={id} id={id} />;
 }

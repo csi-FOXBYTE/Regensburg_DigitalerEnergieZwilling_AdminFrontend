@@ -26,8 +26,6 @@ export default function ComunityParameterSection({
           p: 2,
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
-          bgcolor: " white",
           borderBottom: "2px solid #e30613",
           cursor: "pointer",
         }}
@@ -35,15 +33,13 @@ export default function ComunityParameterSection({
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {expandedSections.communityParams ? <ExpandMore /> : <ChevronRight />}
-          <Typography variant="h6" fontWeight="600">
-            Kommunale Parameter
-          </Typography>
+          <Typography variant="h3">Kommunale Parameter</Typography>
         </Box>
       </Box>
 
       <Collapse in={expandedSections.communityParams}>
         <Box sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight="600" mb={1}>
+          <Typography variant="body1" fontWeight={"bold"} mb={1}>
             Standard‑Auswahl
           </Typography>
 
@@ -88,37 +84,6 @@ export default function ComunityParameterSection({
             </Tooltip>
 
             <Box />
-
-            <Typography>Heizung Erzeugerart</Typography>
-            <Tooltip
-              title={
-                configStore.heat.heatingSystemTypes.find(
-                  (t) => t.value === configStore.heat.defaultHeatingSystemType,
-                )?.localization.de ?? ""
-              }
-              placement="top"
-              arrow
-              slotProps={{ tooltip: { sx: { fontSize: "0.85rem" } } }}
-            >
-              <TextField
-                select
-                size="small"
-                value={configStore.heat.defaultHeatingSystemType}
-                onChange={(e) =>
-                  updateSimpleValue(
-                    "heat.defaultHeatingSystemType",
-                    e.target.value,
-                  )
-                }
-              >
-                {configStore.heat.heatingSystemTypes.map((type) => (
-                  <MenuItem key={type.value} value={type.value}>
-                    {type.localization.de}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Tooltip>
-
             <Typography>Heizflächenart</Typography>
             <Tooltip
               title={
@@ -154,7 +119,7 @@ export default function ComunityParameterSection({
             <Box />
           </Box>
 
-          <Typography variant="subtitle1" fontWeight="600" mb={1}>
+          <Typography variant="body1" fontWeight={"bold"} mb={1}>
             Energetische Kennwerte
           </Typography>
 

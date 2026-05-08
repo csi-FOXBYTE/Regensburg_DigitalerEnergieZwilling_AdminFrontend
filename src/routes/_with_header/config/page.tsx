@@ -1,16 +1,15 @@
 import { useAuth } from "@/components/AuthContext";
-import { RecordDetail } from "@/features/TriageView/RecordDetail";
+import { ConfigOverview } from "@/features/SystemMaintenance/ConfigOverview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-export const Route = createFileRoute("/record/$id/")({
-  component: RecordDetailPage,
+export const Route = createFileRoute("/_with_header/config/")({
+  component: ConfigPage,
 });
 
-function RecordDetailPage() {
+function ConfigPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
-  const { id } = Route.useParams();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -19,5 +18,5 @@ function RecordDetailPage() {
   }, [isAuthenticated, isLoading, navigate]);
 
   if (isLoading || !isAuthenticated) return null;
-  return <RecordDetail key={id} id={id} />;
+  return <ConfigOverview />;
 }

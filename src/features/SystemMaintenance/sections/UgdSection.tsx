@@ -56,14 +56,12 @@ export default function UgdSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.bottomFloor ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h6" fontWeight="600">
-              Unterste Geschossdecke
-            </Typography>
+            <Typography variant="h3">Unterste Geschossdecke</Typography>
           </Box>
         </Box>
         <Collapse in={expandedSections.bottomFloor}>
           <Box sx={{ p: 2 }}>
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Allgemeine Parameter
             </Typography>
             <Box
@@ -118,7 +116,7 @@ export default function UgdSection({
               />
             </Box>
 
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Erlaubte Konstruktionen nach beheiztem Keller
             </Typography>
 
@@ -174,7 +172,7 @@ export default function UgdSection({
               )}
             </Box>
 
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Standard‑Konstruktion
             </Typography>
 
@@ -251,7 +249,7 @@ export default function UgdSection({
               )}
             </Box>
 
-            <Typography variant="body1" fontWeight="600" mb={1}>
+            <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² * K)
             </Typography>
             <TableContainer sx={{ overflowX: "auto" }}>

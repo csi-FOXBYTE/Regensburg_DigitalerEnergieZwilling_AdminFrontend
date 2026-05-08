@@ -44,8 +44,6 @@ export default function WindowSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -53,9 +51,7 @@ export default function WindowSection({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.windows ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h6" fontWeight="600">
-              Fenster
-            </Typography>
+            <Typography variant="h3">Fenster</Typography>
           </Box>
         </Box>
         <Collapse in={expandedSections.windows}>

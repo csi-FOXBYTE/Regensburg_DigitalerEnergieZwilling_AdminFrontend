@@ -79,7 +79,7 @@ export function FiltersControls({
                 ),
               },
             }}
-            sx={{ flex: 1, maxWidth: 600 }}
+            sx={{ flex: 1, maxWidth: 600, mt: 0.75 }}
           />
 
           <TextField
@@ -87,7 +87,7 @@ export function FiltersControls({
             select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as string)}
-            sx={{ minWidth: 140 }}
+            sx={{ minWidth: 140, mt: 0.7 }}
           >
             <MenuItem value="all">Alle Status</MenuItem>
             <MenuItem value="NEU">Neu</MenuItem>
@@ -102,7 +102,7 @@ export function FiltersControls({
             label="Einträge"
             value={itemsPerPage}
             onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            sx={{ minWidth: 80 }}
+            sx={{ minWidth: 90, mt: 0.7 }}
           >
             {PAGE_SIZE_OPTIONS.map((n) => (
               <MenuItem key={n} value={n}>

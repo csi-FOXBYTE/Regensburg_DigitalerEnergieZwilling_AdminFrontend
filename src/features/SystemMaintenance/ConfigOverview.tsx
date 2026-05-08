@@ -269,16 +269,13 @@ export function ConfigOverview() {
           left: 0,
           right: 0,
           zIndex: 1200,
-          borderTop: "1px solid",
-          borderColor: "divider",
           bgcolor: "#191919",
-          py: 1.5,
+          py: 2.5,
         }}
       >
         <Box
           sx={{
             maxWidth: 1170,
-
             mx: "auto",
             display: "flex",
             justifyContent: "flex-end",

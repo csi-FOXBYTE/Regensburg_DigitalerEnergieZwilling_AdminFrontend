@@ -44,8 +44,6 @@ export default function SurfaceTempResistenceSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
           }}
           onClick={() => toggleSection("surfaceTempResistence")}
@@ -56,9 +54,7 @@ export default function SurfaceTempResistenceSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h6" fontWeight="600">
-              Wärmeübergangswiderstände
-            </Typography>
+            <Typography variant="h3">Wärmeübergangswiderstände</Typography>
           </Box>
         </Box>
         <Collapse in={expandedSections.surfaceTempResistence}>

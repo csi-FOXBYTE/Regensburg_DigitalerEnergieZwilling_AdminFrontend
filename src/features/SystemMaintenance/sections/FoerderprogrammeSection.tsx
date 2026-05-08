@@ -316,8 +316,6 @@ export default function FoerderprogrammeSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
             borderBottom: "2px solid #e30613",
             cursor: "pointer",
           }}
@@ -329,7 +327,7 @@ export default function FoerderprogrammeSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h6" fontWeight="600">
+            <Typography variant="h3">
               Förderprogramme ({programs.length})
             </Typography>
           </Box>
@@ -348,7 +346,7 @@ export default function FoerderprogrammeSection({
         <Collapse in={expandedSections.foerderprogramme}>
           {programs.length === 0 ? (
             <Box sx={{ p: 3, textAlign: "center", color: "text.secondary" }}>
-              <Typography variant="body2">
+              <Typography variant="body1">
                 Noch keine Förderprogramme hinterlegt.
               </Typography>
             </Box>
