@@ -292,6 +292,7 @@ export function ConfigOverview() {
       </Box>
 
       <SaveDialog
+        key={String(saveDialogOpen)}
         open={saveDialogOpen}
         defaultName={selectedConfigFile}
         onClose={() => setSaveDialogOpen(false)}
@@ -299,6 +300,7 @@ export function ConfigOverview() {
       />
 
       <EditDialog
+        key={String(editState.open)}
         open={editState.open}
         title={editState.title}
         fields={editState.fields}

@@ -45,7 +45,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
 import {
@@ -79,15 +79,10 @@ function FoerderprogrammDialog({
   onClose,
   onSave,
 }: FoerderprogrammDialogProps) {
-  const [form, setForm] = useState<Omit<Foerderprogramm, "id">>(EMPTY_FORM);
+  const [form, setForm] = useState<Omit<Foerderprogramm, "id">>(
+    initial ? { ...initial } : { ...EMPTY_FORM },
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (open) {
-      setForm(initial ? { ...initial } : { ...EMPTY_FORM });
-      setErrors({});
-    }
-  }, [open, initial]);
 
   const set = (
     key: keyof Omit<Foerderprogramm, "id">,
@@ -438,6 +433,7 @@ export default function FoerderprogrammeSection({
       </Paper>
 
       <FoerderprogrammDialog
+        key={dialogOpen ? (editing?.id ?? "new") : "closed"}
         open={dialogOpen}
         initial={editing}
         onClose={() => setDialogOpen(false)}

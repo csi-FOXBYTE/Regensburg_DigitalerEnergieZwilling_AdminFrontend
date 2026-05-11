@@ -3,7 +3,7 @@ import { RecordDetail } from "@/features/TriageView/RecordDetail";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-export const Route = createFileRoute("/_with_header/$id/")({
+export const Route = createFileRoute("/_with_header/record/$id/")({
   component: RecordDetailPage,
 });
 

@@ -175,6 +175,7 @@ export function YearBandSection({
       </Paper>
 
       <EditDialog
+        key={String(editState.open)}
         open={editState.open}
         title={editState.title}
         fields={editState.fields}

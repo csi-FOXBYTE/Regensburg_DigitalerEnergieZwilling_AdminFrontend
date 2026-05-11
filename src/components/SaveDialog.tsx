@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface SaveDialogProps {
   open: boolean;
@@ -25,12 +25,6 @@ export function SaveDialog({
   const [fileName, setFileName] = useState(defaultName);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (open) {
-      setFileName(defaultName);
-      setError("");
-    }
-  }, [open, defaultName]);
 
   const handleSave = () => {
     const trimmed = fileName.trim();

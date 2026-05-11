@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface EditDialogProps {
   open: boolean;
@@ -38,17 +38,6 @@ export function EditDialog({
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (open) {
-      setValues(
-        fields.reduce(
-          (acc, field) => ({ ...acc, [field.key]: field.value }),
-          {},
-        ),
-      );
-      setErrors({});
-    }
-  }, [open, fields]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};

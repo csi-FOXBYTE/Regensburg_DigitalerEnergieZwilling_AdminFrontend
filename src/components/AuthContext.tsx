@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 export interface User {
   id: string;
@@ -22,20 +22,17 @@ const fakeUsers: User[] = [
 ];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const stored = localStorage.getItem("currentUser");
-    if (stored) {
-      try {
-        setCurrentUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem("currentUser");
-      }
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored);
+    } catch {
+      localStorage.removeItem("currentUser");
+      return null;
     }
-    setIsLoading(false);
-  }, []);
+  });
+  const [isLoading] = useState(false);
 
   const login = async (email: string, password: string) => {
     await new Promise((resolve) => setTimeout(resolve, 300));

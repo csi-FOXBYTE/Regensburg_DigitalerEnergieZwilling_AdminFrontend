@@ -4,7 +4,7 @@ import { RecordsContext } from "@/components/RecordsContext";
 import { addAuditEntry } from "@/hooks/auditLog";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "./parts/DeleteDialog";
 import FiltersControls from "./parts/FiltersControls";
@@ -90,10 +90,6 @@ export function Dashboard() {
     return deduplicatedRecords.slice(startIndex, startIndex + itemsPerPage);
   }, [deduplicatedRecords, currentPage, itemsPerPage]);
 
-  useEffect(
-    () => setCurrentPage(1),
-    [addressFilter, statusFilter, myRecordsOn],
-  );
 
   const handleAssignToMe = useCallback(
     (record: BuildingRecord) => {
@@ -195,8 +191,8 @@ export function Dashboard() {
         <FiltersControls
           refreshData={refreshData}
           addressFilter={addressFilter}
-          setAddressFilter={setAddressFilter}
-          setStatusFilter={setStatusFilter}
+          setAddressFilter={(v) => { setAddressFilter(v); setCurrentPage(1); }}
+          setStatusFilter={(v) => { setStatusFilter(v); setCurrentPage(1); }}
           statusFilter={statusFilter}
           resetSort={resetSort}
           itemsPerPage={itemsPerPage}
@@ -205,7 +201,7 @@ export function Dashboard() {
             setCurrentPage(1);
           }}
           myRecordsOn={myRecordsOn}
-          setMyRecordsOn={setMyRecordsOn}
+          setMyRecordsOn={(v) => { setMyRecordsOn(v); setCurrentPage(1); }}
         />
 
         {/* Table + Pagination */}
