@@ -1,4 +1,8 @@
 node_modules
-dist
+.pnpm-store
+.pnpm
 .git
-*.md
+.gitignore
+.vscode
+dist
+build

@@ -39,3 +39,9 @@ coverage/
 
 # temp stuff
 .tanstack/tmp/
+
+# TanStack Router (auto-generated, do not edit)
+*.gen.ts
+
+# Audit log dummy for testing
+public/audit-log.json
