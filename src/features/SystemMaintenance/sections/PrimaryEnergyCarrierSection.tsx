@@ -189,13 +189,14 @@ export function PrimaryEnergyCarrierSection({
 
   return (
     <>
-      <Paper sx={{ mb: 3, overflow: "hidden" }}>
+      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
         <Box
           sx={{
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            borderBottom: "2px solid #e30613",
+            color: "#e30613",
+            borderBottom: "2px solid black",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("energyCarriers")}
@@ -206,7 +207,7 @@ export function PrimaryEnergyCarrierSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h3">
+            <Typography variant="h3" color="#e30613">
               Primäre Energieträger (
               {configStore.heat.primaryEnergyCarriers.length})
             </Typography>

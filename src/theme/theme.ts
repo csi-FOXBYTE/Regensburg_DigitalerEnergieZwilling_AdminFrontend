@@ -67,13 +67,13 @@ const theme = createTheme({
         },
         sizeMedium: {
           paddingLeft: "29px",
-          paddingRight: "20px",
+          paddingRight: "29px",
           paddingTop: "9px",
           paddingBottom: "9px",
         },
         sizeLarge: {
           paddingLeft: "29px",
-          paddingRight: "20px",
+          paddingRight: "29px",
           paddingTop: "9px",
           paddingBottom: "9px",
         },
@@ -81,6 +81,26 @@ const theme = createTheme({
           paddingLeft: "16px",
           paddingRight: "12px",
         },
+        outlined: {
+          "&:hover": {
+            backgroundColor: "transparent",
+            borderColor: "#8b2412",
+            color: "#8b2412",
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 0,
+          boxShadow: "0 0 8px 0 #0000001a",
+        },
+      },
+    },
+    MuiTab: {
+      defaultProps: {
+        disableRipple: true,
       },
     },
   },

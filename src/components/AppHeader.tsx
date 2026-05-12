@@ -39,7 +39,7 @@ export function AppHeader() {
         position: "sticky",
         top: 0,
         zIndex: 10,
-        boxShadow: "0px 1px 5px rgba(0,0,0,0.08)",
+        boxShadow: "0px 4px 10px 0px rgba(0, 0, 0, 0.12)",
       }}
     >
       {/* Top section — 123 px */}
@@ -52,7 +52,7 @@ export function AppHeader() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: "1px solid #191919",
+          borderBottom: "2px solid rgb(229, 229, 229)",
         }}
       >
         <Typography
@@ -97,6 +97,7 @@ export function AppHeader() {
                 color: "#757575",
                 textTransform: "none",
                 fontWeight: 400,
+                "&:hover": { backgroundColor: "transparent", color: "black" },
               }}
             >
               Abmelden
@@ -125,13 +126,14 @@ export function AppHeader() {
         <Tabs
           value={tabValue}
           onChange={(_, v) => navigate({ to: NAV_ITEMS[v]?.path })}
-          TabIndicatorProps={{ style: { display: "none" } }}
           sx={{
             height: 68,
             minHeight: 68,
             "& .MuiTabs-indicator": {
               backgroundColor: "error.main",
               height: 3,
+              left: 0,
+              right: "24px",
             },
             "& .MuiTab-root": {
               fontSize: 16,
@@ -141,9 +143,16 @@ export function AppHeader() {
               height: 68,
               minHeight: 68,
               paddingLeft: 0,
-              paddingRight: "24px",
+              paddingRight: 0,
+              transition: "color 0.2s",
+              "&:hover": {
+                color: "#e30613",
+              },
             },
             "& .MuiTab-root.Mui-selected": { color: "#e30613" },
+            "& .MuiTabs-flexContainer": {
+              gap: "24px",
+            },
           }}
         >
           {NAV_ITEMS.map((item) => (

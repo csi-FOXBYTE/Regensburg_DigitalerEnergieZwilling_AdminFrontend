@@ -433,13 +433,14 @@ export default function HeatingTypesSection({
 
   return (
     <>
-      <Paper sx={{ mb: 3, overflow: "hidden" }}>
+      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
         <Box
           sx={{
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            borderBottom: "2px solid #e30613",
+            color: "#e30613",
+            borderBottom: "2px solid black",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("heatingSystemTypes")}
@@ -450,7 +451,7 @@ export default function HeatingTypesSection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h3">
+            <Typography variant="h3" color="#e30613">
               Heizungserzeugerart ({configStore.heat.heatingSystemTypes.length})
             </Typography>
           </Box>
@@ -751,11 +752,15 @@ export default function HeatingTypesSection({
                                     openAddRowDialog(item.value, true)
                                   }
                                   sx={{
-                                    color: "text.secondary",
-                                    fontSize: "0.75rem",
+                                    "&:hover": {
+                                      backgroundColor: "transparent",
+                                    },
+                                    cursor: "pointer",
                                   }}
                                 >
-                                  Zeile hinzufügen
+                                  <Typography variant="body2">
+                                    Zeile hinzufügen
+                                  </Typography>
                                 </Button>
                               </Box>
                               <Typography
@@ -958,11 +963,15 @@ export default function HeatingTypesSection({
                                     openAddRowDialog(item.value, false)
                                   }
                                   sx={{
-                                    color: "text.secondary",
-                                    fontSize: "0.75rem",
+                                    "&:hover": {
+                                      backgroundColor: "transparent",
+                                    },
+                                    cursor: "pointer",
                                   }}
                                 >
-                                  Zeile hinzufügen
+                                  <Typography variant="body2">
+                                    Zeile hinzufügen
+                                  </Typography>
                                 </Button>
                               </Box>
 

@@ -20,10 +20,7 @@ import {
   BUILDING_TYPE_SELECTIONS,
   resolveLabel,
 } from "../../assets/labelResolver";
-import {
-  STATUS_COLORS,
-  statusConfig,
-} from "../../assets/types";
+import { STATUS_COLORS, statusConfig } from "../../assets/types";
 import { RecordsContext } from "../../components/RecordsContext";
 import BuildingMap from "./BuildingMap";
 
@@ -117,10 +114,17 @@ export default function DashboardPage() {
                   flexDirection: "column",
                   gap: 1.5,
                   p: 3,
+                  borderRadius: "0px",
                 }}
               >
                 <Typography variant="h4">{stat.title}</Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
                   <Box
                     sx={{
                       bgcolor: stat.bgColor,
@@ -180,6 +184,7 @@ export default function DashboardPage() {
                                   justifyContent: "space-between",
                                   alignItems: "flex-start",
                                   gap: 1,
+                                  mb: 1,
                                 }}
                               >
                                 <Typography variant="body1">
@@ -196,7 +201,10 @@ export default function DashboardPage() {
                             secondary={
                               <Box component="span">
                                 <Typography component="span" variant="body2">
-                                  {resolveLabel(BUILDING_TYPE_SELECTIONS, record.detInput?.general.type) ??
+                                  {resolveLabel(
+                                    BUILDING_TYPE_SELECTIONS,
+                                    record.detInput?.general.type,
+                                  ) ??
                                     record.detInput?.general.type ??
                                     "Unbekannt"}{" "}
                                   • Baujahr{" "}

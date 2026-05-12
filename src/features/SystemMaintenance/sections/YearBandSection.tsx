@@ -67,10 +67,17 @@ export function YearBandSection({
       ],
       onSave: (values) => {
         updateYearBand(index, (draft) => {
-          draft.from = values.from as number;
-          draft.to = values.to as number;
+          if (values.from !== undefined && values.from !== "") {
+            draft.from = values.from as number;
+          } else {
+            delete draft.from;
+          }
+          if (values.to !== undefined && values.to !== "") {
+            draft.to = values.to as number;
+          } else {
+            delete draft.to;
+          }
         });
-        toast.success("Jahresband aktualisiert");
       },
     });
   };
@@ -84,10 +91,9 @@ export function YearBandSection({
         { key: "to", label: "Bis Jahr", value: "", type: "number" },
       ],
       onSave: (values) => {
-        addYearBand({
-          from: values.from as number,
-          to: values.to as number,
-        });
+        const from = values.from !== "" ? (values.from as number) : undefined;
+        const to = values.to !== "" ? (values.to as number) : undefined;
+        addYearBand({ from, to });
         toast.success("Jahresband hinzugefügt");
       },
     });
@@ -95,20 +101,23 @@ export function YearBandSection({
 
   return (
     <>
-      <Paper sx={{ mb: 3, overflow: "hidden" }}>
+      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
         <Box
           sx={{
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            borderBottom: "2px solid #e30613",
+            color: "#e30613",
+            borderBottom: "2px solid black",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("yearBand")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.yearBand ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3">Jahresbänder</Typography>
+            <Typography variant="h3" color="#e30613">
+              Jahresbänder
+            </Typography>
           </Box>
           <Button
             variant="outlined"

@@ -20,20 +20,23 @@ export default function ComunityParameterSection({
   toggleSection: (section: string) => void;
 }) {
   return (
-    <Paper sx={{ overflow: "hidden", mb: 2 }}>
+    <Paper sx={{ overflow: "hidden", mb: 2, boxShadow: "none" }}>
       <Box
         sx={{
           p: 2,
           display: "flex",
           justifyContent: "space-between",
-          borderBottom: "2px solid #e30613",
+          color: "#e30613",
+          borderBottom: "2px solid black",
           cursor: "pointer",
         }}
         onClick={() => toggleSection("communityParams")}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {expandedSections.communityParams ? <ExpandMore /> : <ChevronRight />}
-          <Typography variant="h3">Kommunale Parameter</Typography>
+          <Typography variant="h3" color="#e30613">
+            Kommunale Parameter
+          </Typography>
         </Box>
       </Box>
 

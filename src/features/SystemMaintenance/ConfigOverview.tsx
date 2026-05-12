@@ -17,7 +17,11 @@ import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../../components/ConfirmDeleteDialog";
 import { EditDialog } from "../../components/EditDialog";
 import { SaveDialog } from "../../components/SaveDialog";
-import { config } from "../../hooks/store";
+import {
+  config,
+  type EnergyEfficiencyEntry,
+  type YearBandEntry,
+} from "../../hooks/store";
 import { EnergyEfficiencySection } from "./sections/EnergyEfficiencySection";
 import { GeneralParametersSection } from "./sections/GeneralParametersSection";
 import { YearBandSection } from "./sections/YearBandSection";
@@ -44,6 +48,34 @@ export interface NamedTypeItem {
   value?: string;
   key?: string;
   localization?: { de: string; en: string };
+}
+
+export type YearBandValidationError =
+  | "first_must_have_only_to"
+  | "last_must_have_only_from"
+  | "middle_must_have_both"
+  | "gap_between_bands"
+  | "overlap_between_bands"
+  | "single_must_be_empty";
+
+export interface YearBandValidationResult {
+  valid: boolean;
+  errors: { index: number; error: YearBandValidationError }[];
+}
+
+export type EnergyClassValidationError =
+  | "first_must_have_only_to"
+  | "last_must_have_only_from"
+  | "middle_must_have_both"
+  | "gap_between_bands"
+  | "overlap_between_bands"
+  | "single_must_be_empty"
+  | "missing_value"
+  | "missing_color";
+
+export interface EnergyClassValidationResult {
+  valid: boolean;
+  errors: { index: number; error: EnergyClassValidationError }[];
 }
 
 export function ConfigOverview() {
@@ -103,6 +135,149 @@ export function ConfigOverview() {
     configFiles[2]!.value,
   );
 
+  const validateYearBands = (
+    bands: YearBandEntry[],
+  ): YearBandValidationResult => {
+    const errors: { index: number; error: YearBandValidationError }[] = [];
+
+    if (bands.length === 0) return { valid: true, errors: [] };
+
+    if (bands.length === 1) {
+      if (bands[0]!.from !== undefined || bands[0]!.to !== undefined) {
+        errors.push({ index: 0, error: "single_must_be_empty" });
+      }
+      return { valid: errors.length === 0, errors };
+    }
+
+    bands.forEach((band, i) => {
+      const isFirst = i === 0;
+      const isLast = i === bands.length - 1;
+
+      if (isFirst) {
+        if (band.to === undefined || band.from !== undefined)
+          errors.push({ index: i, error: "first_must_have_only_to" });
+      } else if (isLast) {
+        if (band.from === undefined || band.to !== undefined)
+          errors.push({ index: i, error: "last_must_have_only_from" });
+      } else {
+        if (band.from === undefined || band.to === undefined)
+          errors.push({ index: i, error: "middle_must_have_both" });
+      }
+
+      // Check gap/overlap with previous band
+      if (i > 0) {
+        const prev = bands[i - 1];
+        const prevTo = prev!.to;
+        const currFrom = band.from;
+
+        if (prevTo !== undefined && currFrom !== undefined) {
+          if (currFrom > prevTo + 1)
+            errors.push({ index: i, error: "gap_between_bands" });
+          else if (currFrom <= prevTo)
+            errors.push({ index: i, error: "overlap_between_bands" });
+        }
+      }
+    });
+
+    return { valid: errors.length === 0, errors };
+  };
+
+  const yearBandErrorMessage = (error: YearBandValidationError): string => {
+    switch (error) {
+      case "first_must_have_only_to":
+        return "Erstes Band darf nur 'Bis' haben";
+      case "last_must_have_only_from":
+        return "Letztes Band darf nur 'Von' haben";
+      case "middle_must_have_both":
+        return "Mittleres Band braucht 'Von' und 'Bis'";
+      case "gap_between_bands":
+        return "Lücke zum vorherigen Band";
+      case "overlap_between_bands":
+        return "Überschneidung mit vorherigem Band";
+      case "single_must_be_empty":
+        return "Einzelnes Band darf keine Werte haben";
+    }
+  };
+
+  const validateEnergyClasses = (
+    bands: EnergyEfficiencyEntry[],
+  ): EnergyClassValidationResult => {
+    const errors: { index: number; error: EnergyClassValidationError }[] = [];
+
+    if (bands.length === 0) return { valid: true, errors: [] };
+
+    if (bands.length === 1) {
+      const b = bands[0]!;
+      if (b.from !== undefined || b.to !== undefined)
+        errors.push({ index: 0, error: "single_must_be_empty" });
+      if (!b.value) errors.push({ index: 0, error: "missing_value" });
+      if (!b.color) errors.push({ index: 0, error: "missing_color" });
+      return { valid: errors.length === 0, errors };
+    }
+
+    bands.forEach((band, i) => {
+      const isFirst = i === 0;
+      const isLast = i === bands.length - 1;
+
+      if (isFirst) {
+        if (band.to === undefined || band.from !== undefined)
+          errors.push({ index: i, error: "first_must_have_only_to" });
+      } else if (isLast) {
+        if (band.from === undefined || band.to !== undefined)
+          errors.push({ index: i, error: "last_must_have_only_from" });
+      } else {
+        if (band.from === undefined || band.to === undefined)
+          errors.push({ index: i, error: "middle_must_have_both" });
+      }
+
+      if (!band.value) errors.push({ index: i, error: "missing_value" });
+      if (!band.color) errors.push({ index: i, error: "missing_color" });
+
+      if (i > 0) {
+        const prevTo = bands[i - 1]!.to;
+        const currFrom = band.from;
+        if (prevTo !== undefined && currFrom !== undefined) {
+          if (currFrom > prevTo)
+            errors.push({ index: i, error: "gap_between_bands" });
+          else if (currFrom < prevTo)
+            errors.push({ index: i, error: "overlap_between_bands" });
+        }
+      }
+    });
+
+    return { valid: errors.length === 0, errors };
+  };
+
+  const energyClassErrorMessage = (
+    error: EnergyClassValidationError,
+  ): string => {
+    switch (error) {
+      case "first_must_have_only_to":
+        return "Erstes Band darf nur 'Bis' haben";
+      case "last_must_have_only_from":
+        return "Letztes Band darf nur 'Von' haben";
+      case "middle_must_have_both":
+        return "Mittleres Band braucht 'Von' und 'Bis'";
+      case "gap_between_bands":
+        return "Lücke zum vorherigen Band";
+      case "overlap_between_bands":
+        return "Überschneidung mit vorherigem Band";
+      case "single_must_be_empty":
+        return "Einzelnes Band darf keine Bereichswerte haben";
+      case "missing_value":
+        return "Klasse fehlt";
+      case "missing_color":
+        return "Farbe fehlt";
+    }
+  };
+
+  const yearBandValidation = validateYearBands(
+    configStore.general.generalYearBands as YearBandEntry[],
+  );
+  const energyClassValidation = validateEnergyClasses(
+    configStore.general.energyEfficiencyClasses as EnergyEfficiencyEntry[],
+  );
+  const canSave = yearBandValidation.valid && energyClassValidation.valid;
   return (
     <Box sx={{ width: "full" }}>
       <Box
@@ -269,7 +444,8 @@ export function ConfigOverview() {
           left: 0,
           right: 0,
           zIndex: 1200,
-          bgcolor: "#191919",
+          bgcolor: "white",
+          borderTop: "2px solid rgb(229, 229, 229)",
           py: 2.5,
         }}
       >
@@ -278,16 +454,36 @@ export function ConfigOverview() {
             maxWidth: 1170,
             mx: "auto",
             display: "flex",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => setSaveDialogOpen(true)}
-          >
-            Speichern
-          </Button>
+          {!canSave && (
+            <Typography color="error" variant="body2">
+              {[
+                ...(yearBandValidation.errors.length > 0
+                  ? [
+                      `Jahresbänder: ${yearBandValidation.errors.map((e) => yearBandErrorMessage(e.error)).join(", ")}`,
+                    ]
+                  : []),
+                ...(energyClassValidation.errors.length > 0
+                  ? [
+                      `Energieeffizienzklassen: ${energyClassValidation.errors.map((e) => energyClassErrorMessage(e.error)).join(", ")}`,
+                    ]
+                  : []),
+              ].join(" | ")}
+            </Typography>
+          )}
+          <Box sx={{ ml: "auto" }}>
+            <Button
+              variant="contained"
+              color="error"
+              disabled={!canSave}
+              onClick={() => setSaveDialogOpen(true)}
+            >
+              Speichern
+            </Button>
+          </Box>
         </Box>
       </Box>
 

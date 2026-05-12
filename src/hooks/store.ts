@@ -144,7 +144,7 @@ export const updateInternalGainsFactorByBuildingType = (
 
 export const addYearBand = (entry: YearBandEntry) => {
   updateConfig((draft) => {
-    (draft.general.generalYearBands as Array<YearBandEntry>).push(entry);
+    (draft.general.generalYearBands as YearBandEntry[]).push(entry);
   });
 };
 
@@ -656,9 +656,9 @@ export const deleteEnergyEfficiencyClass = (index: number) => {
 
 export const addEnergyEfficiencyClass = (entry: EnergyEfficiencyEntry) => {
   updateConfig((draft) => {
-    (
-      draft.general.energyEfficiencyClasses as Array<EnergyEfficiencyEntry>
-    ).push(entry);
+    (draft.general.energyEfficiencyClasses as EnergyEfficiencyEntry[]).push(
+      entry,
+    );
   });
 };
 

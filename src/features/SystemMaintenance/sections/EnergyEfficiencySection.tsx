@@ -54,93 +54,139 @@ export function EnergyEfficiencySection({
   };
 
   const handleEditEnergyClass = (index: number) => {
-    const item = configStore.general.energyEfficiencyClasses[index];
+    const bands = configStore.general
+      .energyEfficiencyClasses as EnergyEfficiencyEntry[];
+    const item = bands[index];
+    if (!item) return;
+    const isFirst = index === 0 && bands.length > 1;
+    const isLast = index === bands.length - 1 && bands.length > 1;
+
     setEditState({
       open: true,
       title: "Energieeffizienzklasse bearbeiten",
       fields: [
-        {
-          key: "from",
-          label: "Von (kWh/m²a)",
-          value: item.from ?? "",
-          type: "number",
-        },
-        {
-          key: "to",
-          label: "Bis (kWh/m²a)",
-          value: item.to ?? "",
-          type: "number",
-        },
+        ...(!isFirst
+          ? [
+              {
+                key: "from",
+                label: "Von (kWh/m²a)",
+                value: item.from ?? "",
+                type: "number" as const,
+              },
+            ]
+          : []),
+        ...(!isLast
+          ? [
+              {
+                key: "to",
+                label: "Bis (kWh/m²a)",
+                value: item.to ?? "",
+                type: "number" as const,
+              },
+            ]
+          : []),
         {
           key: "value",
           label: "Klasse",
-          value: item.value as EnergyEfficiencyClass,
-          type: "text",
+          value: item.value ?? "",
+          type: "text" as const,
           required: true,
         },
         {
           key: "color",
           label: "Farbe",
-          value: (item as EnergyEfficiencyEntry).color ?? "#6b7280",
-          type: "color",
+          value: item.color ?? "#6b7280",
+          type: "color" as const,
           required: true,
         },
       ],
       onSave: (values) => {
         updateEnergyEfficiencyClass(index, (draft) => {
-          draft.from = values.from as number;
-          draft.to = values.to as number;
-          draft.value = values.value as EnergyEfficiencyClass;
-          draft.color = values.color as "color";
+          if (values.from === "") {
+            delete draft.from;
+          } else if (values.from !== undefined) {
+            draft.from = values.from as number;
+          }
+          if (values.to === "") {
+            delete draft.to;
+          } else if (values.to !== undefined) {
+            draft.to = values.to as number;
+          }
+          if (values.value) draft.value = values.value as EnergyEfficiencyClass;
+          if (values.color) draft.color = values.color as string;
         });
-        toast.success("Energieeffizienzklasse aktualisiert");
       },
     });
   };
 
   const handleAddEnergyEfficiencyClass = () => {
+    const bands = configStore.general
+      .energyEfficiencyClasses as EnergyEfficiencyEntry[];
+    const isEmpty = bands.length === 0;
+
     setEditState({
       open: true,
       title: "Neue Energieeffizienzklasse hinzufügen",
       fields: [
-        { key: "from", label: "Von (kWh/m²a)", value: "", type: "number" },
-        { key: "to", label: "Bis (kWh/m²a)", value: "", type: "number" },
+        ...(!isEmpty
+          ? [
+              {
+                key: "from",
+                label: "Von (kWh/m²a) — leer = neuer Anfang",
+                value: "",
+                type: "number" as const,
+              },
+            ]
+          : []),
+        ...(!isEmpty
+          ? [
+              {
+                key: "to",
+                label: "Bis (kWh/m²a) — leer = neues Ende",
+                value: "",
+                type: "number" as const,
+              },
+            ]
+          : []),
         {
           key: "value",
           label: "Klasse",
           value: "",
-          type: "text",
+          type: "text" as const,
           required: true,
         },
         {
           key: "color",
           label: "Farbe",
           value: "#22c55e",
-          type: "color",
+          type: "color" as const,
           required: true,
         },
       ],
       onSave: (values) => {
+        const from = values.from !== "" ? (values.from as number) : undefined;
+        const to = values.to !== "" ? (values.to as number) : undefined;
+
         addEnergyEfficiencyClass({
-          from: values.from as number,
-          to: values.to as number,
+          from,
+          to,
           value: values.value as EnergyEfficiencyClass,
-          color: values.color as "color",
+          color: values.color as string,
         });
-        toast.success("Energieeffizienzklasse hinzugefügt");
       },
     });
   };
 
   return (
     <>
-      <Paper sx={{ mb: 3, overflow: "hidden" }}>
+      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
         <Box
           sx={{
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            borderBottom: "2px solid #e30613",
+            color: "#e30613",
+            borderBottom: "2px solid black",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("energyEfficiency")}
@@ -151,7 +197,9 @@ export function EnergyEfficiencySection({
             ) : (
               <ChevronRight />
             )}
-            <Typography variant="h3">Energieeffizienzklassen</Typography>
+            <Typography variant="h3" color="#e30613">
+              Energieeffizienzklassen
+            </Typography>
           </Box>
           <Button
             variant="outlined"

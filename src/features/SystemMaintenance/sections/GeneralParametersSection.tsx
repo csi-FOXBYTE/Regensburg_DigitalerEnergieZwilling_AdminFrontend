@@ -112,20 +112,23 @@ export function GeneralParametersSection({
 
   return (
     <>
-      <Paper sx={{ mb: 3, overflow: "hidden" }}>
+      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
         <Box
           sx={{
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            borderBottom: "2px solid #e30613",
+            color: "#e30613",
+            borderBottom: "2px solid black",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("generalParams")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.generalParams ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3">Allgemeine Parameter</Typography>
+            <Typography variant="h3" color="#e30613">
+              Allgemeine Parameter
+            </Typography>
           </Box>
         </Box>
 

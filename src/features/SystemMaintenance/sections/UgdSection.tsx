@@ -47,16 +47,17 @@ export default function UgdSection({
             p: 2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            bgcolor: " white",
-            borderBottom: "2px solid #e30613",
+            color: "#e30613",
+            borderBottom: "2px solid black",
             cursor: "pointer",
           }}
           onClick={() => toggleSection("bottomFloor")}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {expandedSections.bottomFloor ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3">Unterste Geschossdecke</Typography>
+            <Typography variant="h3" color="#e30613">
+              Unterste Geschossdecke
+            </Typography>
           </Box>
         </Box>
         <Collapse in={expandedSections.bottomFloor}>

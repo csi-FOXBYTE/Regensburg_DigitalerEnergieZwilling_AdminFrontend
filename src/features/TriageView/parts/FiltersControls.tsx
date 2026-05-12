@@ -47,13 +47,38 @@ export function FiltersControls({
     setAddressFilter(debouncedAddressFilter);
   }, [debouncedAddressFilter, setAddressFilter]);
 
+  const sharedTextFieldSx = {
+    "& .MuiOutlinedInput-root": {
+      borderRadius: 2,
+      "& input": {
+        py: 1,
+        px: 1,
+      },
+      "& .MuiSelect-select": {
+        py: 1,
+        px: 1.5,
+      },
+      "& fieldset": {
+        borderColor: "divider",
+        transition: "border-color 0.2s",
+      },
+      "&:hover fieldset": {
+        borderColor: "#e30613",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#e30613",
+        borderWidth: "1.5px",
+      },
+    },
+  } as const;
+
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{ p: 2, boxShadow: "0 0 8px 0 #0000001a" }}>
       <Box>
         <Box sx={{ mb: 2 }}>
           <Typography variant="h3">Filter und Suche</Typography>
         </Box>
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Tooltip title="Aktualisieren">
             <IconButton onClick={refreshData} size="small">
               <RefreshIcon />
@@ -79,7 +104,11 @@ export function FiltersControls({
                 ),
               },
             }}
-            sx={{ flex: 1, maxWidth: 600, mt: 0.75 }}
+            sx={{
+              flex: 1,
+              maxWidth: 450,
+              ...sharedTextFieldSx,
+            }}
           />
 
           <TextField
@@ -87,7 +116,10 @@ export function FiltersControls({
             select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as string)}
-            sx={{ minWidth: 140, mt: 0.7 }}
+            sx={{
+              minWidth: 140,
+              ...sharedTextFieldSx,
+            }}
           >
             <MenuItem value="all">Alle Status</MenuItem>
             <MenuItem value="NEU">Neu</MenuItem>
@@ -96,20 +128,24 @@ export function FiltersControls({
             <MenuItem value="ABGELEHNT">Abgelehnt</MenuItem>
           </TextField>
 
-          <TextField
-            size="small"
-            select
-            label="Einträge"
-            value={itemsPerPage}
-            onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            sx={{ minWidth: 90, mt: 0.7 }}
-          >
-            {PAGE_SIZE_OPTIONS.map((n) => (
-              <MenuItem key={n} value={n}>
-                {n}
-              </MenuItem>
-            ))}
-          </TextField>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
+              Einträge pro Seite:
+            </Typography>
+            <TextField
+              size="small"
+              select
+              value={itemsPerPage}
+              onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              sx={{ minWidth: 90, ...sharedTextFieldSx }}
+            >
+              {PAGE_SIZE_OPTIONS.map((n) => (
+                <MenuItem key={n} value={n}>
+                  {n}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
 
           <FormControlLabel
             control={
@@ -117,6 +153,10 @@ export function FiltersControls({
                 checked={myRecordsOn}
                 onChange={(e) => setMyRecordsOn(e.target.checked)}
                 size="small"
+                sx={{
+                  color: "text.disabled",
+                  "&.Mui-checked": { color: "#e30613" },
+                }}
               />
             }
             label="Nur meine"
