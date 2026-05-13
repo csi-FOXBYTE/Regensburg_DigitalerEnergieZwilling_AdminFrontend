@@ -701,9 +701,9 @@ export const deleteEnergyEfficiencyClass = (index: number) => {
 
 export const addEnergyEfficiencyClass = (entry: EnergyEfficiencyEntry) => {
   updateConfig((draft) => {
-    (draft.general.energyEfficiencyClasses as EnergyEfficiencyEntry[]).push(
-      entry,
-    );
+    const classes = draft.general.energyEfficiencyClasses as EnergyEfficiencyEntry[];
+    classes.push(entry);
+    classes.sort((a, b) => (a.to ?? Infinity) - (b.to ?? Infinity));
   });
 };
 

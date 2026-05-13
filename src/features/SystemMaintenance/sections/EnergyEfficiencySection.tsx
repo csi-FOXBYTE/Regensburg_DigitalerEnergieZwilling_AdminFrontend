@@ -46,33 +46,23 @@ export function EnergyEfficiencySection({
       .energyEfficiencyClasses as EnergyEfficiencyEntry[];
     const item = bands[index];
     if (!item) return;
-    const isFirst = index === 0 && bands.length > 1;
-    const isLast = index === bands.length - 1 && bands.length > 1;
 
     setEditState({
       open: true,
       title: "Energieeffizienzklasse bearbeiten",
       fields: [
-        ...(!isFirst
-          ? [
-              {
-                key: "from",
-                label: "Von (kWh/m²a)",
-                value: item.from ?? "",
-                type: "number" as const,
-              },
-            ]
-          : []),
-        ...(!isLast
-          ? [
-              {
-                key: "to",
-                label: "Bis (kWh/m²a)",
-                value: item.to ?? "",
-                type: "number" as const,
-              },
-            ]
-          : []),
+        {
+          key: "from",
+          label: "Von (kWh/m²a)",
+          value: item.from ?? "",
+          type: "number" as const,
+        },
+        {
+          key: "to",
+          label: "Bis (kWh/m²a)",
+          value: item.to ?? "",
+          type: "number" as const,
+        },
         {
           key: "value",
           label: "Klasse",
