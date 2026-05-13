@@ -23,7 +23,7 @@ interface EditDialogProps {
     options?: Array<{ label: string; value: string }>;
   }>;
   onClose: () => void;
-  onSave: (values: Record<string, string | number>) => void;
+  onSave: (strings: Record<string, string>, numbers: Record<string, number>) => void;
 }
 
 export function EditDialog({
@@ -59,7 +59,17 @@ export function EditDialog({
 
   const handleSave = () => {
     if (validate()) {
-      onSave(values);
+      const strings: Record<string, string> = {};
+      const numbers: Record<string, number> = {};
+      fields.forEach((field) => {
+        if (field.type === "number") {
+          const v = values[field.key];
+          if (v !== "" && v !== undefined) numbers[field.key] = v as number;
+        } else {
+          strings[field.key] = (values[field.key] ?? "") as string;
+        }
+      });
+      onSave(strings, numbers);
       onClose();
     }
   };

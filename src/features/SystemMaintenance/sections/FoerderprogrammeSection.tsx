@@ -11,18 +11,11 @@ import {
   toolbarPlugin,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
-import {
-  ChevronRight,
-  Delete,
-  Edit,
-  ExpandMore,
-  OpenInNew,
-} from "@mui/icons-material";
+import { Delete, Edit, OpenInNew } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
-  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -32,7 +25,6 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  Paper,
   Select,
   Switch,
   Table,
@@ -56,6 +48,7 @@ import {
   updateFoerderprogramm,
 } from "../../../hooks/store";
 import type { DeleteConfirmState } from "../ConfigOverview";
+import { CollapsibleSection } from "../CollapsibleSection";
 
 const EMPTY_FORM: Omit<Foerderprogramm, "id"> = {
   name: "",
@@ -305,28 +298,12 @@ export default function FoerderprogrammeSection({
 
   return (
     <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
-          }}
-          onClick={() => toggleSection("foerderprogramme")}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.foerderprogramme ? (
-              <ExpandMore />
-            ) : (
-              <ChevronRight />
-            )}
-            <Typography variant="h3" color="#e30613">
-              Förderprogramme ({programs.length})
-            </Typography>
-          </Box>
+      <CollapsibleSection
+        sectionKey="foerderprogramme"
+        title={`Förderprogramme (${programs.length})`}
+        expandedSections={expandedSections}
+        toggleSection={toggleSection}
+        action={
           <Button
             variant="outlined"
             color="error"
@@ -337,9 +314,8 @@ export default function FoerderprogrammeSection({
           >
             Neues Programm +
           </Button>
-        </Box>
-
-        <Collapse in={expandedSections.foerderprogramme}>
+        }
+      >
           {programs.length === 0 ? (
             <Box sx={{ p: 3, textAlign: "center", color: "text.secondary" }}>
               <Typography variant="body1">
@@ -430,8 +406,7 @@ export default function FoerderprogrammeSection({
               </Table>
             </TableContainer>
           )}
-        </Collapse>
-      </Paper>
+      </CollapsibleSection>
 
       <FoerderprogrammDialog
         key={dialogOpen ? (editing?.id ?? "new") : "closed"}

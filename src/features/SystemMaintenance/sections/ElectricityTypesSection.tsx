@@ -5,7 +5,6 @@ import {
   Collapse,
   IconButton,
   MenuItem,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -17,8 +16,7 @@ import {
 } from "@mui/material";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
-import { EditDialog } from "../../../components/EditDialog";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   addElectricityType,
   config,
@@ -39,17 +37,13 @@ const gridSx = {
 
 export default function ElectricityTypesSection({
   configStore,
-  editState,
   setEditState,
-  deleteConfirm,
   setDeleteConfirm,
   expandedSections,
   toggleSection,
 }: {
   configStore: ReturnType<typeof config.get>;
-  editState: EditState;
   setEditState: React.Dispatch<React.SetStateAction<EditState>>;
-  deleteConfirm: DeleteConfirmState;
   setDeleteConfirm: React.Dispatch<React.SetStateAction<DeleteConfirmState>>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
@@ -60,11 +54,6 @@ export default function ElectricityTypesSection({
 
   const handleDeleteConfirm = (onConfirm: () => void) =>
     setDeleteConfirm({ open: true, onConfirm });
-
-  const handleConfirmDelete = () => {
-    deleteConfirm.onConfirm();
-    setDeleteConfirm({ open: false, onConfirm: () => {} });
-  };
 
   const toggleType = (index: number) =>
     setExpandedTypes((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -89,10 +78,10 @@ export default function ElectricityTypesSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         addElectricityType({
-          value: String(values.value),
-          localization: { de: String(values.de), en: String(values.de) },
+          value: strings.value ?? "",
+          localization: { de: strings.de ?? "", en: strings.de ?? "" },
         });
         toast.success("Stromtyp hinzugefügt");
       },
@@ -122,9 +111,10 @@ export default function ElectricityTypesSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         const oldKey = item.value;
-        const newKey = String(values.value).trim();
+        const newKey = (strings.value ?? "").trim();
+        const newDe = strings.de ?? "";
         if (newKey !== oldKey) {
           updateConfig((draft) => {
             const type = draft.heat.electricityTypes.find(
@@ -132,8 +122,8 @@ export default function ElectricityTypesSection({
             );
             if (type) {
               type.value = newKey;
-              type.localization.de = String(values.de);
-              type.localization.en = String(values.de);
+              type.localization.de = newDe;
+              type.localization.en = newDe;
             }
             const data = draft.heat.electricityTypeData.find(
               (d) => d.key === oldKey,
@@ -145,8 +135,8 @@ export default function ElectricityTypesSection({
           });
         } else {
           updateElectricityType(index, (draft) => {
-            draft.localization.de = String(values.de);
-            draft.localization.en = String(values.de);
+            draft.localization.de = newDe;
+            draft.localization.en = newDe;
           });
         }
         toast.success("Stromtyp aktualisiert");
@@ -155,42 +145,24 @@ export default function ElectricityTypesSection({
   };
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
+    <CollapsibleSection
+      sectionKey="electricityTypes"
+      title={`Stromtypen (${configStore.heat.electricityTypes.length})`}
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+      action={
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddElectricityType();
           }}
-          onClick={() => toggleSection("electricityTypes")}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.electricityTypes ? (
-              <ExpandMore />
-            ) : (
-              <ChevronRight />
-            )}
-            <Typography variant="h3" color="#e30613">
-              Stromtypen ({configStore.heat.electricityTypes.length})
-            </Typography>
-          </Box>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddElectricityType();
-            }}
-          >
-            Neuer Stromtyp +
-          </Button>
-        </Box>
-
-        <Collapse in={expandedSections.electricityTypes}>
+          Neuer Stromtyp +
+        </Button>
+      }
+    >
           <Box sx={{ px: 2, pt: 2, pb: 1 }}>
             <Box sx={{ ...gridSx, mb: 1 }}>
               <Typography variant="body1">Standard-Stromtyp</Typography>
@@ -363,22 +335,6 @@ export default function ElectricityTypesSection({
               </TableBody>
             </Table>
           </TableContainer>
-        </Collapse>
-      </Paper>
-
-      <EditDialog
-        key={String(editState.open)}
-        open={editState.open}
-        title={editState.title}
-        fields={editState.fields}
-        onClose={() => setEditState((s) => ({ ...s, open: false }))}
-        onSave={editState.onSave}
-      />
-      <ConfirmDeleteDialog
-        open={deleteConfirm.open}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
-      />
-    </>
+    </CollapsibleSection>
   );
 }

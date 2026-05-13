@@ -12,7 +12,7 @@ import UgdSection from "@/features/SystemMaintenance/sections/UgdSection";
 import WindowSection from "@/features/SystemMaintenance/sections/WindowSection";
 import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { useStore } from "@nanostores/react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../../components/ConfirmDeleteDialog";
 import { EditDialog } from "../../components/EditDialog";
@@ -36,7 +36,7 @@ export interface EditState {
     type?: "text" | "number" | "string" | "color" | "select";
     required?: boolean;
   }>;
-  onSave: (values: Record<string, string | number>) => void;
+  onSave: (strings: Record<string, string>, numbers: Record<string, number>) => void;
 }
 
 export interface DeleteConfirmState {
@@ -50,32 +50,104 @@ export interface NamedTypeItem {
   localization?: { de: string; en: string };
 }
 
-export type YearBandValidationError =
-  | "first_must_have_only_to"
-  | "last_must_have_only_from"
-  | "middle_must_have_both"
-  | "gap_between_bands"
-  | "overlap_between_bands"
-  | "single_must_be_empty";
-
-export interface YearBandValidationResult {
+export interface BandValidationResult {
   valid: boolean;
-  errors: { index: number; error: YearBandValidationError }[];
+  errors: { index: number; error: string }[];
 }
 
-export type EnergyClassValidationError =
-  | "first_must_have_only_to"
-  | "last_must_have_only_from"
-  | "middle_must_have_both"
-  | "gap_between_bands"
-  | "overlap_between_bands"
-  | "single_must_be_empty"
-  | "missing_value"
-  | "missing_color";
+const YEAR_BAND_ERRORS: Record<string, string> = {
+  first_must_have_only_to: "Erstes Band darf nur 'Bis' haben",
+  middle_must_have_both: "Mittleres Band braucht 'Von' und 'Bis'",
+  last_must_have_only_from: "Letztes Band darf nur 'Von' haben",
+  gap_between_bands: "Lücke zum vorherigen Band",
+  overlap_between_bands: "Überschneidung mit vorherigem Band",
+  single_must_be_empty: "Einzelnes Band darf keine Werte haben",
+};
 
-export interface EnergyClassValidationResult {
-  valid: boolean;
-  errors: { index: number; error: EnergyClassValidationError }[];
+const ENERGY_BAND_ERRORS: Record<string, string> = {
+  ...YEAR_BAND_ERRORS,
+  single_must_be_empty: "Einzelnes Band darf keine Bereichswerte haben",
+  missing_value: "Klasse fehlt",
+  missing_color: "Farbe fehlt",
+};
+
+function validateYearBands(bands: YearBandEntry[]): BandValidationResult {
+  const errors: { index: number; error: string }[] = [];
+  if (bands.length === 0) return { valid: true, errors: [] };
+  if (bands.length === 1) {
+    if (bands[0]!.from !== undefined || bands[0]!.to !== undefined)
+      errors.push({ index: 0, error: YEAR_BAND_ERRORS["single_must_be_empty"]! });
+    return { valid: errors.length === 0, errors };
+  }
+  bands.forEach((band, i) => {
+    const isFirst = i === 0;
+    const isLast = i === bands.length - 1;
+    if (isFirst) {
+      if (band.to === undefined || band.from !== undefined)
+        errors.push({ index: i, error: YEAR_BAND_ERRORS["first_must_have_only_to"]! });
+    } else if (isLast) {
+      if (band.from === undefined || band.to !== undefined)
+        errors.push({ index: i, error: YEAR_BAND_ERRORS["last_must_have_only_from"]! });
+    } else {
+      if (band.from === undefined || band.to === undefined)
+        errors.push({ index: i, error: YEAR_BAND_ERRORS["middle_must_have_both"]! });
+    }
+    if (i > 0) {
+      const prevTo = bands[i - 1]!.to;
+      const currFrom = band.from;
+      if (prevTo !== undefined && currFrom !== undefined) {
+        if (currFrom > prevTo + 1)
+          errors.push({ index: i, error: YEAR_BAND_ERRORS["gap_between_bands"]! });
+        else if (currFrom <= prevTo)
+          errors.push({ index: i, error: YEAR_BAND_ERRORS["overlap_between_bands"]! });
+      }
+    }
+  });
+  return { valid: errors.length === 0, errors };
+}
+
+function validateEnergyClasses(bands: EnergyEfficiencyEntry[]): BandValidationResult {
+  const errors: { index: number; error: string }[] = [];
+  if (bands.length === 0) return { valid: true, errors: [] };
+  if (bands.length === 1) {
+    const b = bands[0]!;
+    if (b.from !== undefined || b.to !== undefined)
+      errors.push({ index: 0, error: ENERGY_BAND_ERRORS["single_must_be_empty"]! });
+    if (!b.value)
+      errors.push({ index: 0, error: ENERGY_BAND_ERRORS["missing_value"]! });
+    if (!b.color)
+      errors.push({ index: 0, error: ENERGY_BAND_ERRORS["missing_color"]! });
+    return { valid: errors.length === 0, errors };
+  }
+  bands.forEach((band, i) => {
+    const isFirst = i === 0;
+    const isLast = i === bands.length - 1;
+    if (isFirst) {
+      if (band.to === undefined || band.from !== undefined)
+        errors.push({ index: i, error: ENERGY_BAND_ERRORS["first_must_have_only_to"]! });
+    } else if (isLast) {
+      if (band.from === undefined || band.to !== undefined)
+        errors.push({ index: i, error: ENERGY_BAND_ERRORS["last_must_have_only_from"]! });
+    } else {
+      if (band.from === undefined || band.to === undefined)
+        errors.push({ index: i, error: ENERGY_BAND_ERRORS["middle_must_have_both"]! });
+    }
+    if (!band.value)
+      errors.push({ index: i, error: ENERGY_BAND_ERRORS["missing_value"]! });
+    if (!band.color)
+      errors.push({ index: i, error: ENERGY_BAND_ERRORS["missing_color"]! });
+    if (i > 0) {
+      const prevTo = bands[i - 1]!.to;
+      const currFrom = band.from;
+      if (prevTo !== undefined && currFrom !== undefined) {
+        if (currFrom > prevTo)
+          errors.push({ index: i, error: ENERGY_BAND_ERRORS["gap_between_bands"]! });
+        else if (currFrom < prevTo)
+          errors.push({ index: i, error: ENERGY_BAND_ERRORS["overlap_between_bands"]! });
+      }
+    }
+  });
+  return { valid: errors.length === 0, errors };
 }
 
 export function ConfigOverview() {
@@ -101,12 +173,12 @@ export function ConfigOverview() {
     setDeleteConfirm({ open: false, onConfirm: () => {} });
   };
 
-  const toggleSection = (section: string) => {
+  const toggleSection = useCallback((section: string) => {
     setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
-  };
+  }, []);
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
@@ -135,147 +207,13 @@ export function ConfigOverview() {
     configFiles[2]!.value,
   );
 
-  const validateYearBands = (
-    bands: YearBandEntry[],
-  ): YearBandValidationResult => {
-    const errors: { index: number; error: YearBandValidationError }[] = [];
-
-    if (bands.length === 0) return { valid: true, errors: [] };
-
-    if (bands.length === 1) {
-      if (bands[0]!.from !== undefined || bands[0]!.to !== undefined) {
-        errors.push({ index: 0, error: "single_must_be_empty" });
-      }
-      return { valid: errors.length === 0, errors };
-    }
-
-    bands.forEach((band, i) => {
-      const isFirst = i === 0;
-      const isLast = i === bands.length - 1;
-
-      if (isFirst) {
-        if (band.to === undefined || band.from !== undefined)
-          errors.push({ index: i, error: "first_must_have_only_to" });
-      } else if (isLast) {
-        if (band.from === undefined || band.to !== undefined)
-          errors.push({ index: i, error: "last_must_have_only_from" });
-      } else {
-        if (band.from === undefined || band.to === undefined)
-          errors.push({ index: i, error: "middle_must_have_both" });
-      }
-
-      // Check gap/overlap with previous band
-      if (i > 0) {
-        const prev = bands[i - 1];
-        const prevTo = prev!.to;
-        const currFrom = band.from;
-
-        if (prevTo !== undefined && currFrom !== undefined) {
-          if (currFrom > prevTo + 1)
-            errors.push({ index: i, error: "gap_between_bands" });
-          else if (currFrom <= prevTo)
-            errors.push({ index: i, error: "overlap_between_bands" });
-        }
-      }
-    });
-
-    return { valid: errors.length === 0, errors };
-  };
-
-  const yearBandErrorMessage = (error: YearBandValidationError): string => {
-    switch (error) {
-      case "first_must_have_only_to":
-        return "Erstes Band darf nur 'Bis' haben";
-      case "last_must_have_only_from":
-        return "Letztes Band darf nur 'Von' haben";
-      case "middle_must_have_both":
-        return "Mittleres Band braucht 'Von' und 'Bis'";
-      case "gap_between_bands":
-        return "Lücke zum vorherigen Band";
-      case "overlap_between_bands":
-        return "Überschneidung mit vorherigem Band";
-      case "single_must_be_empty":
-        return "Einzelnes Band darf keine Werte haben";
-    }
-  };
-
-  const validateEnergyClasses = (
-    bands: EnergyEfficiencyEntry[],
-  ): EnergyClassValidationResult => {
-    const errors: { index: number; error: EnergyClassValidationError }[] = [];
-
-    if (bands.length === 0) return { valid: true, errors: [] };
-
-    if (bands.length === 1) {
-      const b = bands[0]!;
-      if (b.from !== undefined || b.to !== undefined)
-        errors.push({ index: 0, error: "single_must_be_empty" });
-      if (!b.value) errors.push({ index: 0, error: "missing_value" });
-      if (!b.color) errors.push({ index: 0, error: "missing_color" });
-      return { valid: errors.length === 0, errors };
-    }
-
-    bands.forEach((band, i) => {
-      const isFirst = i === 0;
-      const isLast = i === bands.length - 1;
-
-      if (isFirst) {
-        if (band.to === undefined || band.from !== undefined)
-          errors.push({ index: i, error: "first_must_have_only_to" });
-      } else if (isLast) {
-        if (band.from === undefined || band.to !== undefined)
-          errors.push({ index: i, error: "last_must_have_only_from" });
-      } else {
-        if (band.from === undefined || band.to === undefined)
-          errors.push({ index: i, error: "middle_must_have_both" });
-      }
-
-      if (!band.value) errors.push({ index: i, error: "missing_value" });
-      if (!band.color) errors.push({ index: i, error: "missing_color" });
-
-      if (i > 0) {
-        const prevTo = bands[i - 1]!.to;
-        const currFrom = band.from;
-        if (prevTo !== undefined && currFrom !== undefined) {
-          if (currFrom > prevTo)
-            errors.push({ index: i, error: "gap_between_bands" });
-          else if (currFrom < prevTo)
-            errors.push({ index: i, error: "overlap_between_bands" });
-        }
-      }
-    });
-
-    return { valid: errors.length === 0, errors };
-  };
-
-  const energyClassErrorMessage = (
-    error: EnergyClassValidationError,
-  ): string => {
-    switch (error) {
-      case "first_must_have_only_to":
-        return "Erstes Band darf nur 'Bis' haben";
-      case "last_must_have_only_from":
-        return "Letztes Band darf nur 'Von' haben";
-      case "middle_must_have_both":
-        return "Mittleres Band braucht 'Von' und 'Bis'";
-      case "gap_between_bands":
-        return "Lücke zum vorherigen Band";
-      case "overlap_between_bands":
-        return "Überschneidung mit vorherigem Band";
-      case "single_must_be_empty":
-        return "Einzelnes Band darf keine Bereichswerte haben";
-      case "missing_value":
-        return "Klasse fehlt";
-      case "missing_color":
-        return "Farbe fehlt";
-    }
-  };
-
-  const yearBandValidation = validateYearBands(
-    configStore.general.generalYearBands as YearBandEntry[],
+  const yearBandValidation = useMemo(
+    () => validateYearBands(configStore.general.generalYearBands as YearBandEntry[]),
+    [configStore.general.generalYearBands],
   );
-  const energyClassValidation = validateEnergyClasses(
-    configStore.general.energyEfficiencyClasses as EnergyEfficiencyEntry[],
+  const energyClassValidation = useMemo(
+    () => validateEnergyClasses(configStore.general.energyEfficiencyClasses as EnergyEfficiencyEntry[]),
+    [configStore.general.energyEfficiencyClasses],
   );
   const canSave = yearBandValidation.valid && energyClassValidation.valid;
   return (
@@ -334,9 +272,7 @@ export function ConfigOverview() {
         >
           <GeneralParametersSection
             configStore={configStore}
-            editState={editState}
             setEditState={setEditState}
-            deleteConfirm={deleteConfirm}
             setDeleteConfirm={setDeleteConfirm}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
@@ -348,36 +284,28 @@ export function ConfigOverview() {
           />
           <YearBandSection
             configStore={configStore}
-            editState={editState}
             setEditState={setEditState}
-            deleteConfirm={deleteConfirm}
             setDeleteConfirm={setDeleteConfirm}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
           />
           <PrimaryEnergyCarrierSection
             configStore={configStore}
-            editState={editState}
             setEditState={setEditState}
-            deleteConfirm={deleteConfirm}
             setDeleteConfirm={setDeleteConfirm}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
           />
           <ElectricityTypesSection
             configStore={configStore}
-            editState={editState}
             setEditState={setEditState}
-            deleteConfirm={deleteConfirm}
             setDeleteConfirm={setDeleteConfirm}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
           />
           <HeatingTypesSection
             configStore={configStore}
-            editState={editState}
             setEditState={setEditState}
-            deleteConfirm={deleteConfirm}
             setDeleteConfirm={setDeleteConfirm}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
@@ -391,9 +319,7 @@ export function ConfigOverview() {
           />
           <EnergyEfficiencySection
             configStore={configStore}
-            editState={editState}
             setEditState={setEditState}
-            deleteConfirm={deleteConfirm}
             setDeleteConfirm={setDeleteConfirm}
             expandedSections={expandedSections}
             toggleSection={toggleSection}
@@ -463,12 +389,12 @@ export function ConfigOverview() {
               {[
                 ...(yearBandValidation.errors.length > 0
                   ? [
-                      `Jahresbänder: ${yearBandValidation.errors.map((e) => yearBandErrorMessage(e.error)).join(", ")}`,
+                      `Jahresbänder: ${yearBandValidation.errors.map((e) => e.error).join(", ")}`,
                     ]
                   : []),
                 ...(energyClassValidation.errors.length > 0
                   ? [
-                      `Energieeffizienzklassen: ${energyClassValidation.errors.map((e) => energyClassErrorMessage(e.error)).join(", ")}`,
+                      `Energieeffizienzklassen: ${energyClassValidation.errors.map((e) => e.error).join(", ")}`,
                     ]
                   : []),
               ].join(" | ")}

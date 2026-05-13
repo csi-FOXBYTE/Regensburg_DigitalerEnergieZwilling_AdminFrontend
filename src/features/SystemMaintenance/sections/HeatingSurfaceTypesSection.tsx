@@ -1,11 +1,9 @@
-import { ChevronRight, Delete, Edit, ExpandMore } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Collapse,
   IconButton,
   MenuItem,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -26,6 +24,7 @@ import {
   updateSimpleValue,
 } from "../../../hooks/store";
 import type { DeleteConfirmState, EditState } from "../ConfigOverview";
+import { CollapsibleSection } from "../CollapsibleSection";
 
 export default function HeatingSurfaceTypesSection({
   configStore,
@@ -64,10 +63,10 @@ export default function HeatingSurfaceTypesSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         addHeatingSurfaceType({
-          value: String(values.value),
-          localization: { de: String(values.de), en: String(values.de) },
+          value: strings.value ?? "",
+          localization: { de: strings.de ?? "", en: strings.de ?? "" },
         });
         toast.success("Heizflächentyp hinzugefügt");
       },
@@ -96,10 +95,10 @@ export default function HeatingSurfaceTypesSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         const oldKey = item.value;
-        const newKey = String(values.value).trim();
-        const newDe = String(values.de);
+        const newKey = (strings.value ?? "").trim();
+        const newDe = strings.de ?? "";
         if (newKey !== oldKey) {
           updateConfig((draft) => {
             const type = draft.heat.heatingSurfaceTypes.find(
@@ -136,42 +135,24 @@ export default function HeatingSurfaceTypesSection({
   };
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
+    <CollapsibleSection
+      sectionKey="heatingSurfaceTypes"
+      title={`Heizflächenarten (${configStore.heat.heatingSurfaceTypes.length})`}
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+      action={
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddHeatingSurfaceType();
           }}
-          onClick={() => toggleSection("heatingSurfaceTypes")}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.heatingSurfaceTypes ? (
-              <ExpandMore />
-            ) : (
-              <ChevronRight />
-            )}
-            <Typography variant="h3" color="#e30613">
-              Heizflächenarten ({configStore.heat.heatingSurfaceTypes.length})
-            </Typography>
-          </Box>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddHeatingSurfaceType();
-            }}
-          >
-            Neue Heizflächenart +
-          </Button>
-        </Box>
-
-        <Collapse in={expandedSections.heatingSurfaceTypes}>
+          Neue Heizflächenart +
+        </Button>
+      }
+    >
           <Box sx={{ px: 2, pt: 2, pb: 1 }}>
             <Box
               sx={{
@@ -251,8 +232,6 @@ export default function HeatingSurfaceTypesSection({
               </TableBody>
             </Table>
           </TableContainer>
-        </Collapse>
-      </Paper>
-    </>
+    </CollapsibleSection>
   );
 }

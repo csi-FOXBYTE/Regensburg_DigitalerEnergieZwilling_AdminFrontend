@@ -35,7 +35,7 @@ export interface Foerderprogramm {
 export interface EnergyEfficiencyEntry {
   to?: number;
   from?: number;
-  value?: EnergyEfficiencyClass;
+  value: EnergyEfficiencyClass;
   color?: string;
 }
 
@@ -61,7 +61,7 @@ const withDefaultColors = (cfg: DETConfig): DETConfig =>
     draft.general.energyEfficiencyClasses.forEach((entry) => {
       const e = entry as EnergyEfficiencyEntry;
       if (!e.color) {
-        e.color = DEFAULT_ENERGY_CLASS_COLORS[e.value ?? 0] ?? "#6b7280";
+        e.color = DEFAULT_ENERGY_CLASS_COLORS[e.value] ?? "#6b7280";
       }
     });
   });
@@ -141,6 +141,51 @@ export const updateInternalGainsFactorByBuildingType = (
 };
 
 // Jahresbänder //
+
+const setValueForBand = (
+  values: (YearBandEntry & { value: number })[],
+  band: YearBandEntry,
+  newValue: number,
+): void => {
+  const bf = band.from ?? -Infinity;
+  const bt = band.to ?? Infinity;
+  const idx = values.findIndex(
+    (e) => (e.from ?? -Infinity) <= bf && (e.to ?? Infinity) >= bt,
+  );
+  if (idx === -1) return;
+
+  const entry = values[idx]!;
+  const ef = entry.from ?? -Infinity;
+  const et = entry.to ?? Infinity;
+
+  if (ef === bf && et === bt) {
+    entry.value = newValue;
+    return;
+  }
+
+  const pieces: (YearBandEntry & { value: number })[] = [];
+
+  if (ef < bf) {
+    const before: YearBandEntry & { value: number } = { value: entry.value };
+    if (entry.from !== undefined) before.from = entry.from;
+    before.to = band.from! - 1;
+    pieces.push(before);
+  }
+
+  const edited: YearBandEntry & { value: number } = { value: newValue };
+  if (band.from !== undefined) edited.from = band.from;
+  if (band.to !== undefined) edited.to = band.to;
+  pieces.push(edited);
+
+  if (et > bt) {
+    const after: YearBandEntry & { value: number } = { value: entry.value };
+    after.from = band.to! + 1;
+    if (entry.to !== undefined) after.to = entry.to;
+    pieces.push(after);
+  }
+
+  values.splice(idx, 1, ...pieces);
+};
 
 export const addYearBand = (entry: YearBandEntry) => {
   updateConfig((draft) => {
@@ -688,6 +733,20 @@ export const updateOuterSurfaceThermalResistance = (
   });
 };
 
+const applyUValueUpdate = (
+  draft: DETConfig,
+  uValueRows: unknown[],
+  constructionIndex: number,
+  yearBandIndex: number,
+  value: number,
+) => {
+  const band = draft.general.generalYearBands[yearBandIndex] as YearBandEntry | undefined;
+  if (!band) return;
+  const row = uValueRows[constructionIndex] as { value: (YearBandEntry & { value: number })[] } | undefined;
+  if (!row) return;
+  setValueForBand(row.value, band, value);
+};
+
 // Dach //
 
 export const updateRoofUValue = (
@@ -696,11 +755,7 @@ export const updateRoofUValue = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    if (
-      draft.roof.uValue[constructionIndex]?.value[yearBandIndex] !== undefined
-    ) {
-      draft.roof.uValue[constructionIndex].value[yearBandIndex].value = value;
-    }
+    applyUValueUpdate(draft, draft.roof.uValue, constructionIndex, yearBandIndex, value);
   });
 };
 
@@ -719,9 +774,7 @@ export const updateTopFloorUValue = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    if (draft.topFloor.uValue[typeIndex]?.value[yearBandIndex] !== undefined) {
-      draft.topFloor.uValue[typeIndex].value[yearBandIndex].value = value;
-    }
+    applyUValueUpdate(draft, draft.topFloor.uValue, typeIndex, yearBandIndex, value);
   });
 };
 
@@ -743,13 +796,7 @@ export const updateOuterWallUValue = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    if (
-      draft.outerWall.uValue[constructionIndex]?.value[yearBandIndex] !==
-      undefined
-    ) {
-      draft.outerWall.uValue[constructionIndex].value[yearBandIndex].value =
-        value;
-    }
+    applyUValueUpdate(draft, draft.outerWall.uValue, constructionIndex, yearBandIndex, value);
   });
 };
 
@@ -784,13 +831,7 @@ export const updateWindowsUValue = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    if (
-      draft.windows.uValue[constructionIndex]?.value[yearBandIndex] !==
-      undefined
-    ) {
-      draft.windows.uValue[constructionIndex].value[yearBandIndex].value =
-        value;
-    }
+    applyUValueUpdate(draft, draft.windows.uValue, constructionIndex, yearBandIndex, value);
   });
 };
 
@@ -812,13 +853,7 @@ export const updateBottomFloorUValue = (
   value: number,
 ) => {
   updateConfig((draft) => {
-    if (
-      draft.bottomFloor.uValue[constructionIndex]?.value[yearBandIndex] !==
-      undefined
-    ) {
-      draft.bottomFloor.uValue[constructionIndex].value[yearBandIndex].value =
-        value;
-    }
+    applyUValueUpdate(draft, draft.bottomFloor.uValue, constructionIndex, yearBandIndex, value);
   });
 };
 

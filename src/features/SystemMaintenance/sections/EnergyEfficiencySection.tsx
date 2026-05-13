@@ -1,12 +1,10 @@
 import type { EnergyEfficiencyClass } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
-import { ChevronRight, Delete, Edit, ExpandMore } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
-  Collapse,
   IconButton,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -17,8 +15,7 @@ import {
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
 import { toast } from "sonner";
-import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
-import { EditDialog } from "../../../components/EditDialog";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   addEnergyEfficiencyClass,
   deleteEnergyEfficiencyClass,
@@ -29,28 +26,19 @@ import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 export function EnergyEfficiencySection({
   configStore,
-  editState,
   setEditState,
-  deleteConfirm,
   setDeleteConfirm,
   expandedSections,
   toggleSection,
 }: {
   configStore: ReturnType<typeof useStore>;
-  editState: EditState;
   setEditState: React.Dispatch<React.SetStateAction<EditState>>;
-  deleteConfirm: DeleteConfirmState;
   setDeleteConfirm: React.Dispatch<React.SetStateAction<DeleteConfirmState>>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
 }) {
   const handleDeleteConfirm = (onConfirm: () => void) => {
     setDeleteConfirm({ open: true, onConfirm });
-  };
-
-  const handleConfirmDelete = () => {
-    deleteConfirm.onConfirm();
-    setDeleteConfirm({ open: false, onConfirm: () => {} });
   };
 
   const handleEditEnergyClass = (index: number) => {
@@ -88,7 +76,7 @@ export function EnergyEfficiencySection({
         {
           key: "value",
           label: "Klasse",
-          value: item.value ?? "",
+          value: item.value,
           type: "text" as const,
           required: true,
         },
@@ -100,20 +88,12 @@ export function EnergyEfficiencySection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings, numbers) => {
         updateEnergyEfficiencyClass(index, (draft) => {
-          if (values.from === "") {
-            delete draft.from;
-          } else if (values.from !== undefined) {
-            draft.from = values.from as number;
-          }
-          if (values.to === "") {
-            delete draft.to;
-          } else if (values.to !== undefined) {
-            draft.to = values.to as number;
-          }
-          if (values.value) draft.value = values.value as EnergyEfficiencyClass;
-          if (values.color) draft.color = values.color as string;
+          draft.from = numbers.from;
+          draft.to = numbers.to;
+          if (strings.value) draft.value = strings.value as EnergyEfficiencyClass;
+          if (strings.color) draft.color = strings.color;
         });
       },
     });
@@ -163,56 +143,36 @@ export function EnergyEfficiencySection({
           required: true,
         },
       ],
-      onSave: (values) => {
-        const from = values.from !== "" ? (values.from as number) : undefined;
-        const to = values.to !== "" ? (values.to as number) : undefined;
-
+      onSave: (strings, numbers) => {
         addEnergyEfficiencyClass({
-          from,
-          to,
-          value: values.value as EnergyEfficiencyClass,
-          color: values.color as string,
+          from: numbers.from,
+          to: numbers.to,
+          value: (strings.value ?? "") as EnergyEfficiencyClass,
+          color: strings.color ?? "",
         });
       },
     });
   };
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
+    <CollapsibleSection
+      sectionKey="energyEfficiency"
+      title="Energieeffizienzklassen"
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+      action={
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddEnergyEfficiencyClass();
           }}
-          onClick={() => toggleSection("energyEfficiency")}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.energyEfficiency ? (
-              <ExpandMore />
-            ) : (
-              <ChevronRight />
-            )}
-            <Typography variant="h3" color="#e30613">
-              Energieeffizienzklassen
-            </Typography>
-          </Box>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddEnergyEfficiencyClass();
-            }}
-          >
-            Neue Energieeffizienzklasse +
-          </Button>
-        </Box>
-        <Collapse in={expandedSections.energyEfficiency}>
+          Neue Energieeffizienzklasse +
+        </Button>
+      }
+    >
           <TableContainer>
             <Table size="small">
               <TableHead>
@@ -302,22 +262,6 @@ export function EnergyEfficiencySection({
               </TableBody>
             </Table>
           </TableContainer>
-        </Collapse>
-      </Paper>
-
-      <EditDialog
-        key={String(editState.open)}
-        open={editState.open}
-        title={editState.title}
-        fields={editState.fields}
-        onClose={() => setEditState((s) => ({ ...s, open: false }))}
-        onSave={editState.onSave}
-      />
-      <ConfirmDeleteDialog
-        open={deleteConfirm.open}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
-      />
-    </>
+    </CollapsibleSection>
   );
 }

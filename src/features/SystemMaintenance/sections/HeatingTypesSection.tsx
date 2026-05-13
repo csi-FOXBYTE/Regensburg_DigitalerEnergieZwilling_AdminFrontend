@@ -1,10 +1,4 @@
-import {
-  Add,
-  ChevronRight,
-  Delete,
-  Edit,
-  ExpandMore,
-} from "@mui/icons-material";
+import { Add, ChevronRight, Delete, Edit, ExpandMore } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -24,8 +18,7 @@ import {
 } from "@mui/material";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
-import { EditDialog } from "../../../components/EditDialog";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   addHeatingPerformanceFactorColumn,
   addHeatingPerformanceFactorRow,
@@ -221,30 +214,19 @@ const headerCellSx = {
 
 const colDividerSx = { borderRight: "1px solid", borderColor: "divider" };
 
-function buildYearBand(values: Record<string, string>): {
-  from?: number;
-  to?: number;
-} {
-  const result: { from?: number; to?: number } = {};
-  if (values.from !== "" && values.from != null)
-    result.from = Number(values.from);
-  if (values.to !== "" && values.to != null) result.to = Number(values.to);
-  return result;
+function buildYearBand(numbers: Record<string, number>): { from?: number; to?: number } {
+  return { from: numbers.from, to: numbers.to };
 }
 
 export default function HeatingTypesSection({
   configStore,
-  editState,
   setEditState,
-  deleteConfirm,
   setDeleteConfirm,
   expandedSections,
   toggleSection,
 }: {
   configStore: ReturnType<typeof config.get>;
-  editState: EditState;
   setEditState: React.Dispatch<React.SetStateAction<EditState>>;
-  deleteConfirm: DeleteConfirmState;
   setDeleteConfirm: React.Dispatch<React.SetStateAction<DeleteConfirmState>>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
@@ -256,11 +238,6 @@ export default function HeatingTypesSection({
 
   const handleDeleteConfirm = (onConfirm: () => void) =>
     setDeleteConfirm({ open: true, onConfirm });
-
-  const handleConfirmDelete = () => {
-    deleteConfirm.onConfirm();
-    setDeleteConfirm({ open: false, onConfirm: () => {} });
-  };
 
   const handleAddHeatingSystemType = () => {
     setEditState({
@@ -282,10 +259,10 @@ export default function HeatingTypesSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         addHeatingSystemType({
-          value: values.value as string,
-          localization: { de: values.de as string, en: values.de as string },
+          value: strings.value ?? "",
+          localization: { de: strings.de ?? "", en: strings.de ?? "" },
         });
         toast.success("Heizungserzeugerart hinzugefügt");
       },
@@ -314,9 +291,10 @@ export default function HeatingTypesSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         const oldKey = item.value;
-        const newKey = String(values.value).trim();
+        const newKey = (strings.value ?? "").trim();
+        const newDe = strings.de ?? "";
         if (newKey !== oldKey) {
           updateConfig((draft) => {
             const type = draft.heat.heatingSystemTypes.find(
@@ -324,8 +302,8 @@ export default function HeatingTypesSection({
             );
             if (type) {
               type.value = newKey;
-              type.localization.de = String(values.de);
-              type.localization.en = String(values.de);
+              type.localization.de = newDe;
+              type.localization.en = newDe;
             }
             const perf = (
               draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
@@ -354,7 +332,8 @@ export default function HeatingTypesSection({
           });
         } else {
           updateHeatingSystemType(index, (draft) => {
-            draft.localization.de = values.de as string;
+            draft.localization.de = newDe;
+            draft.localization.en = newDe;
           });
         }
         toast.success("Heizungstyp aktualisiert");
@@ -380,8 +359,8 @@ export default function HeatingTypesSection({
           type: "number",
         },
       ],
-      onSave: (values) => {
-        const band = buildYearBand(values as Record<string, string>);
+      onSave: (_, numbers) => {
+        const band = buildYearBand(numbers);
         if (isPerf) addHeatingPerformanceFactorRow(itemValue, band);
         else addTemperatureControlRow(itemValue, band);
       },
@@ -396,11 +375,8 @@ export default function HeatingTypesSection({
         { key: "from", label: "Von kW (optional)", value: "", type: "number" },
         { key: "to", label: "Bis kW (optional)", value: "", type: "number" },
       ],
-      onSave: (values) => {
-        addHeatingPerformanceFactorColumn(
-          itemValue,
-          buildYearBand(values as Record<string, string>),
-        );
+      onSave: (_, numbers) => {
+        addHeatingPerformanceFactorColumn(itemValue, buildYearBand(numbers));
       },
     });
   };
@@ -425,49 +401,31 @@ export default function HeatingTypesSection({
           required: true,
         },
       ],
-      onSave: (values) => {
-        addTemperatureControlColumn(itemValue, String(values));
+      onSave: (strings) => {
+        addTemperatureControlColumn(itemValue, strings.controlKey ?? "");
       },
     });
   };
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
+    <CollapsibleSection
+      sectionKey="heatingSystemTypes"
+      title={`Heizungserzeugerart (${configStore.heat.heatingSystemTypes.length})`}
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+      action={
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddHeatingSystemType();
           }}
-          onClick={() => toggleSection("heatingSystemTypes")}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.heatingSystemTypes ? (
-              <ExpandMore />
-            ) : (
-              <ChevronRight />
-            )}
-            <Typography variant="h3" color="#e30613">
-              Heizungserzeugerart ({configStore.heat.heatingSystemTypes.length})
-            </Typography>
-          </Box>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddHeatingSystemType();
-            }}
-          >
-            Neue Erzeugerart +
-          </Button>
-        </Box>
-
-        <Collapse in={expandedSections.heatingSystemTypes}>
+          Neue Erzeugerart +
+        </Button>
+      }
+    >
           <TableContainer>
             <Table size="small">
               <TableHead>
@@ -1044,22 +1002,6 @@ export default function HeatingTypesSection({
               </TableBody>
             </Table>
           </TableContainer>
-        </Collapse>
-      </Paper>
-
-      <EditDialog
-        key={String(editState.open)}
-        open={editState.open}
-        title={editState.title}
-        fields={editState.fields}
-        onClose={() => setEditState((s) => ({ ...s, open: false }))}
-        onSave={editState.onSave}
-      />
-      <ConfirmDeleteDialog
-        open={deleteConfirm.open}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
-      />
-    </>
+    </CollapsibleSection>
   );
 }

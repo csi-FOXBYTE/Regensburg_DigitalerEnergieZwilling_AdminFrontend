@@ -1,11 +1,8 @@
-import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import {
   Box,
   Checkbox,
-  Collapse,
   FormControlLabel,
   MenuItem,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -16,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   toggleAllowedBottomFloorConstructionType,
   updateBottomFloorDefaultConstructionType,
@@ -24,7 +22,9 @@ import {
 } from "../../../hooks/store";
 import {
   formatBand,
+  getValueForBand,
   lookUpForNames,
+  type BandEntry,
   type YearBand,
 } from "../../../lib/buildingTypes";
 
@@ -40,27 +40,12 @@ export default function UgdSection({
   const yearBands = configStore.general.generalYearBands as YearBand[];
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
-          }}
-          onClick={() => toggleSection("bottomFloor")}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.bottomFloor ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3" color="#e30613">
-              Unterste Geschossdecke
-            </Typography>
-          </Box>
-        </Box>
-        <Collapse in={expandedSections.bottomFloor}>
+    <CollapsibleSection
+      sectionKey="bottomFloor"
+      title="Unterste Geschossdecke"
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+    >
           <Box sx={{ p: 2 }}>
             <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Allgemeine Parameter
@@ -280,12 +265,12 @@ export default function UgdSection({
                         <TableCell>
                           {lookUpForNames(construction.key)}
                         </TableCell>
-                        {yearBands.map((_, bandIndex) => (
+                        {yearBands.map((band, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
                               size="small"
                               type="number"
-                              value={construction.value[bandIndex]?.value ?? ""}
+                              value={getValueForBand(construction.value as BandEntry[], band) ?? ""}
                               onChange={(e) =>
                                 updateBottomFloorUValue(
                                   constructionIndex,
@@ -304,8 +289,6 @@ export default function UgdSection({
               </Table>
             </TableContainer>
           </Box>
-        </Collapse>
-      </Paper>
-    </>
+    </CollapsibleSection>
   );
 }

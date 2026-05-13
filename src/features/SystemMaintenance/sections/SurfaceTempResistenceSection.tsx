@@ -1,9 +1,5 @@
 import { HeatFlowDirection } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
-import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import {
-  Box,
-  Collapse,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -11,9 +7,9 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   updateInnerSurfaceThermalResistance,
   updateOuterSurfaceThermalResistance,
@@ -37,30 +33,12 @@ export default function SurfaceTempResistenceSection({
     return lookUpTable[key];
   };
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-          }}
-          onClick={() => toggleSection("surfaceTempResistence")}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.surfaceTempResistence ? (
-              <ExpandMore />
-            ) : (
-              <ChevronRight />
-            )}
-            <Typography variant="h3" color="#e30613">
-              Wärmeübergangswiderstände
-            </Typography>
-          </Box>
-        </Box>
-        <Collapse in={expandedSections.surfaceTempResistence}>
+    <CollapsibleSection
+      sectionKey="surfaceTempResistence"
+      title="Wärmeübergangswiderstände"
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+    >
           <TableContainer>
             <Table size="small">
               <TableHead>
@@ -150,8 +128,6 @@ export default function SurfaceTempResistenceSection({
               </TableBody>
             </Table>
           </TableContainer>
-        </Collapse>
-      </Paper>
-    </>
+    </CollapsibleSection>
   );
 }

@@ -1,9 +1,6 @@
-import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import {
   Box,
-  Collapse,
   MenuItem,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -14,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   updateSimpleValue,
   updateWindowDefaultType,
@@ -21,7 +19,9 @@ import {
 } from "../../../hooks/store";
 import {
   formatBand,
+  getValueForBand,
   lookUpForNames,
+  type BandEntry,
   type YearBand,
 } from "../../../lib/buildingTypes";
 
@@ -37,27 +37,12 @@ export default function WindowSection({
   const yearBands = configStore.general.generalYearBands as YearBand[];
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
-          }}
-          onClick={() => toggleSection("windows")}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.windows ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3" color="#e30613">
-              Fenster
-            </Typography>
-          </Box>
-        </Box>
-        <Collapse in={expandedSections.windows}>
+    <CollapsibleSection
+      sectionKey="windows"
+      title="Fenster"
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+    >
           <Box sx={{ p: 2 }}>
             <Typography variant="body1" fontWeight="600" mb={1}>
               Allgemeine Parameter
@@ -180,12 +165,12 @@ export default function WindowSection({
                     ) => (
                       <TableRow key={windowType.key}>
                         <TableCell>{lookUpForNames(windowType.key)}</TableCell>
-                        {yearBands.map((_, bandIndex) => (
+                        {yearBands.map((band, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
                               size="small"
                               type="number"
-                              value={windowType.value[bandIndex]?.value ?? ""}
+                              value={getValueForBand(windowType.value as BandEntry[], band) ?? ""}
                               onChange={(e) =>
                                 updateWindowsUValue(
                                   windowTypeIndex,
@@ -204,8 +189,6 @@ export default function WindowSection({
               </Table>
             </TableContainer>
           </Box>
-        </Collapse>
-      </Paper>
-    </>
+    </CollapsibleSection>
   );
 }

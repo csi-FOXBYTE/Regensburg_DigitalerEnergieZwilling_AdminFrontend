@@ -1,23 +1,9 @@
-import {
-  Add,
-  ChevronRight,
-  Delete,
-  Edit,
-  ExpandMore,
-} from "@mui/icons-material";
-import {
-  Box,
-  Collapse,
-  IconButton,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Add, Delete, Edit } from "@mui/icons-material";
+import { Box, IconButton, TextField, Typography } from "@mui/material";
 import { useStore } from "@nanostores/react";
 import { Fragment } from "react";
 import { toast } from "sonner";
-import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
-import { EditDialog } from "../../../components/EditDialog";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   addCorrectionFactor,
   deleteCorrectionFactor,
@@ -27,39 +13,23 @@ import {
   updateSimpleValue,
 } from "../../../hooks/store";
 import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
-
-function lookUpForNames(key: string): string {
-  const BUILDING_TYPE_NAMES: Record<string, string> = {
-    singleFamily: "Einfamilienhaus",
-    multiFamily: "Mehrfamilienhaus",
-  };
-  return BUILDING_TYPE_NAMES[key] ?? key;
-}
+import { lookUpForNames } from "../../../lib/buildingTypes";
 
 export function GeneralParametersSection({
   configStore,
-  editState,
   setEditState,
-  deleteConfirm,
   setDeleteConfirm,
   expandedSections,
   toggleSection,
 }: {
   configStore: ReturnType<typeof useStore>;
-  editState: EditState;
   setEditState: React.Dispatch<React.SetStateAction<EditState>>;
-  deleteConfirm: DeleteConfirmState;
   setDeleteConfirm: React.Dispatch<React.SetStateAction<DeleteConfirmState>>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
 }) {
   const handleDeleteConfirm = (onConfirm: () => void) => {
     setDeleteConfirm({ open: true, onConfirm });
-  };
-
-  const handleConfirmDelete = () => {
-    deleteConfirm.onConfirm();
-    setDeleteConfirm({ open: false, onConfirm: () => {} });
   };
 
   const handleEditCorrectionFactor = (index: number) => {
@@ -72,11 +42,11 @@ export function GeneralParametersSection({
         { key: "to", label: "Bis", value: item.to, type: "number" },
         { key: "value", label: "Faktor", value: item.value, type: "number" },
       ],
-      onSave: (values) => {
+      onSave: (_, numbers) => {
         updateCorrectionFactor(index, (draft) => {
-          draft.from = values.from as number;
-          draft.to = values.to as number;
-          draft.value = values.value as number;
+          draft.from = numbers.from ?? draft.from;
+          draft.to = numbers.to ?? draft.to;
+          draft.value = numbers.value ?? draft.value;
         });
         toast.success("Korrekturfaktor aktualisiert");
       },
@@ -92,11 +62,11 @@ export function GeneralParametersSection({
         { key: "to", label: "Bis", value: "", type: "number" },
         { key: "value", label: "Faktor", value: "", type: "number" },
       ],
-      onSave: (values) => {
+      onSave: (_, numbers) => {
         addCorrectionFactor({
-          from: values.from as number,
-          to: values.to as number,
-          value: values.value as number,
+          from: numbers.from,
+          to: numbers.to,
+          value: numbers.value,
         });
         toast.success("Korrekturfaktor hinzugefügt");
       },
@@ -111,28 +81,12 @@ export function GeneralParametersSection({
   };
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
-          }}
-          onClick={() => toggleSection("generalParams")}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.generalParams ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3" color="#e30613">
-              Allgemeine Parameter
-            </Typography>
-          </Box>
-        </Box>
-
-        <Collapse in={expandedSections.generalParams}>
+    <CollapsibleSection
+      sectionKey="generalParams"
+      title="Allgemeine Parameter"
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+    >
           <Box sx={{ p: 2 }}>
             <Typography variant="body1" fontWeight={"bold"} mb={1}>
               Geometrische Annahmen
@@ -383,22 +337,6 @@ export function GeneralParametersSection({
               </IconButton>
             </Box>
           </Box>
-        </Collapse>
-      </Paper>
-
-      <EditDialog
-        key={String(editState.open)}
-        open={editState.open}
-        title={editState.title}
-        fields={editState.fields}
-        onClose={() => setEditState((s) => ({ ...s, open: false }))}
-        onSave={editState.onSave}
-      />
-      <ConfirmDeleteDialog
-        open={deleteConfirm.open}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
-      />
-    </>
+    </CollapsibleSection>
   );
 }

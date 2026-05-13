@@ -1,10 +1,7 @@
-import { ChevronRight, Delete, Edit, ExpandMore } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import {
-  Box,
   Button,
-  Collapse,
   IconButton,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -14,8 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { toast } from "sonner";
-import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
-import { EditDialog } from "../../../components/EditDialog";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   addYearBand,
   config,
@@ -27,28 +23,19 @@ import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 export function YearBandSection({
   configStore,
-  editState,
   setEditState,
-  deleteConfirm,
   setDeleteConfirm,
   expandedSections,
   toggleSection,
 }: {
   configStore: ReturnType<typeof config.get>;
-  editState: EditState;
   setEditState: React.Dispatch<React.SetStateAction<EditState>>;
-  deleteConfirm: DeleteConfirmState;
   setDeleteConfirm: React.Dispatch<React.SetStateAction<DeleteConfirmState>>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
 }) {
   const handleDeleteConfirm = (onConfirm: () => void) => {
     setDeleteConfirm({ open: true, onConfirm });
-  };
-
-  const handleConfirmDelete = () => {
-    deleteConfirm.onConfirm();
-    setDeleteConfirm({ open: false, onConfirm: () => {} });
   };
 
   const handleEditYearBand = (index: number) => {
@@ -65,18 +52,10 @@ export function YearBandSection({
         },
         { key: "to", label: "Bis Jahr", value: item.to ?? "", type: "number" },
       ],
-      onSave: (values) => {
+      onSave: (_, numbers) => {
         updateYearBand(index, (draft) => {
-          if (values.from !== undefined && values.from !== "") {
-            draft.from = values.from as number;
-          } else {
-            delete draft.from;
-          }
-          if (values.to !== undefined && values.to !== "") {
-            draft.to = values.to as number;
-          } else {
-            delete draft.to;
-          }
+          draft.from = numbers.from;
+          draft.to = numbers.to;
         });
       },
     });
@@ -90,47 +69,32 @@ export function YearBandSection({
         { key: "from", label: "Von Jahr", value: "", type: "number" },
         { key: "to", label: "Bis Jahr", value: "", type: "number" },
       ],
-      onSave: (values) => {
-        const from = values.from !== "" ? (values.from as number) : undefined;
-        const to = values.to !== "" ? (values.to as number) : undefined;
-        addYearBand({ from, to });
+      onSave: (_, numbers) => {
+        addYearBand({ from: numbers.from, to: numbers.to });
         toast.success("Jahresband hinzugefügt");
       },
     });
   };
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
+    <CollapsibleSection
+      sectionKey="yearBand"
+      title="Jahresbänder"
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+      action={
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddYearBand();
           }}
-          onClick={() => toggleSection("yearBand")}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.yearBand ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3" color="#e30613">
-              Jahresbänder
-            </Typography>
-          </Box>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddYearBand();
-            }}
-          >
-            Neues Jahresband +
-          </Button>
-        </Box>
-        <Collapse in={expandedSections.yearBand}>
+          Neues Jahresband +
+        </Button>
+      }
+    >
           <TableContainer>
             <Table size="small">
               <TableHead>
@@ -180,22 +144,6 @@ export function YearBandSection({
               </TableBody>
             </Table>
           </TableContainer>
-        </Collapse>
-      </Paper>
-
-      <EditDialog
-        key={String(editState.open)}
-        open={editState.open}
-        title={editState.title}
-        fields={editState.fields}
-        onClose={() => setEditState((s) => ({ ...s, open: false }))}
-        onSave={editState.onSave}
-      />
-      <ConfirmDeleteDialog
-        open={deleteConfirm.open}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
-      />
-    </>
+    </CollapsibleSection>
   );
 }

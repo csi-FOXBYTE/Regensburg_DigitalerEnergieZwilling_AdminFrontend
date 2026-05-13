@@ -1,8 +1,5 @@
-import { ChevronRight, ExpandMore } from "@mui/icons-material";
 import {
   Box,
-  Collapse,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -13,10 +10,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
+import { CollapsibleSection } from "../CollapsibleSection";
 import { updateRoofUValue, updateSimpleValue } from "../../../hooks/store";
 import {
   formatBand,
+  getValueForBand,
   lookUpForNames,
+  type BandEntry,
   type YearBand,
 } from "../../../lib/buildingTypes";
 
@@ -32,27 +32,12 @@ export default function RoofSection({
   const yearBands = configStore.general.generalYearBands as YearBand[];
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
-          }}
-          onClick={() => toggleSection("roof")}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.roof ? <ExpandMore /> : <ChevronRight />}
-            <Typography variant="h3" color="#e30613">
-              Dach
-            </Typography>
-          </Box>
-        </Box>
-        <Collapse in={expandedSections.roof}>
+    <CollapsibleSection
+      sectionKey="roof"
+      title="Dach"
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+    >
           <Box sx={{ p: 2 }}>
             <Typography variant="body1" fontWeight={"bold"} mb={1.5}>
               Allgemeine Parameter
@@ -154,12 +139,12 @@ export default function RoofSection({
                         <TableCell>
                           {lookUpForNames(construction.key)}
                         </TableCell>
-                        {yearBands.map((_, bandIndex) => (
+                        {yearBands.map((band, bandIndex) => (
                           <TableCell key={bandIndex} align="center">
                             <TextField
                               size="small"
                               type="number"
-                              value={construction.value[bandIndex]?.value ?? ""}
+                              value={getValueForBand(construction.value as BandEntry[], band) ?? ""}
                               onChange={(e) =>
                                 updateRoofUValue(
                                   constructionIndex,
@@ -178,8 +163,6 @@ export default function RoofSection({
               </Table>
             </TableContainer>
           </Box>
-        </Collapse>
-      </Paper>
-    </>
+    </CollapsibleSection>
   );
 }

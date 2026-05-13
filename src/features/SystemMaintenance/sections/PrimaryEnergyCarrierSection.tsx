@@ -7,7 +7,6 @@ import {
   FormControlLabel,
   IconButton,
   MenuItem,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -19,8 +18,7 @@ import {
 } from "@mui/material";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-import { ConfirmDeleteDialog } from "../../../components/ConfirmDeleteDialog";
-import { EditDialog } from "../../../components/EditDialog";
+import { CollapsibleSection } from "../CollapsibleSection";
 import {
   addAllowedHeatingSystemType,
   addPrimaryEnergyCarrier,
@@ -39,17 +37,13 @@ import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 export function PrimaryEnergyCarrierSection({
   configStore,
-  editState,
   setEditState,
   setDeleteConfirm,
-  deleteConfirm,
   expandedSections,
   toggleSection,
 }: {
   configStore: ReturnType<typeof config.get>;
-  editState: EditState;
   setEditState: React.Dispatch<React.SetStateAction<EditState>>;
-  deleteConfirm: DeleteConfirmState;
   setDeleteConfirm: React.Dispatch<React.SetStateAction<DeleteConfirmState>>;
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
@@ -60,11 +54,6 @@ export function PrimaryEnergyCarrierSection({
 
   const handleDeleteConfirm = (onConfirm: () => void) => {
     setDeleteConfirm({ open: true, onConfirm });
-  };
-
-  const handleConfirmDelete = () => {
-    deleteConfirm.onConfirm();
-    setDeleteConfirm({ open: false, onConfirm: () => {} });
   };
 
   const toggleEnergyCarrier = (index: number) => {
@@ -94,10 +83,10 @@ export function PrimaryEnergyCarrierSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         addPrimaryEnergyCarrier({
-          value: values.value as string,
-          localization: { de: values.de as string, en: values.de as string },
+          value: strings.value ?? "",
+          localization: { de: strings.de ?? "", en: strings.de ?? "" },
         });
         toast.success("Energieträger hinzugefügt");
       },
@@ -127,9 +116,10 @@ export function PrimaryEnergyCarrierSection({
           required: true,
         },
       ],
-      onSave: (values) => {
+      onSave: (strings) => {
         const oldKey = item.value;
-        const newKey = String(values.value).trim();
+        const newKey = (strings.value ?? "").trim();
+        const newDe = strings.de ?? "";
         if (newKey !== oldKey) {
           updateConfig((draft) => {
             const carrier = draft.heat.primaryEnergyCarriers.find(
@@ -137,8 +127,8 @@ export function PrimaryEnergyCarrierSection({
             );
             if (carrier) {
               carrier.value = newKey;
-              carrier.localization.de = String(values.de);
-              carrier.localization.en = String(values.de);
+              carrier.localization.de = newDe;
+              carrier.localization.en = newDe;
             }
             const data = draft.heat.primaryEnergyCarrierData.find(
               (d) => d.key === oldKey,
@@ -161,7 +151,7 @@ export function PrimaryEnergyCarrierSection({
           );
           if (idx >= 0) {
             updatePrimaryEnergyCarrier(idx, (draft) => {
-              draft.localization.de = values.de as string;
+              draft.localization.de = newDe;
             });
           }
         }
@@ -188,43 +178,24 @@ export function PrimaryEnergyCarrierSection({
   );
 
   return (
-    <>
-      <Paper sx={{ mb: 3, overflow: "hidden", boxShadow: "none" }}>
-        <Box
-          sx={{
-            p: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            color: "#e30613",
-            borderBottom: "2px solid black",
-            cursor: "pointer",
+    <CollapsibleSection
+      sectionKey="energyCarriers"
+      title={`Primäre Energieträger (${configStore.heat.primaryEnergyCarriers.length})`}
+      expandedSections={expandedSections}
+      toggleSection={toggleSection}
+      action={
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddPrimaryEnergyCarrier();
           }}
-          onClick={() => toggleSection("energyCarriers")}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {expandedSections.energyCarriers ? (
-              <ExpandMore />
-            ) : (
-              <ChevronRight />
-            )}
-            <Typography variant="h3" color="#e30613">
-              Primäre Energieträger (
-              {configStore.heat.primaryEnergyCarriers.length})
-            </Typography>
-          </Box>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleAddPrimaryEnergyCarrier();
-            }}
-          >
-            Neuer Energieträger +
-          </Button>
-        </Box>
-
-        <Collapse in={expandedSections.energyCarriers}>
+          Neuer Energieträger +
+        </Button>
+      }
+    >
           <Box sx={{ px: 2, pt: 2, pb: 1 }}>
             <Box sx={{ ...gridSx }}>
               <Typography variant="body1">Standard-Energieträger</Typography>
@@ -546,22 +517,6 @@ export function PrimaryEnergyCarrierSection({
               </TableBody>
             </Table>
           </TableContainer>
-        </Collapse>
-      </Paper>
-
-      <EditDialog
-        key={String(editState.open)}
-        open={editState.open}
-        title={editState.title}
-        fields={editState.fields}
-        onClose={() => setEditState((s) => ({ ...s, open: false }))}
-        onSave={editState.onSave}
-      />
-      <ConfirmDeleteDialog
-        open={deleteConfirm.open}
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
-      />
-    </>
+    </CollapsibleSection>
   );
 }
