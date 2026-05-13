@@ -21,6 +21,7 @@ import {
   formatBand,
   getValueForBand,
   lookUpForNames,
+  sortBands,
   type BandEntry,
   type YearBand,
 } from "../../../lib/buildingTypes";
@@ -34,7 +35,7 @@ export default function OuterWallSection({
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
 }) {
-  const yearBands = configStore.general.generalYearBands as YearBand[];
+  const yearBands = sortBands(configStore.general.generalYearBands as YearBand[]);
 
   return (
     <CollapsibleSection
@@ -189,7 +190,7 @@ export default function OuterWallSection({
                               onChange={(e) =>
                                 updateOuterWallUValue(
                                   constructionIndex,
-                                  bandIndex,
+                                  band,
                                   parseFloat(e.target.value),
                                 )
                               }

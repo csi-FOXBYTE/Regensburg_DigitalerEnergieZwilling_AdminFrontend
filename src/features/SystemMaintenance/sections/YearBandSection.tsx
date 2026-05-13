@@ -108,22 +108,22 @@ export function YearBandSection({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {configStore.general.generalYearBands.map((item, index) => (
-                  <TableRow key={index} hover>
+                {(configStore.general.generalYearBands as YearBandEntry[])
+                  .map((item, originalIndex) => ({ ...item, originalIndex }))
+                  .sort((a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity))
+                  .map((item) => (
+                  <TableRow key={item.originalIndex} hover>
                     <TableCell sx={{ fontSize: "16px" }}>
-                      {(() => {
-                        const { from, to } = item as YearBandEntry;
-                        return from == null
-                          ? `bis ${to}`
-                          : to == null
-                            ? `ab ${from}`
-                            : `von ${from} bis ${to}`;
-                      })()}
+                      {item.from == null
+                        ? `bis ${item.to}`
+                        : item.to == null
+                          ? `ab ${item.from}`
+                          : `von ${item.from} bis ${item.to}`}
                     </TableCell>
                     <TableCell align="right">
                       <IconButton
                         size="small"
-                        onClick={() => handleEditYearBand(index)}
+                        onClick={() => handleEditYearBand(item.originalIndex)}
                       >
                         <Edit fontSize="small" />
                       </IconButton>
@@ -131,7 +131,7 @@ export function YearBandSection({
                         size="small"
                         onClick={() =>
                           handleDeleteConfirm(() => {
-                            deleteYearBand(index);
+                            deleteYearBand(item.originalIndex);
                             toast.success("Jahresband gelöscht");
                           })
                         }

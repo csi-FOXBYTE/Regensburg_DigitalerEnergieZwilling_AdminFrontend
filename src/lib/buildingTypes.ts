@@ -36,6 +36,9 @@ export const getValueForBand = (
   )?.value;
 };
 
+export const sortBands = <T extends YearBand>(bands: T[]): T[] =>
+  [...bands].sort((a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity));
+
 export const formatBand = (band: YearBand): string => {
   if (band.from != null && band.to != null) return `${band.from}–${band.to}`;
   if (band.to != null) return `≤ ${band.to}`;

@@ -16,6 +16,7 @@ import {
   formatBand,
   getValueForBand,
   lookUpForNames,
+  sortBands,
   type BandEntry,
   type YearBand,
 } from "../../../lib/buildingTypes";
@@ -29,7 +30,7 @@ export default function RoofSection({
   toggleSection: (section: string) => void;
   configStore: ReturnType<typeof useStore>;
 }) {
-  const yearBands = configStore.general.generalYearBands as YearBand[];
+  const yearBands = sortBands(configStore.general.generalYearBands as YearBand[]);
 
   return (
     <CollapsibleSection
@@ -148,7 +149,7 @@ export default function RoofSection({
                               onChange={(e) =>
                                 updateRoofUValue(
                                   constructionIndex,
-                                  bandIndex,
+                                  band,
                                   parseFloat(e.target.value),
                                 )
                               }

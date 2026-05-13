@@ -734,14 +734,11 @@ export const updateOuterSurfaceThermalResistance = (
 };
 
 const applyUValueUpdate = (
-  draft: DETConfig,
   uValueRows: unknown[],
   constructionIndex: number,
-  yearBandIndex: number,
+  band: YearBandEntry,
   value: number,
 ) => {
-  const band = draft.general.generalYearBands[yearBandIndex] as YearBandEntry | undefined;
-  if (!band) return;
   const row = uValueRows[constructionIndex] as { value: (YearBandEntry & { value: number })[] } | undefined;
   if (!row) return;
   setValueForBand(row.value, band, value);
@@ -751,11 +748,11 @@ const applyUValueUpdate = (
 
 export const updateRoofUValue = (
   constructionIndex: number,
-  yearBandIndex: number,
+  band: YearBandEntry,
   value: number,
 ) => {
   updateConfig((draft) => {
-    applyUValueUpdate(draft, draft.roof.uValue, constructionIndex, yearBandIndex, value);
+    applyUValueUpdate(draft.roof.uValue, constructionIndex, band, value);
   });
 };
 
@@ -770,11 +767,11 @@ export const updateTopFloorDefaultType = (index: number, value: string) => {
 
 export const updateTopFloorUValue = (
   typeIndex: number,
-  yearBandIndex: number,
+  band: YearBandEntry,
   value: number,
 ) => {
   updateConfig((draft) => {
-    applyUValueUpdate(draft, draft.topFloor.uValue, typeIndex, yearBandIndex, value);
+    applyUValueUpdate(draft.topFloor.uValue, typeIndex, band, value);
   });
 };
 
@@ -792,11 +789,11 @@ export const updateOuterWallConstructionType = (
 
 export const updateOuterWallUValue = (
   constructionIndex: number,
-  yearBandIndex: number,
+  band: YearBandEntry,
   value: number,
 ) => {
   updateConfig((draft) => {
-    applyUValueUpdate(draft, draft.outerWall.uValue, constructionIndex, yearBandIndex, value);
+    applyUValueUpdate(draft.outerWall.uValue, constructionIndex, band, value);
   });
 };
 
@@ -827,11 +824,11 @@ export const updateWindowDefaultType = (index: number, value: string) => {
 
 export const updateWindowsUValue = (
   constructionIndex: number,
-  yearBandIndex: number,
+  band: YearBandEntry,
   value: number,
 ) => {
   updateConfig((draft) => {
-    applyUValueUpdate(draft, draft.windows.uValue, constructionIndex, yearBandIndex, value);
+    applyUValueUpdate(draft.windows.uValue, constructionIndex, band, value);
   });
 };
 
@@ -849,11 +846,11 @@ export const updateBottomFloorConstructionType = (
 
 export const updateBottomFloorUValue = (
   constructionIndex: number,
-  yearBandIndex: number,
+  band: YearBandEntry,
   value: number,
 ) => {
   updateConfig((draft) => {
-    applyUValueUpdate(draft, draft.bottomFloor.uValue, constructionIndex, yearBandIndex, value);
+    applyUValueUpdate(draft.bottomFloor.uValue, constructionIndex, band, value);
   });
 };
 
