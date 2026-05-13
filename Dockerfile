@@ -22,6 +22,6 @@ COPY server.mjs .
 RUN mkdir -p /data
 
 VOLUME ["/data"]
-EXPOSE 8080
+EXPOSE 8090
 
 CMD ["node", "server.mjs"]
