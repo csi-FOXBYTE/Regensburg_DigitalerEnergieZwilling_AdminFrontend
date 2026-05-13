@@ -16,7 +16,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import type { UseNavigateResult } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import type { BuildingRecord } from "../../../assets/types";
 import { statusConfig } from "../../../assets/types";
@@ -44,7 +44,6 @@ function SortIcon({
 function TableView({
   records,
   currentUserName,
-  navigate,
   handleAssignToMe,
   setRecordToDelete,
   sortBy,
@@ -54,7 +53,6 @@ function TableView({
 }: {
   records: BuildingRecord[];
   currentUserName?: string | null;
-  navigate: UseNavigateResult<string>;
   handleAssignToMe: (record: BuildingRecord) => void;
   setRecordToDelete: (id: string | null) => void;
   sortBy: SortField;
@@ -62,6 +60,7 @@ function TableView({
   toggleSort: (field: SortField) => void;
   variantGroupCounts: Map<string, number>;
 }) {
+  const navigate = useNavigate();
   const sortableCellSx = {
     fontWeight: 600,
     cursor: "pointer",
@@ -123,12 +122,15 @@ function TableView({
       <TableBody>
         {records.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+            <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
               <Typography>Keine Datensätze gefunden.</Typography>
             </TableCell>
           </TableRow>
         ) : (
           records.map((record) => {
+            const variantCount = record.variantGroup
+              ? (variantGroupCounts.get(record.variantGroup) ?? 0)
+              : 0;
             return (
               <TableRow
                 key={record.id}
@@ -146,21 +148,19 @@ function TableView({
                     <Typography variant="body1">
                       {record.buildingAddress}
                     </Typography>
-                    {record.variantGroup &&
-                      (variantGroupCounts.get(record.variantGroup) ?? 0) >
-                        1 && (
-                        <Chip
-                          label={`${variantGroupCounts.get(record.variantGroup)} Einreichungen`}
-                          size="small"
-                          color="info"
-                          variant="outlined"
-                          sx={{
-                            p: 1.7,
-                            borderColor: "#e30613",
-                            color: "#e30613",
-                          }}
-                        />
-                      )}
+                    {variantCount > 1 && (
+                      <Chip
+                        label={`${variantCount} Einreichungen`}
+                        size="small"
+                        color="info"
+                        variant="outlined"
+                        sx={{
+                          p: 1.7,
+                          borderColor: "#e30613",
+                          color: "#e30613",
+                        }}
+                      />
+                    )}
                   </Box>
                 </TableCell>
                 <TableCell>

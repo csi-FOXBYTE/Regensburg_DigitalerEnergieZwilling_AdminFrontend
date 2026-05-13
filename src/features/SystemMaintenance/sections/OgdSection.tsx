@@ -64,7 +64,7 @@ export default function OgdSection({
                 type="number"
                 value={configStore.topFloor.heatLossFactor}
                 onChange={(e) =>
-                  updateSimpleValue("topFloor.heatLossFactor", e.target.value)
+                  updateSimpleValue("topFloor.heatLossFactor", parseFloat(e.target.value))
                 }
               />
 
@@ -76,7 +76,7 @@ export default function OgdSection({
                 onChange={(e) =>
                   updateSimpleValue(
                     "topFloor.assumedInsulationThickness",
-                    e.target.value,
+                    parseFloat(e.target.value),
                   )
                 }
               />
@@ -91,7 +91,7 @@ export default function OgdSection({
                 onChange={(e) =>
                   updateSimpleValue(
                     "topFloor.thermalConductivity",
-                    e.target.value,
+                    parseFloat(e.target.value),
                   )
                 }
               />

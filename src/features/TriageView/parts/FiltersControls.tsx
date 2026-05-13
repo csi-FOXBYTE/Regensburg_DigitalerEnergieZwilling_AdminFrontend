@@ -15,7 +15,32 @@ import {
 import { useEffect, useState } from "react";
 import { useDebounce } from "../../../hooks/useDebounce";
 
-const PAGE_SIZE_OPTIONS = [10, 15, 20, 25, 35, 50, 100];
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 20, 25, 35, 50, 100];
+
+const sharedTextFieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 2,
+    "& input": {
+      py: 1,
+      px: 1,
+    },
+    "& .MuiSelect-select": {
+      py: 1,
+      px: 1.5,
+    },
+    "& fieldset": {
+      borderColor: "divider",
+      transition: "border-color 0.2s",
+    },
+    "&:hover fieldset": {
+      borderColor: "#e30613",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#e30613",
+      borderWidth: "1.5px",
+    },
+  },
+} as const;
 
 export function FiltersControls({
   refreshData,
@@ -47,30 +72,9 @@ export function FiltersControls({
     setAddressFilter(debouncedAddressFilter);
   }, [debouncedAddressFilter, setAddressFilter]);
 
-  const sharedTextFieldSx = {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: 2,
-      "& input": {
-        py: 1,
-        px: 1,
-      },
-      "& .MuiSelect-select": {
-        py: 1,
-        px: 1.5,
-      },
-      "& fieldset": {
-        borderColor: "divider",
-        transition: "border-color 0.2s",
-      },
-      "&:hover fieldset": {
-        borderColor: "#e30613",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#e30613",
-        borderWidth: "1.5px",
-      },
-    },
-  } as const;
+  useEffect(() => {
+    setLocalAddressFilter(addressFilter);
+  }, [addressFilter]);
 
   return (
     <Paper sx={{ p: 2, boxShadow: "0 0 8px 0 #0000001a" }}>
@@ -92,7 +96,7 @@ export function FiltersControls({
 
           <TextField
             size="small"
-            placeholder="Suche nach Adresse, Energieart oder Heizsystem..."
+            placeholder="Suche nach Adresse..."
             value={localAddressFilter}
             onChange={(e) => setLocalAddressFilter(e.target.value)}
             slotProps={{

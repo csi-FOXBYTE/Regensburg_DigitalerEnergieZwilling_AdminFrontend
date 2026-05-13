@@ -31,7 +31,7 @@ export function PaginationView({
         Vorherige
       </Button>
       <Typography variant="body1">
-        Seite {currentPage} von {totalPages}
+        {totalPages === 0 ? "Keine Ergebnisse" : `Seite ${currentPage} von ${totalPages}`}
       </Typography>
       <Button
         variant="outlined"

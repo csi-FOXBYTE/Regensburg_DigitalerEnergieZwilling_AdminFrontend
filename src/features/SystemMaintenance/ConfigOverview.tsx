@@ -33,7 +33,7 @@ export interface EditState {
     key: string;
     label: string;
     value: string | number;
-    type?: "text" | "number" | "string" | "color" | "select";
+    type?: "text" | "number" | "color" | "select";
     required?: boolean;
   }>;
   onSave: (strings: Record<string, string>, numbers: Record<string, number>) => void;
@@ -193,17 +193,17 @@ export function ConfigOverview() {
   const handleSaveAll = (fileName: string) => {
     if (!fileName.endsWith(".json")) {
       toast.error(`Konfigurationsdatei muss mit .json enden`);
-    } else if (configFiles.find((file) => file.value == fileName)) {
+    } else if (configFiles.find((file) => file.value === fileName)) {
       toast.error(`Es existiert schon eine Datei mit den Namen „${fileName}" `);
     } else {
       setConfigFiles((prev) => [...prev, { value: fileName }]);
-      setselectedConfigFile(fileName);
+      setSelectedConfigFile(fileName);
       toast.success(`Konfiguration gespeichert als „${fileName}"`);
       // Deal with new config that is contained in the nanostore
     }
   };
 
-  const [selectedConfigFile, setselectedConfigFile] = useState<string>(
+  const [selectedConfigFile, setSelectedConfigFile] = useState<string>(
     configFiles[2]!.value,
   );
 
@@ -217,7 +217,7 @@ export function ConfigOverview() {
   );
   const canSave = yearBandValidation.valid && energyClassValidation.valid;
   return (
-    <Box sx={{ width: "full" }}>
+    <Box sx={{ width: "100%" }}>
       <Box
         sx={{
           maxWidth: 1170,
@@ -247,7 +247,7 @@ export function ConfigOverview() {
             select
             label="Konfigurationsdatei"
             value={selectedConfigFile}
-            onChange={(e) => setselectedConfigFile(e.target.value)}
+            onChange={(e) => setSelectedConfigFile(e.target.value)}
             sx={{ width: 250 }}
           >
             {configFiles.map((option) => (

@@ -1,4 +1,11 @@
 import { HeatFlowDirection } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
+
+const HEAT_FLOW_LABELS: Record<HeatFlowDirection, string> = {
+  [HeatFlowDirection.UPWARD]: "Aufwärts",
+  [HeatFlowDirection.DOWNWARD]: "Abwärts",
+  [HeatFlowDirection.HORIZONTAL]: "Horizontal",
+};
+
 import {
   Table,
   TableBody,
@@ -24,14 +31,6 @@ export default function SurfaceTempResistenceSection({
   expandedSections: Record<string, boolean>;
   toggleSection: (section: string) => void;
 }) {
-  const lookUpHeatFlowEnum = (key: HeatFlowDirection) => {
-    const lookUpTable: Record<HeatFlowDirection, string> = {
-      [HeatFlowDirection.UPWARD]: "Aufwärts",
-      [HeatFlowDirection.DOWNWARD]: "Abwärts",
-      [HeatFlowDirection.HORIZONTAL]: "Horinzontal",
-    };
-    return lookUpTable[key];
-  };
   return (
     <CollapsibleSection
       sectionKey="surfaceTempResistence"
@@ -57,7 +56,7 @@ export default function SurfaceTempResistenceSection({
                       align="center"
                       sx={{ fontWeight: 700 }}
                     >
-                      {lookUpHeatFlowEnum(entry.key)}
+                      {HEAT_FLOW_LABELS[entry.key]}
                     </TableCell>
                   ))}
                 </TableRow>

@@ -51,6 +51,20 @@ export default function BuildingMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const onBuildingClickRef = useRef(onBuildingClick);
+
+  // Keep ref in sync without triggering the marker-rebuild effect
+  useEffect(() => {
+    onBuildingClickRef.current = onBuildingClick;
+  });
+
+  // Destroy map on unmount to avoid Leaflet memory leaks
+  useEffect(() => {
+    return () => {
+      mapInstanceRef.current?.remove();
+      mapInstanceRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -103,9 +117,7 @@ export default function BuildingMap({
           </div>`,
         );
 
-      if (onBuildingClick) {
-        marker.on("click", () => onBuildingClick(record));
-      }
+      marker.on("click", () => onBuildingClickRef.current?.(record));
 
       markersRef.current.push(marker);
     });
@@ -113,7 +125,7 @@ export default function BuildingMap({
     return () => {
       markersRef.current.forEach((m) => m.remove());
     };
-  }, [buildings, selectedBuildingId, onBuildingClick]);
+  }, [buildings, selectedBuildingId]);
 
   return (
     <div

@@ -168,31 +168,6 @@ export function GeneralParametersSection({
             }
           />
           <Box />
-          <Typography>Heizgradtage [Kd]</Typography>
-          <TextField
-            size="small"
-            type="number"
-            value={configStore.heat.heatingDegreeDays}
-            onChange={(e) =>
-              updateSimpleValue(
-                "heat.heatingDegreeDays",
-                parseFloat(e.target.value),
-              )
-            }
-          />
-
-          <Typography>Brauchwasserbedarf je Fläche [kWh/m²]</Typography>
-          <TextField
-            size="small"
-            type="number"
-            value={configStore.heat.hotWaterEnergyDemandFromAreaFactor}
-            onChange={(e) =>
-              updateSimpleValue(
-                "heat.hotWaterEnergyDemandFromAreaFactor",
-                parseFloat(e.target.value),
-              )
-            }
-          />
           <Box />
           <Box />
           <Box />

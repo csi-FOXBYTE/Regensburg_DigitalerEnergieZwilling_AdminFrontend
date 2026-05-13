@@ -15,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
-import { useContext } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import {
   BUILDING_TYPE_SELECTIONS,
   resolveLabel,
@@ -28,13 +28,29 @@ export default function DashboardPage() {
   const { records } = useContext(RecordsContext)!;
   const navigate = useNavigate();
 
-  const neuCount = records.filter((r) => r.status === "NEU").length;
-  const inPruefungCount = records.filter(
-    (r) => r.status === "IN_PRUEFUNG",
-  ).length;
-  const freigegebenCount = records.filter(
-    (r) => r.status === "FREIGEGEBEN",
-  ).length;
+  const statusCounts = useMemo(() => {
+    const counts = { NEU: 0, IN_PRUEFUNG: 0, FREIGEGEBEN: 0, ABGELEHNT: 0 };
+    for (const r of records) counts[r.status]++;
+    return counts;
+  }, [records]);
+
+  const recentRecords = useMemo(
+    () =>
+      [...records]
+        .sort(
+          (a, b) =>
+            new Date(b.receivedDate).getTime() -
+            new Date(a.receivedDate).getTime(),
+        )
+        .slice(0, 5),
+    [records],
+  );
+
+  const handleBuildingClick = useCallback(
+    (r: (typeof records)[number]) =>
+      navigate({ to: "/record/$id", params: { id: r.id } }),
+    [navigate],
+  );
 
   const stats = [
     {
@@ -45,13 +61,13 @@ export default function DashboardPage() {
     },
     {
       title: "Neu",
-      value: neuCount,
+      value: statusCounts.NEU,
       icon: <ErrorOutlineIcon sx={{ fontSize: 28, color: "primary.main" }} />,
       bgColor: "primary.50",
     },
     {
       title: "Freigegeben",
-      value: freigegebenCount,
+      value: statusCounts.FREIGEGEBEN,
       icon: (
         <CheckCircleOutlineIcon sx={{ fontSize: 28, color: "success.main" }} />
       ),
@@ -59,21 +75,14 @@ export default function DashboardPage() {
     },
     {
       title: "In Prüfung",
-      value: inPruefungCount,
+      value: statusCounts.IN_PRUEFUNG,
       icon: <HourglassEmptyIcon sx={{ fontSize: 28, color: "warning.main" }} />,
       bgColor: "warning.50",
     },
   ];
 
-  const recentRecords = [...records]
-    .sort(
-      (a, b) =>
-        new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime(),
-    )
-    .slice(0, 5);
-
   return (
-    <Box sx={{ width: "full" }}>
+    <Box sx={{ width: "100%" }}>
       <Box
         sx={{
           maxWidth: 1170,
@@ -82,7 +91,6 @@ export default function DashboardPage() {
           display: "flex",
           flexDirection: "column",
           gap: 3,
-          fontFamily: "sans-serif",
         }}
       >
         <Box>
@@ -222,7 +230,7 @@ export default function DashboardPage() {
                                 >
                                   {new Date(
                                     record.receivedDate,
-                                  ).toLocaleDateString("de-DE", {
+                                  ).toLocaleString("de-DE", {
                                     day: "2-digit",
                                     month: "2-digit",
                                     year: "numeric",
@@ -291,9 +299,7 @@ export default function DashboardPage() {
                 {/* }   <MapWithControls /> */}
                 <BuildingMap
                   buildings={records}
-                  onBuildingClick={(r) =>
-                    navigate({ to: "/record/$id", params: { id: r.id } })
-                  }
+                  onBuildingClick={handleBuildingClick}
                 />
               </Box>
             </CardContent>

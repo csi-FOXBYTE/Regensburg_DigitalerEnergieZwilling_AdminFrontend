@@ -69,7 +69,7 @@ export default function UgdSection({
                 onChange={(e) =>
                   updateSimpleValue(
                     "bottomFloor.heatLossFactor",
-                    e.target.value,
+                    parseFloat(e.target.value),
                   )
                 }
               />
@@ -82,7 +82,7 @@ export default function UgdSection({
                 onChange={(e) =>
                   updateSimpleValue(
                     "bottomFloor.assumedInsulationThickness",
-                    e.target.value,
+                    parseFloat(e.target.value),
                   )
                 }
               />
@@ -97,7 +97,7 @@ export default function UgdSection({
                 onChange={(e) =>
                   updateSimpleValue(
                     "bottomFloor.thermalConductivity",
-                    e.target.value,
+                    parseFloat(e.target.value),
                   )
                 }
               />
@@ -125,7 +125,7 @@ export default function UgdSection({
                   >
                     <Typography sx={{ minWidth: 220 }} variant="body2">
                       Beheizter Keller:{" "}
-                      {String(entry.key) == "true" ? "ja" : "nein"}
+                      {entry.key ? "ja" : "nein"}
                     </Typography>
 
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>

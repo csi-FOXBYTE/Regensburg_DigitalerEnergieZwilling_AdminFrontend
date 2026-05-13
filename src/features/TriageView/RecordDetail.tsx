@@ -94,7 +94,7 @@ export function RecordDetail({ id }: { id: string }) {
           </Typography>
           <Button
             variant="outlined"
-            onClick={() => navigate({ to: "/maintenance" })}
+            onClick={() => navigate({ to: "/dashboard" })}
           >
             Zurück zur Übersicht
           </Button>
@@ -167,14 +167,22 @@ export function RecordDetail({ id }: { id: string }) {
       resolvedBy: currentUser?.name ?? null,
     });
     addAuditEntry("approve", record, currentUser, notes.trim() || undefined);
-    siblingsToAutoDecline.forEach((sibling) =>
+    siblingsToAutoDecline.forEach((sibling) => {
+      updateRecord({
+        ...sibling,
+        status: "ABGELEHNT",
+        rejectedDueToApprovalOf: record.id,
+        rejectedDueToApprovalOfLabel: record.variantLabel ?? record.id,
+        resolvedAt: new Date(),
+        resolvedBy: null,
+      });
       addAuditEntry(
         "auto_decline",
         sibling,
         null,
         `Automatisch abgelehnt durch Freigabe von ${record.variantLabel ?? record.id}`,
-      ),
-    );
+      );
+    });
     hasChangesRef.current = false;
     toast.success("Datensatz freigegeben.");
   };
@@ -187,7 +195,7 @@ export function RecordDetail({ id }: { id: string }) {
   };
 
   return (
-    <Box sx={{ width: "full" }}>
+    <Box sx={{ width: "100%" }}>
       <Box
         sx={{
           maxWidth: 1170,

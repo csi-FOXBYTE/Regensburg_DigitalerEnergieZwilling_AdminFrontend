@@ -3,7 +3,6 @@ import { useAuth } from "@/components/AuthContext";
 import { RecordsContext } from "@/components/RecordsContext";
 import { addAuditEntry } from "@/hooks/auditLog";
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "./parts/DeleteDialog";
@@ -14,7 +13,6 @@ import TableView from "./parts/Table";
 export function Dashboard() {
   const { records, updateRecord, setRecords } = useContext(RecordsContext)!;
   const { currentUser } = useAuth();
-  const navigate = useNavigate();
 
   const [addressFilter, setAddressFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -85,10 +83,11 @@ export function Dashboard() {
   }, [filteredAndSortedRecords]);
 
   const totalPages = Math.ceil(deduplicatedRecords.length / itemsPerPage);
+  const effectivePage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
   const paginatedRecords = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    const startIndex = (effectivePage - 1) * itemsPerPage;
     return deduplicatedRecords.slice(startIndex, startIndex + itemsPerPage);
-  }, [deduplicatedRecords, currentPage, itemsPerPage]);
+  }, [deduplicatedRecords, effectivePage, itemsPerPage]);
 
 
   const handleAssignToMe = useCallback(
@@ -210,7 +209,6 @@ export function Dashboard() {
             <TableView
               records={paginatedRecords}
               currentUserName={currentUser?.name}
-              navigate={navigate}
               handleAssignToMe={handleAssignToMe}
               setRecordToDelete={setRecordToDelete}
               sortBy={sortBy}
@@ -220,7 +218,7 @@ export function Dashboard() {
             />
             <PaginationView
               setCurrentPage={setCurrentPage}
-              currentPage={currentPage}
+              currentPage={effectivePage}
               totalPages={totalPages}
             />
           </CardContent>
