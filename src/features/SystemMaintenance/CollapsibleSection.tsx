@@ -39,7 +39,7 @@ export function CollapsibleSection({
         </Box>
         {action}
       </Box>
-      <Collapse in={expandedSections[sectionKey]}>{children}</Collapse>
+      <Collapse in={expandedSections[sectionKey]} mountOnEnter unmountOnExit>{children}</Collapse>
     </Paper>
   );
 }
