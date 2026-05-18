@@ -1,5 +1,5 @@
 services:
-  dev:
+  admin-frontend:
     image: mcr.microsoft.com/devcontainers/base:ubuntu
     volumes:
       - ..:/workspace:cached
@@ -9,3 +9,10 @@ services:
       - "8090:8090"
     env_file:
       - .env
+    networks:
+      - rg-det-shared
+
+networks:
+  rg-det-shared:
+    name: rg-det-shared
+    driver: bridge

@@ -1,8 +1,7 @@
 import theme from "@/theme/theme";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { Box, Button, Divider, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { useAuth } from "./AuthContext";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard" },
@@ -19,16 +18,11 @@ function getTabValue(pathname: string): number | false {
 }
 
 export function AppHeader() {
-  const { currentUser, logout } = useAuth();
+  const currentUser = useCurrentUser();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const tabValue = getTabValue(pathname);
-
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/login" });
-  };
 
   return (
     <Box
@@ -76,33 +70,11 @@ export function AppHeader() {
             py: 1.5,
           }}
         >
-          {/* Utility links */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography
-              sx={{ fontSize: 14, lineHeight: "22px", color: "#757575" }}
-            >
-              {currentUser?.name}
-            </Typography>
-            <Divider orientation="vertical" flexItem />
-            <Button
-              size="small"
-              variant="text"
-              endIcon={<LogoutIcon sx={{ fontSize: "14px !important" }} />}
-              onClick={handleLogout}
-              sx={{
-                minWidth: 0,
-                px: 0,
-                fontSize: 14,
-                lineHeight: "22px",
-                color: "#757575",
-                textTransform: "none",
-                fontWeight: 400,
-                "&:hover": { backgroundColor: "transparent", color: "black" },
-              }}
-            >
-              Abmelden
-            </Button>
-          </Box>
+          <Typography
+            sx={{ fontSize: 14, lineHeight: "22px", color: "#757575" }}
+          >
+            {currentUser?.preferred_username}
+          </Typography>
 
           {/* Logo */}
           <Box

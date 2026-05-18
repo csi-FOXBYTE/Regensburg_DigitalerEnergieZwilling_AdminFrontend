@@ -1,8 +1,7 @@
 import { statusConfig } from "@/assets/types";
-import { useAuth } from "@/components/AuthContext";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { RecordsContext } from "@/components/RecordsContext";
-import { addAuditEntry } from "@/hooks/auditLog";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -41,7 +40,7 @@ import { config } from "../../hooks/store";
 
 export function RecordDetail({ id }: { id: string }) {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const currentUser = useCurrentUser();
   const { records, updateRecord, setRecords } = useContext(RecordsContext)!;
   const cfg = useStore(config);
   const record = useMemo(
@@ -67,13 +66,12 @@ export function RecordDetail({ id }: { id: string }) {
     return records.filter((r) => r.variantGroup === record.variantGroup);
   }, [record, records]);
 
-  // Auto-save notes when navigating away, and log the action
+  // Auto-save notes when navigating away
   useEffect(() => {
     return () => {
       if (hasChangesRef.current && snapshotRef.current.record) {
-        const { record, notes, currentUser } = snapshotRef.current;
+        const { record, notes } = snapshotRef.current;
         updateRecordRef.current({ ...record, notes });
-        addAuditEntry("note", record, currentUser, notes.trim() || undefined);
       }
     };
   }, []);
@@ -103,7 +101,8 @@ export function RecordDetail({ id }: { id: string }) {
     );
   }
 
-  const isAssignedToMe = record.assignedTo === currentUser?.name;
+  const isAssignedToMe =
+    record.assignedTo === currentUser?.preferred_username;
   const isAssignedToOther = !!record.assignedTo && !isAssignedToMe;
   const canAssign =
     record.status === "NEU" && !record.assignedTo && !!currentUser;
@@ -112,14 +111,13 @@ export function RecordDetail({ id }: { id: string }) {
   const StatusIcon = statusConfig[record.status].icon;
 
   const handleAssignToMe = () => {
-    if (!currentUser) return toast.error("Bitte zuerst einloggen.");
+    if (!currentUser) return toast.error("Kein Benutzer — Token fehlt.");
     updateRecord({
       ...record,
       status: "IN_PRUEFUNG",
-      assignedTo: currentUser.name,
+      assignedTo: currentUser.preferred_username,
       assignedAt: new Date(),
     });
-    addAuditEntry("assign", record, currentUser);
     toast.success("Datensatz zugewiesen. Status: In Prüfung");
   };
 
@@ -131,7 +129,6 @@ export function RecordDetail({ id }: { id: string }) {
       assignedAt: null,
       notes: "",
     });
-    addAuditEntry("deassign", record, currentUser);
     setNotes("");
     hasChangesRef.current = false;
     toast.success("Zuweisung aufgehoben.");
@@ -145,9 +142,8 @@ export function RecordDetail({ id }: { id: string }) {
       status: "ABGELEHNT",
       notes,
       resolvedAt: new Date(),
-      resolvedBy: currentUser?.name ?? null,
+      resolvedBy: currentUser?.preferred_username ?? null,
     });
-    addAuditEntry("decline", record, currentUser, notes.trim());
     hasChangesRef.current = false;
     toast.success("Datensatz abgelehnt.");
   };
@@ -164,9 +160,8 @@ export function RecordDetail({ id }: { id: string }) {
       status: "FREIGEGEBEN",
       notes,
       resolvedAt: new Date(),
-      resolvedBy: currentUser?.name ?? null,
+      resolvedBy: currentUser?.preferred_username ?? null,
     });
-    addAuditEntry("approve", record, currentUser, notes.trim() || undefined);
     siblingsToAutoDecline.forEach((sibling) => {
       updateRecord({
         ...sibling,
@@ -176,19 +171,12 @@ export function RecordDetail({ id }: { id: string }) {
         resolvedAt: new Date(),
         resolvedBy: null,
       });
-      addAuditEntry(
-        "auto_decline",
-        sibling,
-        null,
-        `Automatisch abgelehnt durch Freigabe von ${record.variantLabel ?? record.id}`,
-      );
     });
     hasChangesRef.current = false;
     toast.success("Datensatz freigegeben.");
   };
 
   const handleDelete = () => {
-    addAuditEntry("delete_building", record, currentUser);
     setRecords((prev) => prev.filter((r) => r.id !== record.id));
     toast.success("Datensatz gelöscht.");
     navigate({ to: "/dashboard" });
