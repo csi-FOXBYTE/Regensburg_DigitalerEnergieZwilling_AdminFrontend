@@ -208,11 +208,19 @@ export function ConfigOverview() {
   );
 
   const yearBandValidation = useMemo(
-    () => validateYearBands(configStore.general.generalYearBands as YearBandEntry[]),
+    () => validateYearBands(
+      [...(configStore.general.generalYearBands as YearBandEntry[])].sort(
+        (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
+      ),
+    ),
     [configStore.general.generalYearBands],
   );
   const energyClassValidation = useMemo(
-    () => validateEnergyClasses(configStore.general.energyEfficiencyClasses as EnergyEfficiencyEntry[]),
+    () => validateEnergyClasses(
+      [...(configStore.general.energyEfficiencyClasses as EnergyEfficiencyEntry[])].sort(
+        (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
+      ),
+    ),
     [configStore.general.energyEfficiencyClasses],
   );
   const canSave = yearBandValidation.valid && energyClassValidation.valid;
