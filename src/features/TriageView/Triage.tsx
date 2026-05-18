@@ -1,7 +1,6 @@
 import type { BuildingRecord } from "@/assets/types";
-import { useAuth } from "@/components/AuthContext";
 import { RecordsContext } from "@/components/RecordsContext";
-import { addAuditEntry } from "@/hooks/auditLog";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useContext, useMemo, useState } from "react";
@@ -13,7 +12,7 @@ import TableView from "./parts/Table";
 
 export function Dashboard() {
   const { records, updateRecord, setRecords } = useContext(RecordsContext)!;
-  const { currentUser } = useAuth();
+  const currentUser = useCurrentUser();
   const navigate = useNavigate();
 
   const [addressFilter, setAddressFilter] = useState("");
@@ -34,7 +33,9 @@ export function Dashboard() {
         .includes(addressFilter.toLowerCase());
       const matchesStatus =
         statusFilter === "all" || record.status === statusFilter;
-      const matchesMe = !myRecordsOn || record.assignedTo === currentUser?.name;
+      const matchesMe =
+        !myRecordsOn ||
+        record.assignedTo === currentUser?.preferred_username;
       return matchesAddress && matchesStatus && matchesMe;
     });
 
@@ -90,11 +91,13 @@ export function Dashboard() {
     return deduplicatedRecords.slice(startIndex, startIndex + itemsPerPage);
   }, [deduplicatedRecords, currentPage, itemsPerPage]);
 
-
   const handleAssignToMe = useCallback(
     (record: BuildingRecord) => {
-      if (!currentUser) return toast.error("Bitte zuerst einloggen.");
-      if (record.assignedTo && record.assignedTo !== currentUser.name)
+      if (!currentUser) return toast.error("Kein Benutzer — Token fehlt.");
+      if (
+        record.assignedTo &&
+        record.assignedTo !== currentUser.preferred_username
+      )
         return toast.error(
           "Dieser Datensatz ist bereits einem anderen Prüfer zugewiesen.",
         );
@@ -103,10 +106,9 @@ export function Dashboard() {
       updateRecord({
         ...record,
         status: "IN_PRUEFUNG",
-        assignedTo: currentUser.name,
+        assignedTo: currentUser.preferred_username,
         assignedAt: new Date(),
       });
-      addAuditEntry("assign", record, currentUser);
       toast.success("Datensatz zugewiesen. Status: In Prüfung");
     },
     [currentUser, updateRecord],
@@ -114,13 +116,11 @@ export function Dashboard() {
 
   const handleDelete = useCallback(
     (id: string) => {
-      const record = records.find((r) => r.id === id);
-      if (record) addAuditEntry("delete_record", record, currentUser);
       setRecords((prev) => prev.filter((r) => r.id !== id));
       setRecordToDelete(null);
       toast.success("Datensatz wurde gelöscht.");
     },
-    [setRecords, records, currentUser],
+    [setRecords],
   );
 
   const resetSort = useCallback(() => {
@@ -155,12 +155,6 @@ export function Dashboard() {
             assignedAt: null,
             notes: "",
           });
-          addAuditEntry(
-            "auto_deassign",
-            record,
-            null,
-            `72h Timeout (zugewiesen an ${record.assignedTo})`,
-          );
           toast.info(`Datensatz ${record.id} nach 72h zurückgesetzt.`);
         }
       });
@@ -191,8 +185,14 @@ export function Dashboard() {
         <FiltersControls
           refreshData={refreshData}
           addressFilter={addressFilter}
-          setAddressFilter={(v) => { setAddressFilter(v); setCurrentPage(1); }}
-          setStatusFilter={(v) => { setStatusFilter(v); setCurrentPage(1); }}
+          setAddressFilter={(v) => {
+            setAddressFilter(v);
+            setCurrentPage(1);
+          }}
+          setStatusFilter={(v) => {
+            setStatusFilter(v);
+            setCurrentPage(1);
+          }}
           statusFilter={statusFilter}
           resetSort={resetSort}
           itemsPerPage={itemsPerPage}
@@ -201,7 +201,10 @@ export function Dashboard() {
             setCurrentPage(1);
           }}
           myRecordsOn={myRecordsOn}
-          setMyRecordsOn={(v) => { setMyRecordsOn(v); setCurrentPage(1); }}
+          setMyRecordsOn={(v) => {
+            setMyRecordsOn(v);
+            setCurrentPage(1);
+          }}
         />
 
         {/* Table + Pagination */}
@@ -209,7 +212,7 @@ export function Dashboard() {
           <CardContent sx={{ pt: 2 }}>
             <TableView
               records={paginatedRecords}
-              currentUserName={currentUser?.name}
+              currentUserName={currentUser?.preferred_username}
               navigate={navigate}
               handleAssignToMe={handleAssignToMe}
               setRecordToDelete={setRecordToDelete}

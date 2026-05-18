@@ -1,8 +1,8 @@
 {
   "name": "admin-frontend-dev-container",
   "dockerComposeFile": "docker-compose.yml",
-  "service": "dev",
-  "runServices": ["dev"],
+  "service": "admin-frontend",
+  "runServices": ["admin-frontend"],
   "workspaceFolder": "/workspace",
 
   "features": {
