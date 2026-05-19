@@ -1,27 +1,31 @@
+# ==========================================
+# Stage 1: Build
+# ==========================================
 FROM node:22-alpine AS builder
+
+RUN corepack enable pnpm
+
 WORKDIR /app
 
-ARG GITHUB_TOKEN
-ENV GITHUB_TOKEN=$GITHUB_TOKEN
+RUN chown -R 1000:1000 /app
+USER 1000:1000
 
-RUN npm install -g pnpm
+COPY --chown=1000:1000 package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN --mount=type=secret,id=github_token,env=PACKAGE_TOKEN pnpm install --frozen-lockfile
 
-COPY package.json pnpm-lock.yaml .npmrc ./
-RUN pnpm install
+COPY --chown=1000:1000 . .
+RUN pnpm run build
 
-COPY . .
-RUN pnpm build
+# ==========================================
+# Stage 2: Production (nginx non-root)
+# ==========================================
+FROM nginxinc/nginx-unprivileged:alpine
 
-# ---- runtime ----
-FROM node:22-alpine
-WORKDIR /app
+COPY --chown=101:101 nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder --chown=101:101 /app/dist /usr/share/nginx/html
 
-COPY --from=builder /app/dist ./dist
-COPY server.mjs .
+USER 101:101
 
-RUN mkdir -p /data
+EXPOSE 8080
 
-VOLUME ["/data"]
-EXPOSE 8090
-
-CMD ["node", "server.mjs"]
+CMD ["nginx", "-g", "daemon off;"]
