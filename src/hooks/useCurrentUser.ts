@@ -1,24 +1,17 @@
-import { jwtDecode } from "jwt-decode";
+import { getApiAdminAuthVerify } from "@/api/api.gen";
+import type { GetApiAdminAuthVerify200AccessToken } from "@/api/api.gen";
+import { useQuery } from "@tanstack/react-query";
 
-export interface JwtClaims {
-  sub: string;
-  preferred_username: string;
-  email: string;
-  realm_access?: { roles: string[] };
-  resource_access?: { [client: string]: { roles: string[] } };
-  exp: number;
-  iat: number;
+export type CurrentUser = GetApiAdminAuthVerify200AccessToken;
+
+export function useCurrentUser(): CurrentUser | null {
+  const { data } = useQuery({
+    queryKey: ["/api/admin/auth/verify"],
+    queryFn: getApiAdminAuthVerify,
+  });
+  return data?.accessToken ?? null;
 }
 
-export function useCurrentUser(): JwtClaims | null {
-  if (!import.meta.env.DEV) return null;
-
-  const token = import.meta.env.VITE_DEV_ACCESS_TOKEN;
-  if (!token) return null;
-
-  try {
-    return jwtDecode<JwtClaims>(token);
-  } catch {
-    return null;
-  }
+export function getDisplayName(user: CurrentUser | null | undefined): string {
+  return user?.name ?? user?.email ?? "Unbekannt";
 }

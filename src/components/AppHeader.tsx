@@ -1,7 +1,7 @@
 import theme from "@/theme/theme";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard" },
@@ -73,7 +73,7 @@ export function AppHeader() {
           <Typography
             sx={{ fontSize: 14, lineHeight: "22px", color: "#757575" }}
           >
-            {currentUser?.preferred_username}
+            {getDisplayName(currentUser)}
           </Typography>
 
           {/* Logo */}

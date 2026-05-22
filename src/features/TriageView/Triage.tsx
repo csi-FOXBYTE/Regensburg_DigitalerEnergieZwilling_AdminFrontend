@@ -1,6 +1,6 @@
 import type { BuildingRecord } from "@/assets/types";
 import { RecordsContext } from "@/components/RecordsContext";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import { useCallback, useContext, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ export function Dashboard() {
         statusFilter === "all" || record.status === statusFilter;
       const matchesMe =
         !myRecordsOn ||
-        record.assignedTo === currentUser?.preferred_username;
+        record.assignedTo === getDisplayName(currentUser);
       return matchesAddress && matchesStatus && matchesMe;
     });
 
@@ -95,7 +95,7 @@ export function Dashboard() {
       if (!currentUser) return toast.error("Kein Benutzer — Token fehlt.");
       if (
         record.assignedTo &&
-        record.assignedTo !== currentUser.preferred_username
+        record.assignedTo !== getDisplayName(currentUser)
       )
         return toast.error(
           "Dieser Datensatz ist bereits einem anderen Prüfer zugewiesen.",
@@ -105,7 +105,7 @@ export function Dashboard() {
       updateRecord({
         ...record,
         status: "IN_PRUEFUNG",
-        assignedTo: currentUser.preferred_username,
+        assignedTo: getDisplayName(currentUser),
         assignedAt: new Date(),
       });
       toast.success("Datensatz zugewiesen. Status: In Prüfung");
@@ -211,7 +211,7 @@ export function Dashboard() {
           <CardContent sx={{ pt: 2 }}>
             <TableView
               records={paginatedRecords}
-              currentUserName={currentUser?.preferred_username}
+              currentUserName={getDisplayName(currentUser)}
               handleAssignToMe={handleAssignToMe}
               setRecordToDelete={setRecordToDelete}
               sortBy={sortBy}
