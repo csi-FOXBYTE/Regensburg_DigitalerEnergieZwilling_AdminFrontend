@@ -61,8 +61,33 @@ export default function ComunityParameterSection({
               ))}
             </TextField>
           </Tooltip>
-
           <Box />
+          <Typography>Standard-Stromtyp</Typography>
+          <Tooltip
+            title={
+              configStore.heat.electricityTypes.find(
+                (t) => t.value === configStore.heat.defaultElectricityType,
+              )?.localization.de ?? ""
+            }
+            placement="top"
+            arrow
+            slotProps={{ tooltip: { sx: { fontSize: "0.85rem" } } }}
+          >
+            <TextField
+              select
+              size="small"
+              value={configStore.heat.defaultElectricityType}
+              onChange={(e) =>
+                updateSimpleValue("heat.defaultElectricityType", e.target.value)
+              }
+            >
+              {configStore.heat.electricityTypes.map((t) => (
+                <MenuItem key={t.value} value={t.value}>
+                  {t.localization.de}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Tooltip>
           <Typography>Heizflächenart</Typography>
           <Tooltip
             title={
@@ -92,7 +117,6 @@ export default function ComunityParameterSection({
               ))}
             </TextField>
           </Tooltip>
-
           <Box />
           <Box />
           <Box />

@@ -106,7 +106,49 @@ function validateYearBands(bands: YearBandEntry[]): BandValidationResult {
   return { valid: errors.length === 0, errors };
 }
 
-function validateEnergyClasses(bands: EnergyEfficiencyEntry[]): BandValidationResult {
+type RangeBand = { from?: number; to?: number };
+
+function validateCorrectionFactors(bands: RangeBand[]): BandValidationResult {
+  const errors: { index: number; error: string }[] = [];
+  if (bands.length === 0) return { valid: true, errors: [] };
+  if (bands.length === 1) {
+    if (bands[0]!.from !== undefined || bands[0]!.to !== undefined)
+      errors.push({ index: 0, error: YEAR_BAND_ERRORS["single_must_be_empty"]! });
+    return { valid: errors.length === 0, errors };
+  }
+  bands.forEach((band, i) => {
+    const isFirst = i === 0;
+    const isLast = i === bands.length - 1;
+    if (isFirst) {
+      if (band.to === undefined || band.from !== undefined)
+        errors.push({ index: i, error: YEAR_BAND_ERRORS["first_must_have_only_to"]! });
+    } else if (isLast) {
+      if (band.from === undefined || band.to !== undefined)
+        errors.push({ index: i, error: YEAR_BAND_ERRORS["last_must_have_only_from"]! });
+    } else {
+      if (band.from === undefined || band.to === undefined)
+        errors.push({ index: i, error: YEAR_BAND_ERRORS["middle_must_have_both"]! });
+    }
+    if (i > 0) {
+      const prevTo = bands[i - 1]!.to;
+      const currFrom = band.from;
+      if (prevTo !== undefined && currFrom !== undefined) {
+        if (currFrom > prevTo)
+          errors.push({ index: i, error: YEAR_BAND_ERRORS["gap_between_bands"]! });
+        else if (currFrom < prevTo)
+          errors.push({ index: i, error: YEAR_BAND_ERRORS["overlap_between_bands"]! });
+      }
+    }
+  });
+  return { valid: errors.length === 0, errors };
+}
+
+function validateEnergyClasses(
+  bands: EnergyEfficiencyEntry[],
+  colorMap: { key: string; value: string }[],
+): BandValidationResult {
+  const hasColor = (band: EnergyEfficiencyEntry) =>
+    !!(band.color || colorMap.find((c) => c.key === band.value)?.value);
   const errors: { index: number; error: string }[] = [];
   if (bands.length === 0) return { valid: true, errors: [] };
   if (bands.length === 1) {
@@ -115,7 +157,7 @@ function validateEnergyClasses(bands: EnergyEfficiencyEntry[]): BandValidationRe
       errors.push({ index: 0, error: ENERGY_BAND_ERRORS["single_must_be_empty"]! });
     if (!b.value)
       errors.push({ index: 0, error: ENERGY_BAND_ERRORS["missing_value"]! });
-    if (!b.color)
+    if (!hasColor(b))
       errors.push({ index: 0, error: ENERGY_BAND_ERRORS["missing_color"]! });
     return { valid: errors.length === 0, errors };
   }
@@ -134,7 +176,7 @@ function validateEnergyClasses(bands: EnergyEfficiencyEntry[]): BandValidationRe
     }
     if (!band.value)
       errors.push({ index: i, error: ENERGY_BAND_ERRORS["missing_value"]! });
-    if (!band.color)
+    if (!hasColor(band))
       errors.push({ index: i, error: ENERGY_BAND_ERRORS["missing_color"]! });
     if (i > 0) {
       const prevTo = bands[i - 1]!.to;
@@ -217,13 +259,22 @@ export function ConfigOverview() {
   );
   const energyClassValidation = useMemo(
     () => validateEnergyClasses(
-      [...(configStore.general.energyEfficiencyClasses as EnergyEfficiencyEntry[])].sort(
+      [...(configStore.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[])].sort(
+        (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
+      ),
+      configStore.general.energyEfficiencyClassColors as { key: string; value: string }[],
+    ),
+    [configStore.general.energyEfficiencyClasses, configStore.general.energyEfficiencyClassColors],
+  );
+  const correctionFactorValidation = useMemo(
+    () => validateCorrectionFactors(
+      [...(configStore.general.heatedAirVolumeCorrectionFactor as RangeBand[])].sort(
         (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
       ),
     ),
-    [configStore.general.energyEfficiencyClasses],
+    [configStore.general.heatedAirVolumeCorrectionFactor],
   );
-  const canSave = yearBandValidation.valid && energyClassValidation.valid;
+  const canSave = yearBandValidation.valid && energyClassValidation.valid && correctionFactorValidation.valid;
   return (
     <Box sx={{ width: "100%" }}>
       <Box
@@ -403,6 +454,11 @@ export function ConfigOverview() {
                 ...(energyClassValidation.errors.length > 0
                   ? [
                       `Energieeffizienzklassen: ${energyClassValidation.errors.map((e) => e.error).join(", ")}`,
+                    ]
+                  : []),
+                ...(correctionFactorValidation.errors.length > 0
+                  ? [
+                      `Faktor beheiztes Luftvolumen: ${correctionFactorValidation.errors.map((e) => e.error).join(", ")}`,
                     ]
                   : []),
               ].join(" | ")}

@@ -4,7 +4,6 @@ import {
   Button,
   Collapse,
   IconButton,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -16,7 +15,6 @@ import {
 } from "@mui/material";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-import { CollapsibleSection } from "../CollapsibleSection";
 import {
   addElectricityType,
   config,
@@ -24,8 +22,8 @@ import {
   updateConfig,
   updateElectricityType,
   updateElectricityTypeData,
-  updateSimpleValue,
 } from "../../../hooks/store";
+import { CollapsibleSection } from "../CollapsibleSection";
 import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 const gridSx = {
@@ -163,178 +161,134 @@ export default function ElectricityTypesSection({
         </Button>
       }
     >
-          <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-            <Box sx={{ ...gridSx, mb: 1 }}>
-              <Typography variant="body1">Standard-Stromtyp</Typography>
-              <TextField
-                select
-                size="small"
-                value={configStore.heat.defaultElectricityType}
-                onChange={(e) =>
-                  updateSimpleValue(
-                    "heat.defaultElectricityType",
-                    e.target.value,
-                  )
-                }
-                sx={{ gridColumn: "span 2" }}
-              >
-                {configStore.heat.electricityTypes.map((t) => (
-                  <MenuItem key={t.value} value={t.value}>
-                    {t.localization.de}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-          </Box>
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <Typography sx={{ fontWeight: "bold" }}>Bezeichnung</Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography sx={{ fontWeight: "bold" }}>Aktionen</Typography>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {configStore.heat.electricityTypes.map((item, index) => {
+              const data = configStore.heat.electricityTypeData.find(
+                (d) => d.key === item.value,
+              )?.value;
 
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <Typography sx={{ fontWeight: "bold" }}>
-                      Bezeichnung
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography sx={{ fontWeight: "bold" }}>
-                      Aktionen
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {configStore.heat.electricityTypes.map((item, index) => {
-                  const data = configStore.heat.electricityTypeData.find(
-                    (d) => d.key === item.value,
-                  )?.value;
+              return (
+                <Fragment>
+                  <TableRow hover key={index}>
+                    <TableCell sx={{ fontSize: "medium" }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => toggleType(index)}
+                      >
+                        {expandedTypes[index] ? (
+                          <ExpandMore fontSize="small" />
+                        ) : (
+                          <ChevronRight fontSize="small" />
+                        )}
+                      </IconButton>
+                      {item.localization.de}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditElectricityType(index, item)}
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() =>
+                          handleDeleteConfirm(() => {
+                            deleteElectricityType(item.value);
+                            toast.success("Stromtyp gelöscht");
+                          })
+                        }
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
 
-                  return (
-                    <Fragment>
-                      <TableRow hover key={index}>
-                        <TableCell sx={{ fontSize: "medium" }}>
-                          <IconButton
-                            size="small"
-                            onClick={() => toggleType(index)}
-                          >
-                            {expandedTypes[index] ? (
-                              <ExpandMore fontSize="small" />
-                            ) : (
-                              <ChevronRight fontSize="small" />
-                            )}
-                          </IconButton>
-                          {item.localization.de}
-                        </TableCell>
-                        <TableCell align="right">
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              handleEditElectricityType(index, item)
-                            }
-                          >
-                            <Edit fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              handleDeleteConfirm(() => {
-                                deleteElectricityType(item.value);
-                                toast.success("Stromtyp gelöscht");
-                              })
-                            }
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={2} sx={{ p: 0 }}>
+                      <Collapse in={!!expandedTypes[index]} unmountOnExit>
+                        <Box sx={{ p: 2 }}>
+                          <Box sx={{ ...gridSx, mb: 1.5 }}>
+                            <Typography variant="body2">
+                              Primärenergiefaktor
+                            </Typography>
+                            <TextField
+                              size="small"
+                              type="number"
+                              value={data?.primaryEnergyFactor ?? ""}
+                              onChange={(e) =>
+                                updateElectricityTypeData(item.value, (d) => {
+                                  d.primaryEnergyFactor = parseFloat(
+                                    e.target.value,
+                                  );
+                                })
+                              }
+                            />
+                            <Box />
+                            <Typography variant="body2">
+                              CO₂-Faktor [gCO₂/kWh]
+                            </Typography>
+                            <TextField
+                              size="small"
+                              type="number"
+                              value={data?.co2Factor ?? ""}
+                              onChange={(e) =>
+                                updateElectricityTypeData(item.value, (d) => {
+                                  d.co2Factor = parseFloat(e.target.value);
+                                })
+                              }
+                            />
 
-                      <TableRow>
-                        <TableCell colSpan={2} sx={{ p: 0 }}>
-                          <Collapse in={!!expandedTypes[index]} unmountOnExit>
-                            <Box sx={{ p: 2 }}>
-                              <Box sx={{ ...gridSx, mb: 1.5 }}>
-                                <Typography variant="body2">
-                                  Primärenergiefaktor
-                                </Typography>
-                                <TextField
-                                  size="small"
-                                  type="number"
-                                  value={data?.primaryEnergyFactor ?? ""}
-                                  onChange={(e) =>
-                                    updateElectricityTypeData(
-                                      item.value,
-                                      (d) => {
-                                        d.primaryEnergyFactor = parseFloat(
-                                          e.target.value,
-                                        );
-                                      },
-                                    )
-                                  }
-                                />
-                                <Box />
-                                <Typography variant="body2">
-                                  CO₂-Faktor [gCO₂/kWh]
-                                </Typography>
-                                <TextField
-                                  size="small"
-                                  type="number"
-                                  value={data?.co2Factor ?? ""}
-                                  onChange={(e) =>
-                                    updateElectricityTypeData(
-                                      item.value,
-                                      (d) => {
-                                        d.co2Factor = parseFloat(
-                                          e.target.value,
-                                        );
-                                      },
-                                    )
-                                  }
-                                />
-
-                                <Typography variant="body2">
-                                  Arbeitspreis [€/kWh]
-                                </Typography>
-                                <TextField
-                                  size="small"
-                                  type="number"
-                                  value={data?.unitRate ?? ""}
-                                  onChange={(e) =>
-                                    updateElectricityTypeData(
-                                      item.value,
-                                      (d) => {
-                                        d.unitRate = parseFloat(e.target.value);
-                                      },
-                                    )
-                                  }
-                                />
-                                <Box />
-                                <Typography variant="body2">
-                                  Grundpreis [€/a]
-                                </Typography>
-                                <TextField
-                                  size="small"
-                                  type="number"
-                                  value={data?.baseRate ?? ""}
-                                  onChange={(e) =>
-                                    updateElectricityTypeData(
-                                      item.value,
-                                      (d) => {
-                                        d.baseRate = parseFloat(e.target.value);
-                                      },
-                                    )
-                                  }
-                                />
-                              </Box>
-                            </Box>
-                          </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </Fragment>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                            <Typography variant="body2">
+                              Arbeitspreis [€/kWh]
+                            </Typography>
+                            <TextField
+                              size="small"
+                              type="number"
+                              value={data?.unitRate ?? ""}
+                              onChange={(e) =>
+                                updateElectricityTypeData(item.value, (d) => {
+                                  d.unitRate = parseFloat(e.target.value);
+                                })
+                              }
+                            />
+                            <Box />
+                            <Typography variant="body2">
+                              Grundpreis [€/a]
+                            </Typography>
+                            <TextField
+                              size="small"
+                              type="number"
+                              value={data?.baseRate ?? ""}
+                              onChange={(e) =>
+                                updateElectricityTypeData(item.value, (d) => {
+                                  d.baseRate = parseFloat(e.target.value);
+                                })
+                              }
+                            />
+                          </Box>
+                        </Box>
+                      </Collapse>
+                    </TableCell>
+                  </TableRow>
+                </Fragment>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </CollapsibleSection>
   );
 }
