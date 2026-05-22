@@ -38,14 +38,14 @@ export function GeneralParametersSection({
       open: true,
       title: "Korrekturfaktor bearbeiten",
       fields: [
-        { key: "from", label: "Von", value: item.from, type: "number" },
-        { key: "to", label: "Bis", value: item.to, type: "number" },
-        { key: "value", label: "Faktor", value: item.value, type: "number" },
+        { key: "from", label: "Von", value: item.from ?? "", type: "number" },
+        { key: "to", label: "Bis", value: item.to ?? "", type: "number" },
+        { key: "value", label: "Faktor", value: item.value, type: "number", required: true },
       ],
       onSave: (_, numbers) => {
         updateCorrectionFactor(index, (draft) => {
-          draft.from = numbers.from ?? draft.from;
-          draft.to = numbers.to ?? draft.to;
+          draft.from = numbers.from;
+          draft.to = numbers.to;
           draft.value = numbers.value ?? draft.value;
         });
         toast.success("Korrekturfaktor aktualisiert");

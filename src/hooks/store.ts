@@ -36,7 +36,7 @@ export interface EnergyEfficiencyEntry {
   to?: number;
   from?: number;
   value: EnergyEfficiencyClass;
-  color?: string;
+  color: string;
 }
 
 export interface YearBandEntry {
@@ -44,29 +44,7 @@ export interface YearBandEntry {
   to?: number;
 }
 
-export const DEFAULT_ENERGY_CLASS_COLORS: Record<string, string> = {
-  "A+": "#008542",
-  A: "#3aaa35",
-  B: "#94c11c",
-  C: "#c7d21f",
-  D: "#f9e000",
-  E: "#f6a800",
-  F: "#f07d00",
-  G: "#e94e0f",
-  H: "#e2001a",
-};
-
-const withDefaultColors = (cfg: DETConfig): DETConfig =>
-  produce(cfg, (draft) => {
-    draft.general.energyEfficiencyClasses.forEach((entry) => {
-      const e = entry as EnergyEfficiencyEntry;
-      if (!e.color) {
-        e.color = DEFAULT_ENERGY_CLASS_COLORS[e.value] ?? "#6b7280";
-      }
-    });
-  });
-
-export const config = atom<DETConfig>(withDefaultColors(DEFAULT_CONFIG));
+export const config = atom<DETConfig>(DEFAULT_CONFIG);
 
 // Helper function for config-updates: Immer immer nutzen!!
 export const updateConfig = (updater: (draft: DETConfig) => void) => {
@@ -687,9 +665,32 @@ export const updateEnergyEfficiencyClass = (
   updater: (draft: EnergyEfficiencyEntry) => void,
 ) => {
   updateConfig((draft) => {
-    const item = draft.general.energyEfficiencyClasses[index];
-    if (!item) return;
-    updater(item);
+    const rangeItem = draft.general.energyEfficiencyClasses[index];
+    if (!rangeItem) return;
+
+    const colorEntry = draft.general.energyEfficiencyClassColors.find(
+      (e) => e.key === rangeItem.value,
+    );
+    const combined: EnergyEfficiencyEntry = {
+      ...rangeItem,
+      color: colorEntry?.value ?? "",
+    };
+    updater(combined);
+
+    const { color, ...range } = combined;
+    (draft.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[])[index] = range as unknown as EnergyEfficiencyEntry;
+    (draft.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[]).sort(
+      (a, b) => (a.to ?? Infinity) - (b.to ?? Infinity),
+    );
+
+    if (colorEntry) {
+      colorEntry.value = color;
+    } else {
+      draft.general.energyEfficiencyClassColors.push({
+        key: combined.value,
+        value: color,
+      });
+    }
   });
 };
 
@@ -701,9 +702,19 @@ export const deleteEnergyEfficiencyClass = (index: number) => {
 
 export const addEnergyEfficiencyClass = (entry: EnergyEfficiencyEntry) => {
   updateConfig((draft) => {
-    const classes = draft.general.energyEfficiencyClasses as EnergyEfficiencyEntry[];
-    classes.push(entry);
+    const { color, ...range } = entry;
+
+    const classes = draft.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[];
+    classes.push(range as unknown as EnergyEfficiencyEntry);
     classes.sort((a, b) => (a.to ?? Infinity) - (b.to ?? Infinity));
+
+    const colors = draft.general.energyEfficiencyClassColors;
+    const existing = colors.find((c) => c.key === entry.value);
+    if (existing) {
+      existing.value = color;
+    } else {
+      colors.push({ key: entry.value, value: color });
+    }
   });
 };
 
@@ -739,7 +750,9 @@ const applyUValueUpdate = (
   band: YearBandEntry,
   value: number,
 ) => {
-  const row = uValueRows[constructionIndex] as { value: (YearBandEntry & { value: number })[] } | undefined;
+  const row = uValueRows[constructionIndex] as
+    | { value: (YearBandEntry & { value: number })[] }
+    | undefined;
   if (!row) return;
   setValueForBand(row.value, band, value);
 };

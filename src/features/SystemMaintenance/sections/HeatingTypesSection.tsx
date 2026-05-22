@@ -75,7 +75,7 @@ function InlineNumberCell({
     return (
       <Box
         onClick={() => {
-          setDraft(String(value));
+          setDraft(value === 0 ? "" : String(value));
           setEditing(true);
         }}
         sx={{
@@ -88,7 +88,7 @@ function InlineNumberCell({
           "&:hover": { bgcolor: "action.hover" },
         }}
       >
-        {value}
+        {value === 0 ? "" : value}
       </Box>
     );
   }

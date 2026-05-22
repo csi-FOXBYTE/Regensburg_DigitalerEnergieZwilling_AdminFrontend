@@ -1,7 +1,7 @@
+import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 import theme from "@/theme/theme";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard" },
@@ -80,8 +80,9 @@ export function AppHeader() {
           <Box
             component="img"
             src="/logo.png"
+            onClick={() => location.assign("https://www.regensburg.de/")}
             alt="Stadt Regensburg"
-            sx={{ height: 60, width: "auto" }}
+            sx={{ height: 60, width: "auto", cursor: "pointer" }}
           />
         </Box>
       </Box>

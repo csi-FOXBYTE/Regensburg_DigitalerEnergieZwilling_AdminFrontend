@@ -47,8 +47,8 @@ import {
   foerderprogramme,
   updateFoerderprogramm,
 } from "../../../hooks/store";
-import type { DeleteConfirmState } from "../ConfigOverview";
 import { CollapsibleSection } from "../CollapsibleSection";
+import type { DeleteConfirmState } from "../ConfigOverview";
 
 const EMPTY_FORM: Omit<Foerderprogramm, "id"> = {
   name: "",
@@ -151,7 +151,7 @@ function FoerderprogrammDialog({
               type="number"
               value={form.promotionAmount}
               onChange={(e) =>
-                set("promotionAmount", parseFloat(e.target.value) || 0)
+                set("promotionAmount", parseFloat(e.target.value))
               }
               fullWidth
               error={!!errors.promotionAmount}
@@ -166,7 +166,7 @@ function FoerderprogrammDialog({
               type="number"
               value={form.maxPromotionAmount}
               onChange={(e) =>
-                set("maxPromotionAmount", parseFloat(e.target.value) || 0)
+                set("maxPromotionAmount", parseFloat(e.target.value))
               }
               fullWidth
               error={!!errors.maxPromotionAmount}
@@ -316,96 +316,96 @@ export default function FoerderprogrammeSection({
           </Button>
         }
       >
-          {programs.length === 0 ? (
-            <Box sx={{ p: 3, textAlign: "center", color: "text.secondary" }}>
-              <Typography variant="body1">
-                Noch keine Förderprogramme hinterlegt.
-              </Typography>
-            </Box>
-          ) : (
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Beschreibung</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }} align="right">
-                      Förderung
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }} align="right">
-                      Aktionen
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {programs.map((f) => {
-                    return (
-                      <TableRow key={f.id} hover>
-                        <TableCell sx={{ fontSize: "medium" }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 0.5,
-                            }}
-                          >
-                            {f.name}
-                            {f.link && (
-                              <IconButton
-                                size="small"
-                                component="a"
-                                href={f.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                sx={{ p: 0.25 }}
-                              >
-                                <OpenInNew sx={{ fontSize: 14 }} />
-                              </IconButton>
-                            )}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ maxWidth: 260 }}
-                          >
-                            {f.description || "—"}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Chip
-                            label={f.isActive ? "Aktiv" : "Inaktiv"}
-                            size="small"
-                            color={f.isActive ? "success" : "default"}
-                            variant="outlined"
-                          />
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{ whiteSpace: "nowrap", fontWeight: 500 }}
+        {programs.length === 0 ? (
+          <Box sx={{ p: 3, textAlign: "center", color: "text.secondary" }}>
+            <Typography variant="body1">
+              Noch keine Förderprogramme hinterlegt.
+            </Typography>
+          </Box>
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Beschreibung</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="right">
+                    Förderung
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700 }} align="right">
+                    Aktionen
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {programs.map((f) => {
+                  return (
+                    <TableRow key={f.id} hover>
+                      <TableCell sx={{ fontSize: "medium" }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
                         >
-                          {formatPromotion(f)}
-                        </TableCell>
-                        <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                          <IconButton size="small" onClick={() => openEdit(f)}>
-                            <Edit fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDelete(f.id)}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
+                          {f.name}
+                          {f.link && (
+                            <IconButton
+                              size="small"
+                              component="a"
+                              href={f.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              sx={{ p: 0.25 }}
+                            >
+                              <OpenInNew sx={{ fontSize: 14 }} />
+                            </IconButton>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ maxWidth: 260 }}
+                        >
+                          {f.description || "—"}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={f.isActive ? "Aktiv" : "Inaktiv"}
+                          size="small"
+                          color={f.isActive ? "success" : "default"}
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell
+                        align="right"
+                        sx={{ whiteSpace: "nowrap", fontWeight: 500 }}
+                      >
+                        {formatPromotion(f)}
+                      </TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                        <IconButton size="small" onClick={() => openEdit(f)}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDelete(f.id)}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </CollapsibleSection>
 
       <FoerderprogrammDialog

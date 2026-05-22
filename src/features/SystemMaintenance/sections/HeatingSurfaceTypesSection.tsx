@@ -1,16 +1,13 @@
 import { Delete, Edit } from "@mui/icons-material";
 import {
-  Box,
   Button,
   IconButton,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
@@ -21,10 +18,9 @@ import {
   deleteHeatingSurfaceType,
   updateConfig,
   updateHeatingSurfaceType,
-  updateSimpleValue,
 } from "../../../hooks/store";
-import type { DeleteConfirmState, EditState } from "../ConfigOverview";
 import { CollapsibleSection } from "../CollapsibleSection";
+import type { DeleteConfirmState, EditState } from "../ConfigOverview";
 
 export default function HeatingSurfaceTypesSection({
   configStore,
@@ -153,85 +149,53 @@ export default function HeatingSurfaceTypesSection({
         </Button>
       }
     >
-          <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 200px",
-                gap: 1.5,
-                alignItems: "center",
-                mb: 1,
-              }}
-            >
-              <Typography variant="body1">Standard-Heizfläche</Typography>
-              <TextField
-                select
-                size="small"
-                value={configStore.heat.defaultHeatingSurfaceType}
-                onChange={(e) =>
-                  updateSimpleValue(
-                    "heat.defaultHeatingSurfaceType",
-                    e.target.value,
-                  )
-                }
-              >
-                {configStore.heat.heatingSurfaceTypes.map(
-                  (t: { value: string; localization: { de: string } }) => (
-                    <MenuItem key={t.value} value={t.value}>
-                      {t.localization.de}
-                    </MenuItem>
-                  ),
-                )}
-              </TextField>
-            </Box>
-          </Box>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <Typography sx={{ fontWeight: "bold" }}>
-                      Bezeichnung
-                    </Typography>
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <Typography sx={{ fontWeight: "bold" }}>Bezeichnung</Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography sx={{ fontWeight: "bold" }}>Aktionen</Typography>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {configStore.heat.heatingSurfaceTypes.map(
+              (
+                item: { value: string; localization: { de: string } },
+                index: number,
+              ) => (
+                <TableRow key={index} hover>
+                  <TableCell sx={{ fontSize: "medium" }}>
+                    {item.localization.de}
                   </TableCell>
-                  <TableCell align="right">Aktionen</TableCell>
+                  <TableCell align="right">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditHeatingSurfaceType(index)}
+                    >
+                      <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() =>
+                        handleDeleteConfirm(() => {
+                          deleteHeatingSurfaceType(index);
+                          toast.success("Heizflächentyp gelöscht");
+                        })
+                      }
+                    >
+                      <Delete fontSize="small" />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {configStore.heat.heatingSurfaceTypes.map(
-                  (
-                    item: { value: string; localization: { de: string } },
-                    index: number,
-                  ) => (
-                    <TableRow key={index} hover>
-                      <TableCell sx={{ fontSize: "medium" }}>
-                        {item.localization.de}
-                      </TableCell>
-                      <TableCell align="right">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEditHeatingSurfaceType(index)}
-                        >
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() =>
-                            handleDeleteConfirm(() => {
-                              deleteHeatingSurfaceType(index);
-                              toast.success("Heizflächentyp gelöscht");
-                            })
-                          }
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ),
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+              ),
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </CollapsibleSection>
   );
 }
