@@ -103,6 +103,11 @@ const theme = createTheme({
         disableRipple: true,
       },
     },
+    MuiPopover: {
+      defaultProps: {
+        disableScrollLock: true,
+      },
+    },
   },
 });
 
