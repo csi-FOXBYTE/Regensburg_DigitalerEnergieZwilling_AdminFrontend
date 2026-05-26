@@ -2,7 +2,6 @@ import type {
   CarrierSelection,
   DETConfig,
   ElectricityTypeData,
-  EnergyEfficiencyClass,
   HeatFlowDirection,
   PrimaryEnergyCarrierData,
   RangeKey,
@@ -35,7 +34,7 @@ export interface Foerderprogramm {
 export interface EnergyEfficiencyEntry {
   to?: number;
   from?: number;
-  value: EnergyEfficiencyClass;
+  value: string;
   color: string;
 }
 
@@ -678,10 +677,14 @@ export const updateEnergyEfficiencyClass = (
     updater(combined);
 
     const { color, ...range } = combined;
-    (draft.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[])[index] = range as unknown as EnergyEfficiencyEntry;
-    (draft.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[]).sort(
-      (a, b) => (a.to ?? Infinity) - (b.to ?? Infinity),
-    );
+    (
+      draft.general
+        .energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[]
+    )[index] = range as unknown as EnergyEfficiencyEntry;
+    (
+      draft.general
+        .energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[]
+    ).sort((a, b) => (a.to ?? Infinity) - (b.to ?? Infinity));
 
     if (colorEntry) {
       colorEntry.value = color;
@@ -704,7 +707,8 @@ export const addEnergyEfficiencyClass = (entry: EnergyEfficiencyEntry) => {
   updateConfig((draft) => {
     const { color, ...range } = entry;
 
-    const classes = draft.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[];
+    const classes = draft.general
+      .energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[];
     classes.push(range as unknown as EnergyEfficiencyEntry);
     classes.sort((a, b) => (a.to ?? Infinity) - (b.to ?? Infinity));
 

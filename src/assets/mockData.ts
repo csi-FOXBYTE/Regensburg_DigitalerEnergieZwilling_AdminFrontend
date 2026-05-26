@@ -40,6 +40,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: true,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -118,6 +120,8 @@ export const mockRecords: BuildingRecord[] = [
         hasGasSupply: true,
         hasBioGas: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -205,6 +209,8 @@ export const mockRecords: BuildingRecord[] = [
         hasGasSupply: true,
         hasBioGas: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -288,6 +294,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "free_heat_emitter",
         hasGasSupply: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -365,6 +373,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "free_heat_emitter",
         hasGasSupply: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -442,6 +452,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: true,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -524,6 +536,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: true,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -601,6 +615,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "free_heat_emitter",
         hasGasSupply: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -678,6 +694,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "free_heat_emitter",
         hasGasSupply: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -755,6 +773,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: true,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -832,6 +852,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: true,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "renewable",
@@ -919,6 +941,8 @@ export const mockRecords: BuildingRecord[] = [
         hasGasSupply: true,
         hasBioGas: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -998,6 +1022,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: false,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -1077,6 +1103,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: true,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "grid",
@@ -1161,6 +1189,8 @@ export const mockRecords: BuildingRecord[] = [
         heatingSurfaceType: "radiant_surface_heating",
         hasGasSupply: false,
         hasStorage: true,
+        userThermalUnitRate: null,
+        userThermalConsumption: null,
       },
       electricity: {
         electricityType: "renewable",

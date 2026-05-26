@@ -73,13 +73,15 @@ function FoerderprogrammDialog({
   onSave,
 }: FoerderprogrammDialogProps) {
   const [form, setForm] = useState<Omit<Foerderprogramm, "id">>(
-    initial ? { ...initial } : { ...EMPTY_FORM },
+    initial
+      ? ({ ...initial } as Omit<Foerderprogramm, "id">)
+      : { ...EMPTY_FORM },
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const set = (
     key: keyof Omit<Foerderprogramm, "id">,
-    value: Omit<Foerderprogramm, "id">[keyof Omit<Foerderprogramm, "id">],
+    value: Omit<Foerderprogramm, "id">[typeof key],
   ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
@@ -91,6 +93,12 @@ function FoerderprogrammDialog({
     if (isNaN(form.promotionAmount) || form.promotionAmount < 0)
       newErrors.promotionAmount = "Ungültiger Betrag";
     if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    if (form.promotionType === "percent" && form.promotionAmount > 100) {
+      newErrors.promotionAmount =
+        "Prozentualer Betrag darf nicht über 100% liegen";
       setErrors(newErrors);
       return;
     }
@@ -149,31 +157,41 @@ function FoerderprogrammDialog({
                 form.promotionType === "percent" ? "Betrag (%)" : "Betrag (€)"
               }
               type="number"
-              value={form.promotionAmount}
+              value={form.promotionAmount || ""}
               onChange={(e) =>
-                set("promotionAmount", parseFloat(e.target.value))
+                set(
+                  "promotionAmount",
+                  e.target.value === "" ? 0 : parseFloat(e.target.value),
+                )
               }
               fullWidth
               error={!!errors.promotionAmount}
               helperText={errors.promotionAmount}
-              inputProps={{
-                min: 0,
-                step: form.promotionType === "percent" ? 1 : 100,
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                  step: form.promotionType === "percent" ? 1 : 100,
+                },
               }}
             />
             <TextField
               label={"Max. Betrag (€)"}
               type="number"
-              value={form.maxPromotionAmount}
+              value={form.maxPromotionAmount || ""}
               onChange={(e) =>
-                set("maxPromotionAmount", parseFloat(e.target.value))
+                set(
+                  "maxPromotionAmount",
+                  e.target.value === "" ? 0 : parseFloat(e.target.value),
+                )
               }
               fullWidth
               error={!!errors.maxPromotionAmount}
               helperText={errors.maxPromotionAmount}
-              inputProps={{
-                min: 0,
-                step: form.promotionType === "percent" ? 1 : 100,
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                  step: form.promotionType === "percent" ? 1 : 100,
+                },
               }}
             />
           </Box>
@@ -369,6 +387,7 @@ export default function FoerderprogrammeSection({
                         <Typography
                           variant="body2"
                           color="text.secondary"
+                          noWrap
                           sx={{ maxWidth: 260 }}
                         >
                           {f.description || "—"}

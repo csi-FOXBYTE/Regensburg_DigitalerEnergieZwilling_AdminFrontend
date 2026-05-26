@@ -1,4 +1,3 @@
-import { EnergyEfficiencyClass } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { Delete, Edit } from "@mui/icons-material";
 import {
   Box,
@@ -90,8 +89,7 @@ export function EnergyEfficiencySection({
         updateEnergyEfficiencyClass(index, (draft) => {
           draft.from = numbers.from;
           draft.to = numbers.to;
-          if (strings.value)
-            draft.value = strings.value as EnergyEfficiencyClass;
+          if (strings.value) draft.value = strings.value;
           if (strings.color) draft.color = strings.color;
         });
       },
@@ -146,7 +144,7 @@ export function EnergyEfficiencySection({
         addEnergyEfficiencyClass({
           from: numbers.from,
           to: numbers.to,
-          value: strings.value as EnergyEfficiencyClass,
+          value: strings.value!,
           color: strings.color!,
         });
       },

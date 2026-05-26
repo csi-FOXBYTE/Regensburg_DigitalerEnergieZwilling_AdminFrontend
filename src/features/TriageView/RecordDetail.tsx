@@ -2,6 +2,7 @@ import { statusConfig } from "@/assets/types";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { RecordsContext } from "@/components/RecordsContext";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { Power } from "@mui/icons-material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -26,9 +27,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useStore } from "@nanostores/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useStore } from "@nanostores/react";
 import { toast } from "sonner";
 import {
   BUILDING_TYPE_SELECTIONS,
@@ -101,8 +102,7 @@ export function RecordDetail({ id }: { id: string }) {
     );
   }
 
-  const isAssignedToMe =
-    record.assignedTo === currentUser?.preferred_username;
+  const isAssignedToMe = record.assignedTo === currentUser?.preferred_username;
   const isAssignedToOther = !!record.assignedTo && !isAssignedToMe;
   const canAssign =
     record.status === "NEU" && !record.assignedTo && !!currentUser;
@@ -583,6 +583,32 @@ export function RecordDetail({ id }: { id: string }) {
           />
         </InfoCard>
 
+        {/* Strom */}
+        <InfoCard icon={Power} title="Strom" cols={2}>
+          <InfoItem
+            label="Stromart"
+            value={fmt(
+              record.detInput?.electricity.electricityType,
+              undefined,
+              cfg.heat.electricityTypes,
+            )}
+          />
+          <InfoItem
+            label="Jährlicher Stromverbrauch"
+            value={fmt(
+              record.detInput?.electricity.userElectricityConsumption,
+              "kWh",
+            )}
+          />
+          <InfoItem
+            label="Strompreis"
+            value={fmt(
+              record.detInput?.electricity.electricityUnitRate,
+              "€/kWh",
+            )}
+          />
+        </InfoCard>
+
         {/* Heizung */}
         <InfoCard icon={LocalFireDepartmentIcon} title="Heizung" cols={2}>
           <InfoItem
@@ -612,6 +638,26 @@ export function RecordDetail({ id }: { id: string }) {
               undefined,
               cfg.heat.heatingSurfaceTypes,
             )}
+          />
+          <InfoItem
+            label="Gasanschluss vorhanden"
+            value={fmt(record.detInput?.heat.hasGasSupply)}
+          />
+          <InfoItem
+            label="Biogas"
+            value={fmt(record.detInput?.heat.hasBioGas)}
+          />
+          <InfoItem
+            label="Speicher vorhanden"
+            value={fmt(record.detInput?.heat.hasStorage)}
+          />
+          <InfoItem
+            label="Wärmepreis"
+            value={fmt(record.detInput?.heat.userThermalUnitRate, "€/kWh")}
+          />
+          <InfoItem
+            label="Jährlicher Wärmeverbrauch"
+            value={fmt(record.detInput?.heat.userThermalConsumption, "kWh")}
           />
         </InfoCard>
 
