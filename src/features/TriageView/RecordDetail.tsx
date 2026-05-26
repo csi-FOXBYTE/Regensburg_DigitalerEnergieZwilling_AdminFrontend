@@ -1,7 +1,7 @@
 import { statusConfig } from "@/assets/types";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { RecordsContext } from "@/components/RecordsContext";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 import { Power } from "@mui/icons-material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ApartmentIcon from "@mui/icons-material/Apartment";
@@ -102,7 +102,7 @@ export function RecordDetail({ id }: { id: string }) {
     );
   }
 
-  const isAssignedToMe = record.assignedTo === currentUser?.preferred_username;
+  const isAssignedToMe = record.assignedTo === getDisplayName(currentUser);
   const isAssignedToOther = !!record.assignedTo && !isAssignedToMe;
   const canAssign =
     record.status === "NEU" && !record.assignedTo && !!currentUser;
@@ -115,7 +115,7 @@ export function RecordDetail({ id }: { id: string }) {
     updateRecord({
       ...record,
       status: "IN_PRUEFUNG",
-      assignedTo: currentUser.preferred_username,
+      assignedTo: getDisplayName(currentUser),
       assignedAt: new Date(),
     });
     toast.success("Datensatz zugewiesen. Status: In Prüfung");
@@ -142,7 +142,7 @@ export function RecordDetail({ id }: { id: string }) {
       status: "ABGELEHNT",
       notes,
       resolvedAt: new Date(),
-      resolvedBy: currentUser?.preferred_username ?? null,
+      resolvedBy: currentUser?.name ?? null,
     });
     hasChangesRef.current = false;
     toast.success("Datensatz abgelehnt.");
@@ -160,7 +160,7 @@ export function RecordDetail({ id }: { id: string }) {
       status: "FREIGEGEBEN",
       notes,
       resolvedAt: new Date(),
-      resolvedBy: currentUser?.preferred_username ?? null,
+      resolvedBy: currentUser?.name ?? null,
     });
     siblingsToAutoDecline.forEach((sibling) => {
       updateRecord({

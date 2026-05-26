@@ -4,21 +4,6 @@
  * rg-dez-backend
  * OpenAPI spec version: 0.0.0
  */
-import {
-  useQuery
-} from '@tanstack/react-query';
-import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseQueryOptions,
-  UseQueryResult
-} from '@tanstack/react-query';
-
 import { apiClient } from '../lib/apiClient';
 export type Def0Internal = {
   stack?: string;
@@ -132,60 +117,18 @@ export type GetApiAdminAuthVerify200AccessToken = {
   jti?: string;
   realm_access?: GetApiAdminAuthVerify200AccessTokenRealmAccess;
   resource_access?: GetApiAdminAuthVerify200AccessTokenResourceAccess;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  email_verified?: boolean;
+  preferred_username?: string;
+  email?: string;
   [key: string]: unknown;
  };
 
 export type GetApiAdminAuthVerify200 = {
   accessToken: GetApiAdminAuthVerify200AccessToken;
 };
-
-type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-
-
-export type getApiAdminAuthVerifyResponse200 = {
-  data: GetApiAdminAuthVerify200
-  status: 200
-}
-
-export type getApiAdminAuthVerifyResponse400 = {
-  data: Def0
-  status: 400
-}
-
-export type getApiAdminAuthVerifyResponse401 = {
-  data: Def1
-  status: 401
-}
-
-export type getApiAdminAuthVerifyResponse403 = {
-  data: Def2
-  status: 403
-}
-
-export type getApiAdminAuthVerifyResponse404 = {
-  data: Def3
-  status: 404
-}
-
-export type getApiAdminAuthVerifyResponse405 = {
-  data: Def4
-  status: 405
-}
-
-export type getApiAdminAuthVerifyResponse500 = {
-  data: Def5
-  status: 500
-}
-
-export type getApiAdminAuthVerifyResponseSuccess = (getApiAdminAuthVerifyResponse200) & {
-  headers: Headers;
-};
-export type getApiAdminAuthVerifyResponseError = (getApiAdminAuthVerifyResponse400 | getApiAdminAuthVerifyResponse401 | getApiAdminAuthVerifyResponse403 | getApiAdminAuthVerifyResponse404 | getApiAdminAuthVerifyResponse405 | getApiAdminAuthVerifyResponse500) & {
-  headers: Headers;
-};
-
-export type getApiAdminAuthVerifyResponse = (getApiAdminAuthVerifyResponseSuccess | getApiAdminAuthVerifyResponseError)
 
 export const getGetApiAdminAuthVerifyUrl = () => {
 
@@ -195,9 +138,9 @@ export const getGetApiAdminAuthVerifyUrl = () => {
   return `/api/admin/auth/verify`
 }
 
-export const getApiAdminAuthVerify = async ( options?: RequestInit): Promise<getApiAdminAuthVerifyResponse> => {
+export const getApiAdminAuthVerify = async ( options?: RequestInit): Promise<GetApiAdminAuthVerify200> => {
   
-  return apiClient<getApiAdminAuthVerifyResponse>(getGetApiAdminAuthVerifyUrl(),
+  return apiClient<GetApiAdminAuthVerify200>(getGetApiAdminAuthVerifyUrl(),
   {      
     ...options,
     method: 'GET'
@@ -207,122 +150,6 @@ export const getApiAdminAuthVerify = async ( options?: RequestInit): Promise<get
 );}
   
 
-
-
-
-export const getGetApiAdminAuthVerifyQueryKey = () => {
-    return [
-    `/api/admin/auth/verify`
-    ] as const;
-    }
-
-    
-export const getGetApiAdminAuthVerifyQueryOptions = <TData = Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiAdminAuthVerifyQueryKey();
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAdminAuthVerify>>> = ({ signal }) => getApiAdminAuthVerify({ signal, ...requestOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiAdminAuthVerifyQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAdminAuthVerify>>>
-export type GetApiAdminAuthVerifyQueryError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5
-
-
-export function useGetApiAdminAuthVerify<TData = Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminAuthVerify>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminAuthVerify>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminAuthVerify<TData = Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminAuthVerify>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminAuthVerify>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminAuthVerify<TData = Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiAdminAuthVerify<TData = Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminAuthVerify>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiAdminAuthVerifyQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-export type getApiAdminTestResponse200 = {
-  data: unknown
-  status: 200
-}
-
-export type getApiAdminTestResponse400 = {
-  data: Def0
-  status: 400
-}
-
-export type getApiAdminTestResponse401 = {
-  data: Def1
-  status: 401
-}
-
-export type getApiAdminTestResponse403 = {
-  data: Def2
-  status: 403
-}
-
-export type getApiAdminTestResponse404 = {
-  data: Def3
-  status: 404
-}
-
-export type getApiAdminTestResponse405 = {
-  data: Def4
-  status: 405
-}
-
-export type getApiAdminTestResponse500 = {
-  data: Def5
-  status: 500
-}
-
-export type getApiAdminTestResponseSuccess = (getApiAdminTestResponse200) & {
-  headers: Headers;
-};
-export type getApiAdminTestResponseError = (getApiAdminTestResponse400 | getApiAdminTestResponse401 | getApiAdminTestResponse403 | getApiAdminTestResponse404 | getApiAdminTestResponse405 | getApiAdminTestResponse500) & {
-  headers: Headers;
-};
-
-export type getApiAdminTestResponse = (getApiAdminTestResponseSuccess | getApiAdminTestResponseError)
 
 export const getGetApiAdminTestUrl = () => {
 
@@ -332,9 +159,9 @@ export const getGetApiAdminTestUrl = () => {
   return `/api/admin/test`
 }
 
-export const getApiAdminTest = async ( options?: RequestInit): Promise<getApiAdminTestResponse> => {
+export const getApiAdminTest = async ( options?: RequestInit): Promise<unknown> => {
   
-  return apiClient<getApiAdminTestResponse>(getGetApiAdminTestUrl(),
+  return apiClient<unknown>(getGetApiAdminTestUrl(),
   {      
     ...options,
     method: 'GET'
@@ -342,73 +169,3 @@ export const getApiAdminTest = async ( options?: RequestInit): Promise<getApiAdm
     
   }
 );}
-  
-
-
-
-
-export const getGetApiAdminTestQueryKey = () => {
-    return [
-    `/api/admin/test`
-    ] as const;
-    }
-
-    
-export const getGetApiAdminTestQueryOptions = <TData = Awaited<ReturnType<typeof getApiAdminTest>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminTest>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetApiAdminTestQueryKey();
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiAdminTest>>> = ({ signal }) => getApiAdminTest({ signal, ...requestOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiAdminTest>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetApiAdminTestQueryResult = NonNullable<Awaited<ReturnType<typeof getApiAdminTest>>>
-export type GetApiAdminTestQueryError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5
-
-
-export function useGetApiAdminTest<TData = Awaited<ReturnType<typeof getApiAdminTest>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminTest>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminTest>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminTest>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminTest<TData = Awaited<ReturnType<typeof getApiAdminTest>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminTest>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getApiAdminTest>>,
-          TError,
-          Awaited<ReturnType<typeof getApiAdminTest>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiAdminTest<TData = Awaited<ReturnType<typeof getApiAdminTest>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminTest>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetApiAdminTest<TData = Awaited<ReturnType<typeof getApiAdminTest>>, TError = Def0 | Def1 | Def2 | Def3 | Def4 | Def5>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiAdminTest>>, TError, TData>>, request?: SecondParameter<typeof apiClient>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetApiAdminTestQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
