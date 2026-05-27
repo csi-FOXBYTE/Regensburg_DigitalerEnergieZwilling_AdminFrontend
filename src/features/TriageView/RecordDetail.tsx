@@ -3,7 +3,7 @@ import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { AppFooter } from "@/components/Footer";
 import { RecordsContext } from "@/components/RecordsContext";
 import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
-import { Power } from "@mui/icons-material";
+import { GasMeter, LightbulbOutlineRounded, Power } from "@mui/icons-material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -584,29 +584,19 @@ export function RecordDetail({ id }: { id: string }) {
           />
         </InfoCard>
 
-        {/* Strom */}
-        <InfoCard icon={Power} title="Strom" cols={2}>
+        {/* Wärmeversorgung */}
+        <InfoCard icon={GasMeter} title="Wärmeversorgung" cols={2}>
           <InfoItem
-            label="Stromart"
-            value={fmt(
-              record.detInput?.electricity.electricityType,
-              undefined,
-              cfg.heat.electricityTypes,
-            )}
+            label="Gasanschluss vorhanden"
+            value={fmt(record.detInput?.heat.hasGasSupply)}
           />
           <InfoItem
-            label="Jährlicher Stromverbrauch"
-            value={fmt(
-              record.detInput?.electricity.userElectricityConsumption,
-              "kWh",
-            )}
+            label="Biogas"
+            value={fmt(record.detInput?.heat.hasBioGas)}
           />
           <InfoItem
-            label="Strompreis"
-            value={fmt(
-              record.detInput?.electricity.electricityUnitRate,
-              "€/kWh",
-            )}
+            label="Speicher vorhanden"
+            value={fmt(record.detInput?.heat.hasStorage)}
           />
         </InfoCard>
 
@@ -640,18 +630,14 @@ export function RecordDetail({ id }: { id: string }) {
               cfg.heat.heatingSurfaceTypes,
             )}
           />
-          <InfoItem
-            label="Gasanschluss vorhanden"
-            value={fmt(record.detInput?.heat.hasGasSupply)}
-          />
-          <InfoItem
-            label="Biogas"
-            value={fmt(record.detInput?.heat.hasBioGas)}
-          />
-          <InfoItem
-            label="Speicher vorhanden"
-            value={fmt(record.detInput?.heat.hasStorage)}
-          />
+        </InfoCard>
+
+        {/* Wärmeverbrauch */}
+        <InfoCard
+          icon={LightbulbOutlineRounded}
+          title="Wärmeverbrauch"
+          cols={2}
+        >
           <InfoItem
             label="Wärmepreis"
             value={fmt(record.detInput?.heat.userThermalUnitRate, "€/kWh")}
@@ -659,6 +645,32 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Jährlicher Wärmeverbrauch"
             value={fmt(record.detInput?.heat.userThermalConsumption, "kWh")}
+          />
+        </InfoCard>
+
+        {/* Strom */}
+        <InfoCard icon={Power} title="Strom" cols={2}>
+          <InfoItem
+            label="Stromart"
+            value={fmt(
+              record.detInput?.electricity.electricityType,
+              undefined,
+              cfg.heat.electricityTypes,
+            )}
+          />
+          <InfoItem
+            label="Jährlicher Stromverbrauch"
+            value={fmt(
+              record.detInput?.electricity.userElectricityConsumption,
+              "kWh",
+            )}
+          />
+          <InfoItem
+            label="Strompreis"
+            value={fmt(
+              record.detInput?.electricity.electricityUnitRate,
+              "€/kWh",
+            )}
           />
         </InfoCard>
 

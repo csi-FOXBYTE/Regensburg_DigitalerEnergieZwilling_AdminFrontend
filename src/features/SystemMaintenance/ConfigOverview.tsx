@@ -531,6 +531,7 @@ export function ConfigOverview() {
           <Box sx={{ ml: "auto" }}>
             <Button
               variant="contained"
+              sx={{ mb: 1.5 }}
               color="error"
               disabled={!canSave}
               onClick={() => setSaveDialogOpen(true)}

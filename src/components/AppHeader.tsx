@@ -1,7 +1,19 @@
 import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 import theme from "@/theme/theme";
-import { Box, Tab, Tabs, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { useState } from "react";
 
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/dashboard" },
@@ -21,8 +33,17 @@ export function AppHeader() {
   const currentUser = useCurrentUser();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const tabValue = getTabValue(pathname);
+
+  function handleLogoutConfirm() {
+    setLogoutOpen(false);
+    {
+      /* Placeholder */
+    }
+    location.assign("www.google.com");
+  }
 
   return (
     <Box
@@ -71,7 +92,14 @@ export function AppHeader() {
           }}
         >
           <Typography
-            sx={{ fontSize: 14, lineHeight: "22px", color: "#757575" }}
+            onClick={() => setLogoutOpen(true)}
+            sx={{
+              fontSize: 14,
+              lineHeight: "22px",
+              color: "#757575",
+              cursor: "pointer",
+              "&:hover": { color: theme.palette.error.main },
+            }}
           >
             {getDisplayName(currentUser)}
           </Typography>
@@ -133,6 +161,31 @@ export function AppHeader() {
           ))}
         </Tabs>
       </Box>
+
+      <Dialog open={logoutOpen} onClose={() => setLogoutOpen(false)}>
+        <DialogTitle>Abmelden</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Möchten Sie sich wirklich abmelden?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => setLogoutOpen(false)}
+          >
+            Abbrechen
+          </Button>
+          <Button
+            onClick={handleLogoutConfirm}
+            color="error"
+            variant="contained"
+          >
+            Abmelden
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
