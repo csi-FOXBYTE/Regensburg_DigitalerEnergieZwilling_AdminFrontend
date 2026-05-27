@@ -1,4 +1,5 @@
 import type { BuildingRecord } from "@/assets/types";
+import { AppFooter } from "@/components/Footer";
 import { RecordsContext } from "@/components/RecordsContext";
 import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 import { Box, Card, CardContent, Typography } from "@mui/material";
@@ -32,8 +33,7 @@ export function Dashboard() {
       const matchesStatus =
         statusFilter === "all" || record.status === statusFilter;
       const matchesMe =
-        !myRecordsOn ||
-        record.assignedTo === getDisplayName(currentUser);
+        !myRecordsOn || record.assignedTo === getDisplayName(currentUser);
       return matchesAddress && matchesStatus && matchesMe;
     });
 
@@ -113,13 +113,23 @@ export function Dashboard() {
     [currentUser, updateRecord],
   );
 
-  const handleDelete = useCallback(
+  const handleHardDelete = useCallback(
     (id: string) => {
       setRecords((prev) => prev.filter((r) => r.id !== id));
-      setRecordToDelete(null);
-      toast.success("Datensatz wurde gelöscht.");
     },
     [setRecords],
+  );
+  void handleHardDelete;
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      const record = records.find((r) => r.id === id);
+      if (!record) return;
+      updateRecord({ ...record, status: "GELOESCHT" });
+      setRecordToDelete(null);
+      toast.success("Datensatz wurde als gelöscht markiert.");
+    },
+    [records, updateRecord],
   );
 
   const resetSort = useCallback(() => {
@@ -169,6 +179,7 @@ export function Dashboard() {
           display: "flex",
           flexDirection: "column",
           gap: 3,
+          minHeight: "90vh",
         }}
       >
         <Box>
@@ -233,6 +244,7 @@ export function Dashboard() {
         setRecordToDelete={setRecordToDelete}
         handleDelete={handleDelete}
       />
+      <AppFooter />
     </Box>
   );
 }

@@ -130,6 +130,7 @@ export function FiltersControls({
             <MenuItem value="IN_PRUEFUNG">In Prüfung</MenuItem>
             <MenuItem value="FREIGEGEBEN">Freigegeben</MenuItem>
             <MenuItem value="ABGELEHNT">Abgelehnt</MenuItem>
+            <MenuItem value="GELOESCHT">Gelöscht</MenuItem>
           </TextField>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

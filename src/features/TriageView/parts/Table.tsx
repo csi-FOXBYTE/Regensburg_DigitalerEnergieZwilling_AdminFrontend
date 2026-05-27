@@ -131,12 +131,19 @@ function TableView({
             const variantCount = record.variantGroup
               ? (variantGroupCounts.get(record.variantGroup) ?? 0)
               : 0;
+            const isDeleted = record.status === "GELOESCHT";
             return (
               <TableRow
                 key={record.id}
-                hover
-                sx={{ cursor: "pointer", height: 52 }}
+                hover={!isDeleted}
+                sx={{
+                  cursor: isDeleted ? "default" : "pointer",
+                  height: 52,
+                  opacity: isDeleted ? 0.45 : 1,
+                  pointerEvents: isDeleted ? "none" : undefined,
+                }}
                 onClick={() =>
+                  !isDeleted &&
                   navigate({
                     to: "/record/$id",
                     params: { id: record.id },

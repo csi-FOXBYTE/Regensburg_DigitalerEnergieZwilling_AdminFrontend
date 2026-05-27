@@ -1,16 +1,18 @@
 import type { DETInput } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
-export type RecordStatus = "NEU" | "IN_PRUEFUNG" | "FREIGEGEBEN" | "ABGELEHNT";
+export type RecordStatus = "NEU" | "IN_PRUEFUNG" | "FREIGEGEBEN" | "ABGELEHNT" | "GELOESCHT";
 
 export const STATUS_COLORS: Record<RecordStatus, string> = {
   NEU: "#3b82f6",
   IN_PRUEFUNG: "#f59e0b",
   FREIGEGEBEN: "#22c55e",
   ABGELEHNT: "#C1272D",
+  GELOESCHT: "#9e9e9e",
 };
 
 export const STATUS_LABELS: Record<RecordStatus, string> = {
@@ -18,6 +20,7 @@ export const STATUS_LABELS: Record<RecordStatus, string> = {
   IN_PRUEFUNG: "In Prüfung",
   FREIGEGEBEN: "Freigegeben",
   ABGELEHNT: "Abgelehnt",
+  GELOESCHT: "Gelöscht",
 };
 
 export interface BuildingRecord {
@@ -61,6 +64,12 @@ export const statusConfig = {
     icon: HighlightOffIcon,
     chipColor: "error" as const,
     iconColor: "error.main",
+  },
+  GELOESCHT: {
+    label: "Gelöscht",
+    icon: DeleteOutlineIcon,
+    chipColor: "default" as const,
+    iconColor: "text.disabled",
   },
 };
 

@@ -16,6 +16,7 @@ import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../../components/ConfirmDeleteDialog";
 import { EditDialog } from "../../components/EditDialog";
+import { AppFooter } from "../../components/Footer";
 import { SaveDialog } from "../../components/SaveDialog";
 import {
   config,
@@ -36,7 +37,10 @@ export interface EditState {
     type?: "text" | "number" | "color" | "select";
     required?: boolean;
   }>;
-  onSave: (strings: Record<string, string>, numbers: Record<string, number>) => void;
+  onSave: (
+    strings: Record<string, string>,
+    numbers: Record<string, number>,
+  ) => void;
 }
 
 export interface DeleteConfirmState {
@@ -76,7 +80,10 @@ function validateYearBands(bands: YearBandEntry[]): BandValidationResult {
   if (bands.length === 0) return { valid: true, errors: [] };
   if (bands.length === 1) {
     if (bands[0]!.from !== undefined || bands[0]!.to !== undefined)
-      errors.push({ index: 0, error: YEAR_BAND_ERRORS["single_must_be_empty"]! });
+      errors.push({
+        index: 0,
+        error: YEAR_BAND_ERRORS["single_must_be_empty"]!,
+      });
     return { valid: errors.length === 0, errors };
   }
   bands.forEach((band, i) => {
@@ -84,22 +91,37 @@ function validateYearBands(bands: YearBandEntry[]): BandValidationResult {
     const isLast = i === bands.length - 1;
     if (isFirst) {
       if (band.to === undefined || band.from !== undefined)
-        errors.push({ index: i, error: YEAR_BAND_ERRORS["first_must_have_only_to"]! });
+        errors.push({
+          index: i,
+          error: YEAR_BAND_ERRORS["first_must_have_only_to"]!,
+        });
     } else if (isLast) {
       if (band.from === undefined || band.to !== undefined)
-        errors.push({ index: i, error: YEAR_BAND_ERRORS["last_must_have_only_from"]! });
+        errors.push({
+          index: i,
+          error: YEAR_BAND_ERRORS["last_must_have_only_from"]!,
+        });
     } else {
       if (band.from === undefined || band.to === undefined)
-        errors.push({ index: i, error: YEAR_BAND_ERRORS["middle_must_have_both"]! });
+        errors.push({
+          index: i,
+          error: YEAR_BAND_ERRORS["middle_must_have_both"]!,
+        });
     }
     if (i > 0) {
       const prevTo = bands[i - 1]!.to;
       const currFrom = band.from;
       if (prevTo !== undefined && currFrom !== undefined) {
         if (currFrom > prevTo + 1)
-          errors.push({ index: i, error: YEAR_BAND_ERRORS["gap_between_bands"]! });
+          errors.push({
+            index: i,
+            error: YEAR_BAND_ERRORS["gap_between_bands"]!,
+          });
         else if (currFrom <= prevTo)
-          errors.push({ index: i, error: YEAR_BAND_ERRORS["overlap_between_bands"]! });
+          errors.push({
+            index: i,
+            error: YEAR_BAND_ERRORS["overlap_between_bands"]!,
+          });
       }
     }
   });
@@ -113,7 +135,10 @@ function validateCorrectionFactors(bands: RangeBand[]): BandValidationResult {
   if (bands.length === 0) return { valid: true, errors: [] };
   if (bands.length === 1) {
     if (bands[0]!.from !== undefined || bands[0]!.to !== undefined)
-      errors.push({ index: 0, error: YEAR_BAND_ERRORS["single_must_be_empty"]! });
+      errors.push({
+        index: 0,
+        error: YEAR_BAND_ERRORS["single_must_be_empty"]!,
+      });
     return { valid: errors.length === 0, errors };
   }
   bands.forEach((band, i) => {
@@ -121,22 +146,37 @@ function validateCorrectionFactors(bands: RangeBand[]): BandValidationResult {
     const isLast = i === bands.length - 1;
     if (isFirst) {
       if (band.to === undefined || band.from !== undefined)
-        errors.push({ index: i, error: YEAR_BAND_ERRORS["first_must_have_only_to"]! });
+        errors.push({
+          index: i,
+          error: YEAR_BAND_ERRORS["first_must_have_only_to"]!,
+        });
     } else if (isLast) {
       if (band.from === undefined || band.to !== undefined)
-        errors.push({ index: i, error: YEAR_BAND_ERRORS["last_must_have_only_from"]! });
+        errors.push({
+          index: i,
+          error: YEAR_BAND_ERRORS["last_must_have_only_from"]!,
+        });
     } else {
       if (band.from === undefined || band.to === undefined)
-        errors.push({ index: i, error: YEAR_BAND_ERRORS["middle_must_have_both"]! });
+        errors.push({
+          index: i,
+          error: YEAR_BAND_ERRORS["middle_must_have_both"]!,
+        });
     }
     if (i > 0) {
       const prevTo = bands[i - 1]!.to;
       const currFrom = band.from;
       if (prevTo !== undefined && currFrom !== undefined) {
         if (currFrom > prevTo)
-          errors.push({ index: i, error: YEAR_BAND_ERRORS["gap_between_bands"]! });
+          errors.push({
+            index: i,
+            error: YEAR_BAND_ERRORS["gap_between_bands"]!,
+          });
         else if (currFrom < prevTo)
-          errors.push({ index: i, error: YEAR_BAND_ERRORS["overlap_between_bands"]! });
+          errors.push({
+            index: i,
+            error: YEAR_BAND_ERRORS["overlap_between_bands"]!,
+          });
       }
     }
   });
@@ -154,7 +194,10 @@ function validateEnergyClasses(
   if (bands.length === 1) {
     const b = bands[0]!;
     if (b.from !== undefined || b.to !== undefined)
-      errors.push({ index: 0, error: ENERGY_BAND_ERRORS["single_must_be_empty"]! });
+      errors.push({
+        index: 0,
+        error: ENERGY_BAND_ERRORS["single_must_be_empty"]!,
+      });
     if (!b.value)
       errors.push({ index: 0, error: ENERGY_BAND_ERRORS["missing_value"]! });
     if (!hasColor(b))
@@ -166,13 +209,22 @@ function validateEnergyClasses(
     const isLast = i === bands.length - 1;
     if (isFirst) {
       if (band.to === undefined || band.from !== undefined)
-        errors.push({ index: i, error: ENERGY_BAND_ERRORS["first_must_have_only_to"]! });
+        errors.push({
+          index: i,
+          error: ENERGY_BAND_ERRORS["first_must_have_only_to"]!,
+        });
     } else if (isLast) {
       if (band.from === undefined || band.to !== undefined)
-        errors.push({ index: i, error: ENERGY_BAND_ERRORS["last_must_have_only_from"]! });
+        errors.push({
+          index: i,
+          error: ENERGY_BAND_ERRORS["last_must_have_only_from"]!,
+        });
     } else {
       if (band.from === undefined || band.to === undefined)
-        errors.push({ index: i, error: ENERGY_BAND_ERRORS["middle_must_have_both"]! });
+        errors.push({
+          index: i,
+          error: ENERGY_BAND_ERRORS["middle_must_have_both"]!,
+        });
     }
     if (!band.value)
       errors.push({ index: i, error: ENERGY_BAND_ERRORS["missing_value"]! });
@@ -183,9 +235,15 @@ function validateEnergyClasses(
       const currFrom = band.from;
       if (prevTo !== undefined && currFrom !== undefined) {
         if (currFrom > prevTo)
-          errors.push({ index: i, error: ENERGY_BAND_ERRORS["gap_between_bands"]! });
+          errors.push({
+            index: i,
+            error: ENERGY_BAND_ERRORS["gap_between_bands"]!,
+          });
         else if (currFrom < prevTo)
-          errors.push({ index: i, error: ENERGY_BAND_ERRORS["overlap_between_bands"]! });
+          errors.push({
+            index: i,
+            error: ENERGY_BAND_ERRORS["overlap_between_bands"]!,
+          });
       }
     }
   });
@@ -250,31 +308,45 @@ export function ConfigOverview() {
   );
 
   const yearBandValidation = useMemo(
-    () => validateYearBands(
-      [...(configStore.general.generalYearBands as YearBandEntry[])].sort(
-        (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
+    () =>
+      validateYearBands(
+        [...(configStore.general.generalYearBands as YearBandEntry[])].sort(
+          (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
+        ),
       ),
-    ),
     [configStore.general.generalYearBands],
   );
   const energyClassValidation = useMemo(
-    () => validateEnergyClasses(
-      [...(configStore.general.energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[])].sort(
-        (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
+    () =>
+      validateEnergyClasses(
+        [
+          ...(configStore.general
+            .energyEfficiencyClasses as unknown as EnergyEfficiencyEntry[]),
+        ].sort((a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity)),
+        configStore.general.energyEfficiencyClassColors as {
+          key: string;
+          value: string;
+        }[],
       ),
-      configStore.general.energyEfficiencyClassColors as { key: string; value: string }[],
-    ),
-    [configStore.general.energyEfficiencyClasses, configStore.general.energyEfficiencyClassColors],
+    [
+      configStore.general.energyEfficiencyClasses,
+      configStore.general.energyEfficiencyClassColors,
+    ],
   );
   const correctionFactorValidation = useMemo(
-    () => validateCorrectionFactors(
-      [...(configStore.general.heatedAirVolumeCorrectionFactor as RangeBand[])].sort(
-        (a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity),
+    () =>
+      validateCorrectionFactors(
+        [
+          ...(configStore.general
+            .heatedAirVolumeCorrectionFactor as RangeBand[]),
+        ].sort((a, b) => (a.from ?? -Infinity) - (b.from ?? -Infinity)),
       ),
-    ),
     [configStore.general.heatedAirVolumeCorrectionFactor],
   );
-  const canSave = yearBandValidation.valid && energyClassValidation.valid && correctionFactorValidation.valid;
+  const canSave =
+    yearBandValidation.valid &&
+    energyClassValidation.valid &&
+    correctionFactorValidation.valid;
   return (
     <Box sx={{ width: "100%" }}>
       <Box
@@ -422,17 +494,8 @@ export function ConfigOverview() {
         </Box>
       </Box>
 
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1200,
-          bgcolor: "white",
-          borderTop: "2px solid rgb(229, 229, 229)",
-          py: 2.5,
-        }}
+      <AppFooter
+        sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1200 }}
       >
         <Box
           sx={{
@@ -441,10 +504,11 @@ export function ConfigOverview() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            width: "100%",
           }}
         >
           {!canSave && (
-            <Typography color="error" variant="body2">
+            <Typography sx={{ color: "error.main" }} variant="body2">
               {[
                 ...(yearBandValidation.errors.length > 0
                   ? [
@@ -475,7 +539,7 @@ export function ConfigOverview() {
             </Button>
           </Box>
         </Box>
-      </Box>
+      </AppFooter>
 
       <SaveDialog
         key={String(saveDialogOpen)}

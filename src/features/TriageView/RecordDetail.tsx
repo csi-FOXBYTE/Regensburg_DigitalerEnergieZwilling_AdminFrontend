@@ -1,5 +1,6 @@
 import { statusConfig } from "@/assets/types";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { AppFooter } from "@/components/Footer";
 import { RecordsContext } from "@/components/RecordsContext";
 import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
 import { Power } from "@mui/icons-material";
@@ -807,6 +808,7 @@ export function RecordDetail({ id }: { id: string }) {
         <Box sx={{ mb: 2 }} />
       </Box>
 
+      <AppFooter />
       <ConfirmDeleteDialog
         open={deleteDialogOpen}
         onConfirm={handleDelete}

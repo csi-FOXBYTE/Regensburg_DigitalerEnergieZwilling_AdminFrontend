@@ -21,6 +21,7 @@ import {
   resolveLabel,
 } from "../../assets/labelResolver";
 import { STATUS_COLORS, statusConfig } from "../../assets/types";
+import { AppFooter } from "../../components/Footer";
 import { RecordsContext } from "../../components/RecordsContext";
 import BuildingMap from "./BuildingMap";
 
@@ -29,7 +30,13 @@ export default function DashboardPage() {
   const navigate = useNavigate();
 
   const statusCounts = useMemo(() => {
-    const counts = { NEU: 0, IN_PRUEFUNG: 0, FREIGEGEBEN: 0, ABGELEHNT: 0 };
+    const counts = {
+      NEU: 0,
+      IN_PRUEFUNG: 0,
+      FREIGEGEBEN: 0,
+      ABGELEHNT: 0,
+      GELOESCHT: 0,
+    };
     for (const r of records) counts[r.status]++;
     return counts;
   }, [records]);
@@ -228,15 +235,16 @@ export default function DashboardPage() {
                                   variant="caption"
                                   color="#757575"
                                 >
-                                  {new Date(
-                                    record.receivedDate,
-                                  ).toLocaleString("de-DE", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
+                                  {new Date(record.receivedDate).toLocaleString(
+                                    "de-DE",
+                                    {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  )}
                                 </Typography>
                               </Box>
                             }
@@ -306,6 +314,7 @@ export default function DashboardPage() {
           </Card>
         </Box>
       </Box>
+      <AppFooter />
     </Box>
   );
 }
