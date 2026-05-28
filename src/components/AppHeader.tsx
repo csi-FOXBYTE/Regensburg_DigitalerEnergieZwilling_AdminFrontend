@@ -37,14 +37,6 @@ export function AppHeader() {
 
   const tabValue = getTabValue(pathname);
 
-  function handleLogoutConfirm() {
-    setLogoutOpen(false);
-    {
-      /* Placeholder */
-    }
-    location.assign("www.google.com");
-  }
-
   return (
     <Box
       sx={{
@@ -177,12 +169,13 @@ export function AppHeader() {
           >
             Abbrechen
           </Button>
-          <Button
-            onClick={handleLogoutConfirm}
-            color="error"
-            variant="contained"
-          >
-            Abmelden
+          <Button color="error" variant="contained" href="/logout">
+            <a
+              href="/logout"
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
+              Abmelden
+            </a>
           </Button>
         </DialogActions>
       </Dialog>
