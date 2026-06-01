@@ -56,12 +56,41 @@ export function useLoadConfig(versionName: string) {
   });
 }
 
+/**
+ * Activates the config and makes sure any other is not active.
+ */
 export function useActivateConfig() {
   return useMutation({
     mutationFn: ({ versionName }: { versionName: string }) =>
       apiClient(`/api/admin/config/${versionName}/activate`, {
         method: "PATCH",
         body: JSON.stringify({}),
+      }),
+  });
+}
+
+/**
+ * Deletes the chosen config and fails when it is active.
+ */
+export function useDeleteConfig() {
+  return useMutation({
+    mutationFn: ({ versionName }: { versionName: string }) =>
+      apiClient(`/api/admin/config/${versionName}`, {
+        method: "DELETE",
+        body: JSON.stringify({}),
+      }),
+  });
+}
+
+/**
+ * Gets the activated config to mark it in the selection menu.
+ */
+export function useActiveConfig() {
+  return useQuery({
+    queryKey: ["active-config"],
+    queryFn: () =>
+      apiClient<{ versionName: string }>("/api/admin/config/active", {
+        method: "GET",
       }),
   });
 }

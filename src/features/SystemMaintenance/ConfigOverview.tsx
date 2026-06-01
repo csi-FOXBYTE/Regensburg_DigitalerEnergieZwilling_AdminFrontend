@@ -11,7 +11,16 @@ import SurfaceTempResistenceSection from "@/features/SystemMaintenance/sections/
 import UgdSection from "@/features/SystemMaintenance/sections/UgdSection";
 import WindowSection from "@/features/SystemMaintenance/sections/WindowSection";
 import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
-import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
+import {
+  Box,
+  Button,
+  Chip,
+  Menu,
+  MenuItem,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useStore } from "@nanostores/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -21,7 +30,9 @@ import { AppFooter } from "../../components/Footer";
 import { SaveDialog } from "../../components/SaveDialog";
 import {
   useActivateConfig,
+  useActiveConfig,
   useConfigVersions,
+  useDeleteConfig,
   useLoadConfig,
   useSaveConfig,
 } from "../../hooks/configHooks";
@@ -291,6 +302,18 @@ export function ConfigOverview() {
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
+  const [contextMenu, setContextMenu] = useState<{
+    mouseX: number;
+    mouseY: number;
+    versionName: string;
+  } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent, versionName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ mouseX: e.clientX, mouseY: e.clientY, versionName });
+  };
+
   const configVersions = useConfigVersions();
   const configFiles = (configVersions.data?.configs ?? []).map((c) => ({
     value: c.versionName,
@@ -301,6 +324,8 @@ export function ConfigOverview() {
   const loadConfig = useLoadConfig(selectedConfigFile);
 
   const activateConfig = useActivateConfig();
+  const deleteConfig = useDeleteConfig();
+  const activeConfig = useActiveConfig();
 
   const handleSelectConfig = (versionName: string) => {
     setSelectedConfigFile(versionName);
@@ -322,7 +347,7 @@ export function ConfigOverview() {
 
   const saveConfig = useSaveConfig();
 
-  const handleSaveAll = async (fileName: string) => {
+  const handleSaveAll = async (fileName: string, autoActivate: boolean) => {
     try {
       await saveConfig.mutateAsync({
         versionName: fileName,
@@ -332,6 +357,7 @@ export function ConfigOverview() {
       toast.success(`Konfiguration gespeichert als „${fileName}"`);
       await configVersions.refetch();
       setSelectedConfigFile(fileName);
+      if (autoActivate) await publishConfig(fileName);
     } catch (err) {
       if ((err as { status?: number }).status === 409) {
         toast.error(`Version „${fileName}" existiert bereits`);
@@ -343,13 +369,36 @@ export function ConfigOverview() {
 
   const publishConfig = async (fileName: string) => {
     try {
-      await activateConfig.mutateAsync({
-        versionName: fileName,
-      });
-      setSelectedConfigFile(fileName);
+      await activateConfig.mutateAsync({ versionName: fileName });
+      await activeConfig.refetch();
     } catch (err) {
-      toast.error("Config konnte nicht aktiviert werden: " + (err instanceof Error ? err.message : String(err)));
+      toast.error(
+        "Config konnte nicht aktiviert werden: " +
+          (err instanceof Error ? err.message : String(err)),
+      );
     }
+  };
+
+  const handleDeleteConfig = () => {
+    if (!selectedConfigFile) return;
+    setDeleteConfirm({
+      open: true,
+      onConfirm: async () => {
+        try {
+          await deleteConfig.mutateAsync({ versionName: selectedConfigFile });
+          toast.success(`Konfiguration „${selectedConfigFile}" gelöscht`);
+          setSelectedConfigFile("");
+          await configVersions.refetch();
+          await activeConfig.refetch();
+        } catch (err) {
+          if ((err as { status?: number }).status === 409) {
+            toast.error(`AKtive Konfiguration kann nicht gelöscht werden`);
+          } else {
+            toast.error("Löschen fehlgeschlagen");
+          }
+        }
+      },
+    });
   };
 
   const yearBandValidation = useMemo(
@@ -430,9 +479,23 @@ export function ConfigOverview() {
               <MenuItem
                 key={option.value}
                 value={option.value}
-                sx={{ lineHeight: 1.5 }}
+                onContextMenu={(e) => handleContextMenu(e, option.value)}
+                sx={{
+                  lineHeight: 1.5,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 1,
+                }}
               >
                 {option.value}
+                {activeConfig.data?.versionName === option.value && (
+                  <Chip
+                    label="Aktiv"
+                    size="small"
+                    color="success"
+                    icon={<CheckIcon />}
+                  />
+                )}
               </MenuItem>
             ))}
           </TextField>
@@ -573,7 +636,24 @@ export function ConfigOverview() {
               ].join(" | ")}
             </Typography>
           )}
-          <Box sx={{ ml: "auto" }}>
+          <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              sx={{
+                mb: 1.5,
+                borderColor: "rgba(255,255,255,0.5)",
+                color: "rgba(255,255,255,0.7)",
+                "&:hover": { borderColor: "white", color: "white" },
+                "&.Mui-disabled": {
+                  borderColor: "rgba(255,255,255,0.2)",
+                  color: "rgba(255,255,255,0.3)",
+                },
+              }}
+              disabled={!selectedConfigFile}
+              onClick={handleDeleteConfig}
+            >
+              Löschen
+            </Button>
             <Button
               variant="contained"
               sx={{ mb: 1.5 }}
@@ -609,6 +689,26 @@ export function ConfigOverview() {
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
       />
+
+      <Menu
+        open={contextMenu !== null}
+        onClose={() => setContextMenu(null)}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+      >
+        <MenuItem
+          onClick={() => {
+            if (contextMenu) void publishConfig(contextMenu.versionName);
+            setContextMenu(null);
+          }}
+        >
+          Aktivieren
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }

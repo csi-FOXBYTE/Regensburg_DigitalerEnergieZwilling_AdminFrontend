@@ -4,6 +4,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
+  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -13,7 +15,7 @@ interface SaveDialogProps {
   open: boolean;
   defaultName?: string;
   onClose: () => void;
-  onSave: (fileName: string) => void;
+  onSave: (fileName: string, autoActivate: boolean) => void;
 }
 
 export function SaveDialog({
@@ -24,7 +26,7 @@ export function SaveDialog({
 }: SaveDialogProps) {
   const [fileName, setFileName] = useState(defaultName);
   const [error, setError] = useState("");
-
+  const [autoActivate, setAutoActivate] = useState(false);
 
   const handleSave = () => {
     const trimmed = fileName.trim();
@@ -32,7 +34,7 @@ export function SaveDialog({
       setError("Dateiname ist erforderlich");
       return;
     }
-    onSave(trimmed);
+    onSave(trimmed, autoActivate);
     onClose();
   };
 
@@ -54,7 +56,7 @@ export function SaveDialog({
       <DialogTitle>
         <Typography variant="h4">Konfiguration speichern</Typography>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <TextField
           autoFocus
           label="Dateiname"
@@ -69,6 +71,16 @@ export function SaveDialog({
           error={!!error}
           helperText={error}
           sx={{ mt: 1 }}
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={autoActivate}
+              onChange={(e) => setAutoActivate(e.target.checked)}
+              color="success"
+            />
+          }
+          label="Nach dem Speichern automatisch aktivieren"
         />
       </DialogContent>
       <DialogActions>
