@@ -10,17 +10,26 @@ import RoofSection from "@/features/SystemMaintenance/sections/RoofSection";
 import SurfaceTempResistenceSection from "@/features/SystemMaintenance/sections/SurfaceTempResistenceSection";
 import UgdSection from "@/features/SystemMaintenance/sections/UgdSection";
 import WindowSection from "@/features/SystemMaintenance/sections/WindowSection";
+import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
 import { useStore } from "@nanostores/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../../components/ConfirmDeleteDialog";
 import { EditDialog } from "../../components/EditDialog";
 import { AppFooter } from "../../components/Footer";
 import { SaveDialog } from "../../components/SaveDialog";
 import {
+  useActivateConfig,
+  useConfigVersions,
+  useLoadConfig,
+  useSaveConfig,
+} from "../../hooks/configHooks";
+import {
   config,
+  foerderprogramme,
   type EnergyEfficiencyEntry,
+  type Foerderprogramm,
   type YearBandEntry,
 } from "../../hooks/store";
 import { EnergyEfficiencySection } from "./sections/EnergyEfficiencySection";
@@ -282,30 +291,66 @@ export function ConfigOverview() {
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
-  const configFilesDummies = [
-    { value: "config1.json" },
-    { value: "currentconfig.json" },
-    { value: "default.json" },
-  ];
+  const configVersions = useConfigVersions();
+  const configFiles = (configVersions.data?.configs ?? []).map((c) => ({
+    value: c.versionName,
+  }));
 
-  const [configFiles, setConfigFiles] = useState(configFilesDummies);
+  const [selectedConfigFile, setSelectedConfigFile] = useState<string>("");
 
-  const handleSaveAll = (fileName: string) => {
-    if (!fileName.endsWith(".json")) {
-      toast.error(`Konfigurationsdatei muss mit .json enden`);
-    } else if (configFiles.find((file) => file.value === fileName)) {
-      toast.error(`Es existiert schon eine Datei mit den Namen „${fileName}" `);
-    } else {
-      setConfigFiles((prev) => [...prev, { value: fileName }]);
-      setSelectedConfigFile(fileName);
+  const loadConfig = useLoadConfig(selectedConfigFile);
+
+  const activateConfig = useActivateConfig();
+
+  const handleSelectConfig = (versionName: string) => {
+    setSelectedConfigFile(versionName);
+  };
+
+  useEffect(() => {
+    if (!loadConfig.data) return;
+    const calculationConfig =
+      typeof loadConfig.data.calculationConfig === "string"
+        ? (JSON.parse(loadConfig.data.calculationConfig) as DETConfig)
+        : loadConfig.data.calculationConfig;
+    const subsidies =
+      typeof loadConfig.data.foerderprogramme === "string"
+        ? (JSON.parse(loadConfig.data.foerderprogramme) as Foerderprogramm[])
+        : loadConfig.data.foerderprogramme;
+    config.set(calculationConfig);
+    foerderprogramme.set(subsidies);
+  }, [loadConfig.data]);
+
+  const saveConfig = useSaveConfig();
+
+  const handleSaveAll = async (fileName: string) => {
+    try {
+      await saveConfig.mutateAsync({
+        versionName: fileName,
+        config: configStore,
+        subsidies: foerderprogramme.get(),
+      });
       toast.success(`Konfiguration gespeichert als „${fileName}"`);
-      // Deal with new config that is contained in the nanostore
+      await configVersions.refetch();
+      setSelectedConfigFile(fileName);
+    } catch (err) {
+      if ((err as { status?: number }).status === 409) {
+        toast.error(`Version „${fileName}" existiert bereits`);
+      } else {
+        toast.error("Speichern fehlgeschlagen");
+      }
     }
   };
 
-  const [selectedConfigFile, setSelectedConfigFile] = useState<string>(
-    configFiles[2]!.value,
-  );
+  const publishConfig = async (fileName: string) => {
+    try {
+      await activateConfig.mutateAsync({
+        versionName: fileName,
+      });
+      setSelectedConfigFile(fileName);
+    } catch (err) {
+      toast.error("Config konnte nicht aktiviert werden: " + (err instanceof Error ? err.message : String(err)));
+    }
+  };
 
   const yearBandValidation = useMemo(
     () =>
@@ -378,7 +423,7 @@ export function ConfigOverview() {
             select
             label="Konfigurationsdatei"
             value={selectedConfigFile}
-            onChange={(e) => setSelectedConfigFile(e.target.value)}
+            onChange={(e) => handleSelectConfig(e.target.value)}
             sx={{ width: 250 }}
           >
             {configFiles.map((option) => (

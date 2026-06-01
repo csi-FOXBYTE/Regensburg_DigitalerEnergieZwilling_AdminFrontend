@@ -29,7 +29,9 @@ export const apiClient = async <T>(
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as Error & { status: number };
+    error.status = response.status;
+    throw error;
   }
 
   if ([204, 205, 304].includes(response.status)) {
