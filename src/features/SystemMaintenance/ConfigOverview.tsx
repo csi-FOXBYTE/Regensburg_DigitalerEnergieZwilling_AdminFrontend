@@ -12,17 +12,9 @@ import UgdSection from "@/features/SystemMaintenance/sections/UgdSection";
 import WindowSection from "@/features/SystemMaintenance/sections/WindowSection";
 import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import CheckIcon from "@mui/icons-material/Check";
-import {
-  Box,
-  Button,
-  Chip,
-  Menu,
-  MenuItem,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, Paper, Typography } from "@mui/material";
 import { useStore } from "@nanostores/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../../components/ConfirmDeleteDialog";
 import { EditDialog } from "../../components/EditDialog";
@@ -43,6 +35,7 @@ import {
   type Foerderprogramm,
   type YearBandEntry,
 } from "../../hooks/store";
+import { ConfigManagementDialog } from "./ConfigManagementDialog";
 import { EnergyEfficiencySection } from "./sections/EnergyEfficiencySection";
 import { GeneralParametersSection } from "./sections/GeneralParametersSection";
 import { YearBandSection } from "./sections/YearBandSection";
@@ -301,51 +294,59 @@ export function ConfigOverview() {
   }, []);
 
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-
-  const [contextMenu, setContextMenu] = useState<{
-    mouseX: number;
-    mouseY: number;
-    versionName: string;
-  } | null>(null);
-
-  const handleContextMenu = (e: React.MouseEvent, versionName: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setContextMenu({ mouseX: e.clientX, mouseY: e.clientY, versionName });
-  };
+  const [configManagementOpen, setConfigManagementOpen] = useState(false);
 
   const configVersions = useConfigVersions();
-  const configFiles = (configVersions.data?.configs ?? []).map((c) => ({
-    value: c.versionName,
-  }));
+  const configs = configVersions.data?.configs ?? [];
 
   const [selectedConfigFile, setSelectedConfigFile] = useState<string>("");
 
   const loadConfig = useLoadConfig(selectedConfigFile);
-
-  const activateConfig = useActivateConfig();
+  const publishConfig = useActivateConfig();
   const deleteConfig = useDeleteConfig();
   const activeConfig = useActiveConfig();
 
-  const handleSelectConfig = (versionName: string) => {
-    setSelectedConfigFile(versionName);
-  };
-
   useEffect(() => {
     if (!loadConfig.data) return;
-    const calculationConfig =
-      typeof loadConfig.data.calculationConfig === "string"
-        ? (JSON.parse(loadConfig.data.calculationConfig) as DETConfig)
-        : loadConfig.data.calculationConfig;
-    const subsidies =
-      typeof loadConfig.data.foerderprogramme === "string"
-        ? (JSON.parse(loadConfig.data.foerderprogramme) as Foerderprogramm[])
-        : loadConfig.data.foerderprogramme;
+    const calculationConfig = JSON.parse(
+      String(loadConfig.data.calculationConfig),
+    ) as DETConfig;
+    const subsidies = JSON.parse(
+      String(loadConfig.data.subsidies),
+    ) as Foerderprogramm[];
     config.set(calculationConfig);
     foerderprogramme.set(subsidies);
   }, [loadConfig.data]);
 
   const saveConfig = useSaveConfig();
+
+  const autoInitDone = useRef(false);
+  useEffect(() => {
+    if (!configVersions.isSuccess) return;
+    if (configVersions.data.configs.length > 0) return;
+    if (autoInitDone.current) return;
+    autoInitDone.current = true;
+    const init = async () => {
+      try {
+        await saveConfig.mutateAsync({
+          versionName: "default",
+          config: configStore,
+          subsidies: foerderprogramme.get(),
+        });
+        setSelectedConfigFile("default");
+      } catch {
+        toast.error("Standard-Konfiguration konnte nicht erstellt werden");
+      }
+      try {
+        await publishConfig.mutateAsync({ versionName: "default" });
+        await configVersions.refetch();
+        await activeConfig.refetch();
+      } catch {
+        toast.error("Standard-Konfiguration konnte nicht aktiviert werden");
+      }
+    };
+    void init();
+  });
 
   const handleSaveAll = async (fileName: string, autoActivate: boolean) => {
     try {
@@ -357,7 +358,17 @@ export function ConfigOverview() {
       toast.success(`Konfiguration gespeichert als „${fileName}"`);
       await configVersions.refetch();
       setSelectedConfigFile(fileName);
-      if (autoActivate) await publishConfig(fileName);
+      if (autoActivate) {
+        try {
+          await publishConfig.mutateAsync({ versionName: fileName });
+          await activeConfig.refetch();
+        } catch (err) {
+          toast.error(
+            "Config konnte nicht aktiviert werden: " +
+              (err instanceof Error ? err.message : String(err)),
+          );
+        }
+      }
     } catch (err) {
       if ((err as { status?: number }).status === 409) {
         toast.error(`Version „${fileName}" existiert bereits`);
@@ -367,9 +378,9 @@ export function ConfigOverview() {
     }
   };
 
-  const publishConfig = async (fileName: string) => {
+  const activateConfig = async (fileName: string) => {
     try {
-      await activateConfig.mutateAsync({ versionName: fileName });
+      await publishConfig.mutateAsync({ versionName: fileName });
       await activeConfig.refetch();
     } catch (err) {
       toast.error(
@@ -379,20 +390,23 @@ export function ConfigOverview() {
     }
   };
 
-  const handleDeleteConfig = () => {
-    if (!selectedConfigFile) return;
+  const handleDeleteConfig = (versionName: string) => {
+    if (versionName === activeConfig.data?.versionName) {
+      toast.error("Die aktive Konfiguration kann nicht gelöscht werden");
+      return;
+    }
     setDeleteConfirm({
       open: true,
       onConfirm: async () => {
         try {
-          await deleteConfig.mutateAsync({ versionName: selectedConfigFile });
-          toast.success(`Konfiguration „${selectedConfigFile}" gelöscht`);
-          setSelectedConfigFile("");
+          await deleteConfig.mutateAsync({ versionName });
+          toast.success(`Konfiguration „${versionName}" gelöscht`);
+          if (selectedConfigFile === versionName) setSelectedConfigFile("");
           await configVersions.refetch();
           await activeConfig.refetch();
         } catch (err) {
           if ((err as { status?: number }).status === 409) {
-            toast.error(`AKtive Konfiguration kann nicht gelöscht werden`);
+            toast.error("Aktive Konfiguration kann nicht gelöscht werden");
           } else {
             toast.error("Löschen fehlgeschlagen");
           }
@@ -400,6 +414,10 @@ export function ConfigOverview() {
       },
     });
   };
+
+  const selectedConfigMeta = configs.find(
+    (c) => c.versionName === selectedConfigFile,
+  );
 
   const yearBandValidation = useMemo(
     () =>
@@ -468,38 +486,68 @@ export function ConfigOverview() {
               Konfiguration und Anpassung der Systemeinstellungen
             </Typography>
           </Box>
-          <TextField
-            select
-            label="Konfigurationsdatei"
-            value={selectedConfigFile}
-            onChange={(e) => handleSelectConfig(e.target.value)}
-            sx={{ width: 250 }}
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => setConfigManagementOpen(true)}
           >
-            {configFiles.map((option) => (
-              <MenuItem
-                key={option.value}
-                value={option.value}
-                onContextMenu={(e) => handleContextMenu(e, option.value)}
-                sx={{
-                  lineHeight: 1.5,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 1,
-                }}
-              >
-                {option.value}
-                {activeConfig.data?.versionName === option.value && (
-                  <Chip
-                    label="Aktiv"
-                    size="small"
-                    color="success"
-                    icon={<CheckIcon />}
-                  />
-                )}
-              </MenuItem>
-            ))}
-          </TextField>
+            Configs verwalten
+          </Button>
         </Box>
+
+        {selectedConfigFile && (
+          <Paper
+            variant="outlined"
+            sx={{ p: 2, display: "flex", gap: 4, alignItems: "center" }}
+          >
+            <Box>
+              <Typography variant="h6" color="text.secondary" sx={{ pb: 0.5 }}>
+                Konfiguration
+              </Typography>
+              <Typography variant="body1">{selectedConfigFile}</Typography>
+            </Box>
+            {selectedConfigMeta?.createdAt && (
+              <Box>
+                <Typography
+                  variant="h6"
+                  color="text.secondary"
+                  sx={{ pb: 0.5 }}
+                >
+                  Erstellt
+                </Typography>
+                <Typography variant="body1">
+                  {new Date(selectedConfigMeta.createdAt).toLocaleDateString(
+                    "de-DE",
+                  )}
+                </Typography>
+              </Box>
+            )}
+            {selectedConfigMeta?.activatedAt && (
+              <Box>
+                <Typography
+                  variant="h6"
+                  color="text.secondary"
+                  sx={{ pb: 0.5 }}
+                >
+                  Veröffentlicht
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  {new Date(selectedConfigMeta.activatedAt).toLocaleDateString(
+                    "de-DE",
+                  )}
+                </Typography>
+              </Box>
+            )}
+            {activeConfig.data?.versionName === selectedConfigFile && (
+              <Chip
+                label="Aktiv"
+                size="small"
+                color="success"
+                icon={<CheckIcon />}
+              />
+            )}
+          </Paper>
+        )}
 
         <Box
           sx={{
@@ -638,23 +686,6 @@ export function ConfigOverview() {
           )}
           <Box sx={{ ml: "auto", display: "flex", gap: 1 }}>
             <Button
-              variant="outlined"
-              sx={{
-                mb: 1.5,
-                borderColor: "rgba(255,255,255,0.5)",
-                color: "rgba(255,255,255,0.7)",
-                "&:hover": { borderColor: "white", color: "white" },
-                "&.Mui-disabled": {
-                  borderColor: "rgba(255,255,255,0.2)",
-                  color: "rgba(255,255,255,0.3)",
-                },
-              }}
-              disabled={!selectedConfigFile}
-              onClick={handleDeleteConfig}
-            >
-              Löschen
-            </Button>
-            <Button
               variant="contained"
               sx={{ mb: 1.5 }}
               color="error"
@@ -671,6 +702,7 @@ export function ConfigOverview() {
         key={String(saveDialogOpen)}
         open={saveDialogOpen}
         defaultName={selectedConfigFile}
+        existingNames={configs.map((c) => c.versionName)}
         onClose={() => setSaveDialogOpen(false)}
         onSave={handleSaveAll}
       />
@@ -690,25 +722,16 @@ export function ConfigOverview() {
         onCancel={() => setDeleteConfirm({ open: false, onConfirm: () => {} })}
       />
 
-      <Menu
-        open={contextMenu !== null}
-        onClose={() => setContextMenu(null)}
-        anchorReference="anchorPosition"
-        anchorPosition={
-          contextMenu
-            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-            : undefined
-        }
-      >
-        <MenuItem
-          onClick={() => {
-            if (contextMenu) void publishConfig(contextMenu.versionName);
-            setContextMenu(null);
-          }}
-        >
-          Aktivieren
-        </MenuItem>
-      </Menu>
+      <ConfigManagementDialog
+        open={configManagementOpen}
+        onClose={() => setConfigManagementOpen(false)}
+        configs={configs}
+        activeVersionName={activeConfig.data?.versionName}
+        loadedVersionName={selectedConfigFile}
+        onLoad={(versionName) => setSelectedConfigFile(versionName)}
+        onActivate={(versionName) => void activateConfig(versionName)}
+        onDelete={(versionName) => handleDeleteConfig(versionName)}
+      />
     </Box>
   );
 }

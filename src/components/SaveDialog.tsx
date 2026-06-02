@@ -14,6 +14,7 @@ import { useState } from "react";
 interface SaveDialogProps {
   open: boolean;
   defaultName?: string;
+  existingNames?: string[];
   onClose: () => void;
   onSave: (fileName: string, autoActivate: boolean) => void;
 }
@@ -21,6 +22,7 @@ interface SaveDialogProps {
 export function SaveDialog({
   open,
   defaultName = "",
+  existingNames = [],
   onClose,
   onSave,
 }: SaveDialogProps) {
@@ -32,6 +34,10 @@ export function SaveDialog({
     const trimmed = fileName.trim();
     if (!trimmed) {
       setError("Dateiname ist erforderlich");
+      return;
+    }
+    if (existingNames.includes(trimmed)) {
+      setError(`Version „${trimmed}" existiert bereits`);
       return;
     }
     onSave(trimmed, autoActivate);

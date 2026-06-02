@@ -22,7 +22,7 @@ export function useSaveConfig() {
         body: JSON.stringify({
           versionName,
           calculationConfig: JSON.stringify(config),
-          foerderprogramme: JSON.stringify(subsidies),
+          subsidies: JSON.stringify(subsidies),
         }),
       }),
   });
@@ -30,11 +30,17 @@ export function useSaveConfig() {
 /**
  * Lists all Config names for the selector.
  */
+export interface ConfigMeta {
+  versionName: string;
+  createdAt?: string;
+  activatedAt?: string;
+}
+
 export function useConfigVersions() {
   return useQuery({
     queryKey: ["config-versions"],
     queryFn: () =>
-      apiClient<{ configs: { versionName: string }[] }>("/api/admin/config", {
+      apiClient<{ configs: ConfigMeta[] }>("/api/admin/config", {
         method: "GET",
       }),
   });
@@ -50,7 +56,7 @@ export function useLoadConfig(versionName: string) {
       apiClient<{
         versionName: string;
         calculationConfig: DETConfig;
-        foerderprogramme: Foerderprogramm[];
+        subsidies: Foerderprogramm[];
       }>(`/api/admin/config/${versionName}`, { method: "GET" }),
     enabled: !!versionName,
   });
@@ -89,7 +95,7 @@ export function useActiveConfig() {
   return useQuery({
     queryKey: ["active-config"],
     queryFn: () =>
-      apiClient<{ versionName: string }>("/api/admin/config/active", {
+      apiClient<{ versionName: string }>("/api/public/config/active", {
         method: "GET",
       }),
   });
