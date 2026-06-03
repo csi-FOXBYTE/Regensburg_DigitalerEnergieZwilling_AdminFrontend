@@ -1,8 +1,5 @@
 import type { Foerderprogramm } from "@/hooks/store";
 import { apiClient } from "@/lib/apiClient";
-import {
-  validateConfig,
-} from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -19,21 +16,15 @@ export function useSaveConfig() {
       versionName: string;
       config: DETConfig;
       subsidies: Foerderprogramm[];
-    }) => {
-      const result = validateConfig(config);
-      if (!result.success) {
-        const messages = result.issues.map((i: { path: string; message: string }) => `${i.path}: ${i.message}`).join("; ");
-        throw new Error(`Ungültige Konfiguration: ${messages}`);
-      }
-      return apiClient("/api/admin/config", {
+    }) =>
+      apiClient("/api/admin/config", {
         method: "POST",
         body: JSON.stringify({
           versionName,
-          calculationConfig: JSON.stringify(result.data),
+          calculationConfig: JSON.stringify(config),
           subsidies: JSON.stringify(subsidies),
         }),
-      });
-    },
+      }),
   });
 }
 /**
@@ -61,19 +52,12 @@ export function useConfigVersions() {
 export function useLoadConfig(versionName: string) {
   return useQuery({
     queryKey: ["config", versionName],
-    queryFn: async () => {
-      const raw = await apiClient<{
+    queryFn: () =>
+      apiClient<{
         versionName: string;
-        calculationConfig: unknown;
+        calculationConfig: DETConfig;
         subsidies: Foerderprogramm[];
-      }>(`/api/admin/config/${versionName}`, { method: "GET" });
-      const result = validateConfig(raw.calculationConfig);
-      if (!result.success) {
-        const messages = result.issues.map((i: { path: string; message: string }) => `${i.path}: ${i.message}`).join("; ");
-        throw new Error(`Ungültige Konfiguration vom Server: ${messages}`);
-      }
-      return { ...raw, calculationConfig: result.data };
-    },
+      }>(`/api/admin/config/${versionName}`, { method: "GET" }),
     enabled: !!versionName,
   });
 }
