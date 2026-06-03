@@ -1,5 +1,8 @@
 import type { Foerderprogramm } from "@/hooks/store";
 import { apiClient } from "@/lib/apiClient";
+import {
+  validateConfig,
+} from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
@@ -16,15 +19,21 @@ export function useSaveConfig() {
       versionName: string;
       config: DETConfig;
       subsidies: Foerderprogramm[];
-    }) =>
-      apiClient("/api/admin/config", {
+    }) => {
+      const result = validateConfig(config);
+      if (!result.success) {
+        const messages = result.issues.map((i: { path: string; message: string }) => `${i.path}: ${i.message}`).join("; ");
+        throw new Error(`Ungültige Konfiguration: ${messages}`);
+      }
+      return apiClient("/api/admin/config", {
         method: "POST",
         body: JSON.stringify({
           versionName,
-          calculationConfig: JSON.stringify(config),
+          calculationConfig: JSON.stringify(result.data),
           subsidies: JSON.stringify(subsidies),
         }),
-      }),
+      });
+    },
   });
 }
 /**
@@ -52,12 +61,19 @@ export function useConfigVersions() {
 export function useLoadConfig(versionName: string) {
   return useQuery({
     queryKey: ["config", versionName],
-    queryFn: () =>
-      apiClient<{
+    queryFn: async () => {
+      const raw = await apiClient<{
         versionName: string;
-        calculationConfig: DETConfig;
+        calculationConfig: unknown;
         subsidies: Foerderprogramm[];
-      }>(`/api/admin/config/${versionName}`, { method: "GET" }),
+      }>(`/api/admin/config/${versionName}`, { method: "GET" });
+      const result = validateConfig(raw.calculationConfig);
+      if (!result.success) {
+        const messages = result.issues.map((i: { path: string; message: string }) => `${i.path}: ${i.message}`).join("; ");
+        throw new Error(`Ungültige Konfiguration vom Server: ${messages}`);
+      }
+      return { ...raw, calculationConfig: result.data };
+    },
     enabled: !!versionName,
   });
 }

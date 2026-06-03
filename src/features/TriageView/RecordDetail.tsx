@@ -11,6 +11,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import CancelIcon from "@mui/icons-material/Cancel";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FoundationIcon from "@mui/icons-material/Foundation";
+import HistoryIcon from "@mui/icons-material/History";
 import LayersIcon from "@mui/icons-material/Layers";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import RoofingIcon from "@mui/icons-material/Roofing";
@@ -369,7 +370,7 @@ export function RecordDetail({ id }: { id: string }) {
         </Card>
 
         {/* Building info */}
-        <InfoCard icon={ApartmentIcon} title="Gebäudeinformationen" cols={2}>
+        <InfoCard icon={ApartmentIcon} title="Gebäudeinformationen" cols={3}>
           <InfoItem
             label="Gebäudetyp"
             value={fmt(
@@ -384,13 +385,19 @@ export function RecordDetail({ id }: { id: string }) {
           />
           <InfoItem
             label="Wohnfläche"
-            value={`${record.detInput?.general.livingArea ?? "Nicht angegeben"} m²`}
+            value={fmt(record.detInput?.general.livingArea, "m²")}
           />
           <InfoItem
             label="Geschosse"
-            value={
-              record.detInput?.general.numberOfStories ?? "Nicht angegeben"
-            }
+            value={fmt(record.detInput?.general.numberOfStories)}
+          />
+          <InfoItem
+            label="Gebäudehöhe"
+            value={fmt(record.detInput?.general.buildingHeight, "m")}
+          />
+          <InfoItem
+            label="Grundfläche"
+            value={fmt(record.detInput?.general.buildingBaseArea, "m²")}
           />
         </InfoCard>
 
@@ -428,6 +435,10 @@ export function RecordDetail({ id }: { id: string }) {
               ROOF_INSULATION_SELECTIONS,
             )}
           />
+          <InfoItem
+            label="U-Wert"
+            value={fmt(record.detInput?.roof.uValue, "W/(m²K)")}
+          />
         </InfoCard>
 
         {/* Dachfenster */}
@@ -463,6 +474,10 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(record.detInput?.outerWall.area, "m²")}
           />
           <InfoItem
+            label="Angrenzende Wandfläche"
+            value={fmt(record.detInput?.outerWall.adjacentWallArea, "m²")}
+          />
+          <InfoItem
             label="Baujahr / Letzte Sanierung"
             value={fmt(record.detInput?.outerWall.year)}
           />
@@ -481,6 +496,10 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Dämmdicke"
             value={fmt(record.detInput?.outerWall.insulationThickness, "cm")}
+          />
+          <InfoItem
+            label="U-Wert"
+            value={fmt(record.detInput?.outerWall.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -542,6 +561,10 @@ export function RecordDetail({ id }: { id: string }) {
             label="Dämmdicke"
             value={fmt(record.detInput?.topFloor.insulationThickness, "cm")}
           />
+          <InfoItem
+            label="U-Wert"
+            value={fmt(record.detInput?.topFloor.uValue, "W/(m²K)")}
+          />
         </InfoCard>
 
         {/* Untere Geschossdecke */}
@@ -581,6 +604,10 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Keller beheizt"
             value={fmt(record.detInput?.bottomFloor.isBasementHeated)}
+          />
+          <InfoItem
+            label="U-Wert"
+            value={fmt(record.detInput?.bottomFloor.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -643,8 +670,12 @@ export function RecordDetail({ id }: { id: string }) {
             value={fmt(record.detInput?.heat.userThermalUnitRate, "€/kWh")}
           />
           <InfoItem
-            label="Jährlicher Wärmeverbrauch"
-            value={fmt(record.detInput?.heat.userThermalConsumption, "kWh")}
+            label="Grundpreis Wärme"
+            value={fmt(record.detInput?.heat.userThermalBaseRate, "€/Jahr")}
+          />
+          <InfoItem
+            label="Jährliche Wärmekosten"
+            value={fmt(record.detInput?.heat.userThermalTotalCost, "€")}
           />
         </InfoCard>
 
@@ -659,20 +690,58 @@ export function RecordDetail({ id }: { id: string }) {
             )}
           />
           <InfoItem
-            label="Jährlicher Stromverbrauch"
-            value={fmt(
-              record.detInput?.electricity.userElectricityConsumption,
-              "kWh",
-            )}
-          />
-          <InfoItem
             label="Strompreis"
             value={fmt(
               record.detInput?.electricity.electricityUnitRate,
               "€/kWh",
             )}
           />
+          <InfoItem
+            label="Grundpreis Strom"
+            value={fmt(record.detInput?.electricity.userElectricityBaseRate, "€/Jahr")}
+          />
+          <InfoItem
+            label="Jährlicher Stromverbrauch"
+            value={fmt(
+              record.detInput?.electricity.userElectricityConsumption,
+              "kWh",
+            )}
+          />
         </InfoCard>
+
+        {/* Vorsanierungswerte */}
+        {record.detInput?.preRenovationValues && (
+          <InfoCard icon={HistoryIcon} title="Vorsanierungswerte" cols={2}>
+            <InfoItem
+              label="Gesamtenergiebedarf"
+              value={fmt(record.detInput.preRenovationValues.totalEnergyDemand, "kWh")}
+            />
+            <InfoItem
+              label="Primärenergieträger"
+              value={fmt(
+                record.detInput.preRenovationValues.primaryEnergyCarrier,
+                undefined,
+                cfg.heat.primaryEnergyCarriers,
+              )}
+            />
+            <InfoItem
+              label="Heizungstyp"
+              value={fmt(
+                record.detInput.preRenovationValues.heatingSystemType,
+                undefined,
+                cfg.heat.heatingSystemTypes,
+              )}
+            />
+            <InfoItem
+              label="Strom-Offset"
+              value={fmt(record.detInput.preRenovationValues.electricityOffset, "kWh")}
+            />
+            <InfoItem
+              label="Interne Wärmegewinne"
+              value={fmt(record.detInput.preRenovationValues.hadInternalGains)}
+            />
+          </InfoCard>
+        )}
 
         {/* Prüfung und Freigabe / Audit-Protokoll */}
         {record.status === "FREIGEGEBEN" || record.status === "ABGELEHNT" ? (

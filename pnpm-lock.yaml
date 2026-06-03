@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore':
-        specifier: 0.9.1
-        version: 0.9.1
+        specifier: 0.11.0
+        version: 0.11.0(zod@3.25.76)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.14)(react@19.2.4)
@@ -83,6 +83,9 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
     devDependencies:
       '@eslint/js':
         specifier: ^9.39.1
@@ -371,8 +374,10 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.9.1':
-    resolution: {integrity: sha512-FQC5Zr3FPcFBurdxnBPQKM63YODtM/yaOYI4D1Ub4B36966FepXAVKo8FzFmQa1MHGsTOr06Xi7JqI5Kxx02Uw==, tarball: https://npm.pkg.github.com/download/@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore/0.9.1/8ad8f62c1743163eb1281bd77beb69ee50f8542c}
+  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.11.0':
+    resolution: {integrity: sha512-26dZ+sTPEt9Y8xsbdXHIOPktDiY9vkoWGV47PGHlqXcoOb2JhdHWYHufB9yhH9hfbfrFbACKGs7hKDINso3kew==, tarball: https://npm.pkg.github.com/download/@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore/0.11.0/ecb85a44ca60296c1b4188efd3670ba058a68d67}
+    peerDependencies:
+      zod: ^3.24.0
 
   '@emnapi/core@1.8.1':
     resolution: {integrity: sha512-AvT9QFpxK0Zd8J0jopedNm+w/2fIzvtPKPjqyw9jwvBaReTTqPBk9Hixaz7KbjimP+QNz605/XnjFcDAL2pqBg==}
@@ -4278,7 +4283,9 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.9.1': {}
+  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.11.0(zod@3.25.76)':
+    dependencies:
+      zod: 3.25.76
 
   '@emnapi/core@1.8.1':
     dependencies:
@@ -6386,8 +6393,8 @@ snapshots:
       '@babel/parser': 7.29.0
       eslint: 9.39.3(jiti@2.6.1)
       hermes-parser: 0.25.1
-      zod: 4.3.6
-      zod-validation-error: 4.0.2(zod@4.3.6)
+      zod: 3.25.76
+      zod-validation-error: 4.0.2(zod@3.25.76)
     transitivePeerDependencies:
       - supports-color
 
@@ -8027,9 +8034,9 @@ snapshots:
 
   yoctocolors@2.1.2: {}
 
-  zod-validation-error@4.0.2(zod@4.3.6):
+  zod-validation-error@4.0.2(zod@3.25.76):
     dependencies:
-      zod: 4.3.6
+      zod: 3.25.76
 
   zod@3.25.76: {}
 
