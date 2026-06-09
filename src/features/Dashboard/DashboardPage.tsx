@@ -95,6 +95,7 @@ export default function DashboardPage() {
           maxWidth: 1170,
           mx: "auto",
           py: 3,
+          pb: 10,
           display: "flex",
           flexDirection: "column",
           gap: 3,
@@ -314,7 +315,9 @@ export default function DashboardPage() {
           </Card>
         </Box>
       </Box>
-      <AppFooter />
+      <AppFooter
+        sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1200 }}
+      />
     </Box>
   );
 }

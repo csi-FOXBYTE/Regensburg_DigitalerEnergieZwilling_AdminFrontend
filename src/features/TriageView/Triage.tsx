@@ -176,6 +176,7 @@ export function Dashboard() {
           maxWidth: 1170,
           mx: "auto",
           py: 3,
+          pb: 10,
           display: "flex",
           flexDirection: "column",
           gap: 3,
@@ -244,7 +245,9 @@ export function Dashboard() {
         setRecordToDelete={setRecordToDelete}
         handleDelete={handleDelete}
       />
-      <AppFooter />
+      <AppFooter
+        sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1200 }}
+      />
     </Box>
   );
 }
