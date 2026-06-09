@@ -1,7 +1,7 @@
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
+import LanguageIcon from "@mui/icons-material/Language";
+import PublicOffIcon from "@mui/icons-material/PublicOff";
 import {
   Box,
   Button,
@@ -163,8 +163,11 @@ export function ConfigManagementDialog({
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body1">
-                        {formatDate(cfg.publishedAt)}
+                      <Typography
+                        variant="body1"
+                        color={isActive ? "text.primary" : "text.disabled"}
+                      >
+                        {isActive ? formatDate(cfg.publishedAt) : "Deaktiviert"}
                       </Typography>
                     </TableCell>
                     <TableCell
@@ -180,10 +183,10 @@ export function ConfigManagementDialog({
                       >
                         <Tooltip title={isActive ? "Aktiv" : "Aktivieren"}>
                           <IconButton
-                            color="warning"
+                            color={isActive ? "success" : "default"}
                             onClick={() => { if (!isActive) onActivate(cfg.versionName); }}
                           >
-                            {isActive ? <StarIcon /> : <StarBorderIcon />}
+                            {isActive ? <LanguageIcon /> : <PublicOffIcon />}
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Löschen">
