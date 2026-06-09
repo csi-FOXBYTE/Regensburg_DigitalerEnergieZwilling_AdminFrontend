@@ -506,7 +506,7 @@ export function ConfigOverview() {
               </Typography>
               <Typography variant="body1">{selectedConfigFile}</Typography>
             </Box>
-            {selectedConfigMeta?.createdAt && (
+            {!!selectedConfigMeta?.createdAt && (
               <Box>
                 <Typography
                   variant="h6"
@@ -516,13 +516,13 @@ export function ConfigOverview() {
                   Erstellt
                 </Typography>
                 <Typography variant="body1">
-                  {new Date(selectedConfigMeta.createdAt).toLocaleDateString(
+                  {new Date(String(selectedConfigMeta.createdAt)).toLocaleDateString(
                     "de-DE",
                   )}
                 </Typography>
               </Box>
             )}
-            {selectedConfigMeta?.activatedAt && (
+            {!!selectedConfigMeta?.publishedAt && (
               <Box>
                 <Typography
                   variant="h6"
@@ -532,7 +532,7 @@ export function ConfigOverview() {
                   Veröffentlicht
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  {new Date(selectedConfigMeta.activatedAt).toLocaleDateString(
+                  {new Date(String(selectedConfigMeta.publishedAt)).toLocaleDateString(
                     "de-DE",
                   )}
                 </Typography>

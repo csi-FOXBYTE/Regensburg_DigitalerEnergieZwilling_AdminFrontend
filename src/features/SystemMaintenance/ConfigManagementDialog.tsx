@@ -34,9 +34,9 @@ interface ConfigManagementDialogProps {
   onDelete: (versionName: string) => void;
 }
 
-function formatDate(iso?: string) {
+function formatDate(iso?: unknown) {
   if (!iso) return "–";
-  return new Date(iso).toLocaleDateString("de-DE", {
+  return new Date(String(iso)).toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -164,7 +164,7 @@ export function ConfigManagementDialog({
                     </TableCell>
                     <TableCell>
                       <Typography variant="body1">
-                        {formatDate(cfg.activatedAt)}
+                        {formatDate(cfg.publishedAt)}
                       </Typography>
                     </TableCell>
                     <TableCell
