@@ -7,6 +7,7 @@ import type {
   PrimaryEnergyCarrierData,
   RangeKey,
   Selection,
+  Subsidy,
 } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { DEFAULT_CONFIG } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { produce } from "immer";
@@ -21,22 +22,16 @@ export type TempControlEntry = {
   value: Array<RangeKey & { value: Array<{ key: string; value: number }> }>;
 };
 
-export interface Foerderprogramm {
-  id: string;
-  name: string;
-  link?: string;
-  promotionType: "percent" | "absolute";
-  promotionAmount: number;
-  maxPromotionAmount?: number;
-  isActive: boolean;
-  description: string;
-}
-
 export interface EnergyEfficiencyEntry {
   to?: number;
   from?: number;
   value: string;
   color: string;
+}
+
+export interface SubsidyWrapper {
+  subsidy: Subsidy;
+  isActive: boolean;
 }
 
 export interface YearBandEntry {
@@ -902,28 +897,30 @@ export const toggleAllowedBottomFloorConstructionType = (
   });
 };
 
-// Förderprogramme //
+// Subsidies //
 
-export const foerderprogramme = atom<Foerderprogramm[]>(mockSubsidies);
+export const foerderprogramme = atom<SubsidyWrapper[]>(mockSubsidies);
 
-export const addFoerderprogramm = (entry: Foerderprogramm) => {
+export const addFoerderprogramm = (entry: SubsidyWrapper) => {
   foerderprogramme.set([...foerderprogramme.get(), entry]);
 };
 
 export const updateFoerderprogramm = (
-  id: string,
-  updater: (draft: Foerderprogramm) => void,
+  title: string,
+  updater: (draft: SubsidyWrapper) => void,
 ) => {
   foerderprogramme.set(
     produce(foerderprogramme.get(), (draft) => {
-      const item = draft.find((f) => f.id === id);
+      const item = draft.find((f) => f.subsidy.title === title);
       if (item) updater(item);
     }),
   );
 };
 
-export const deleteFoerderprogramm = (id: string) => {
-  foerderprogramme.set(foerderprogramme.get().filter((f) => f.id !== id));
+export const deleteFoerderprogramm = (title: string) => {
+  foerderprogramme.set(
+    foerderprogramme.get().filter((f) => f.subsidy.title !== title),
+  );
 };
 
 // Heat Config Updates

@@ -1,16 +1,19 @@
 import ComunityParameterSection from "@/features/SystemMaintenance/sections/ComunityParameterSection";
 import ElectricityTypesSection from "@/features/SystemMaintenance/sections/ElectricityTypesSection";
-import FoerderprogrammeSection from "@/features/SystemMaintenance/sections/FoerderprogrammeSection";
 import HeatingSurfaceTypesSection from "@/features/SystemMaintenance/sections/HeatingSurfaceTypesSection";
 import HeatingTypesSection from "@/features/SystemMaintenance/sections/HeatingTypesSection";
 import OgdSection from "@/features/SystemMaintenance/sections/OgdSection";
 import OuterWallSection from "@/features/SystemMaintenance/sections/OuterWallSection";
 import { PrimaryEnergyCarrierSection } from "@/features/SystemMaintenance/sections/PrimaryEnergyCarrierSection";
 import RoofSection from "@/features/SystemMaintenance/sections/RoofSection";
+import FoerderprogrammeSection from "@/features/SystemMaintenance/sections/SubsidySection";
 import SurfaceTempResistenceSection from "@/features/SystemMaintenance/sections/SurfaceTempResistenceSection";
 import UgdSection from "@/features/SystemMaintenance/sections/UgdSection";
 import WindowSection from "@/features/SystemMaintenance/sections/WindowSection";
-import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
+import type {
+  DETConfig,
+  Subsidy,
+} from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import CheckIcon from "@mui/icons-material/Check";
 import { Box, Button, Chip, Paper, Typography } from "@mui/material";
 import { useStore } from "@nanostores/react";
@@ -32,7 +35,6 @@ import {
   config,
   foerderprogramme,
   type EnergyEfficiencyEntry,
-  type Foerderprogramm,
   type YearBandEntry,
 } from "../../hooks/store";
 import { ConfigManagementDialog } from "./ConfigManagementDialog";
@@ -313,7 +315,7 @@ export function ConfigOverview() {
     ) as DETConfig;
     const subsidies = JSON.parse(
       String(loadConfig.data.subsidies),
-    ) as Foerderprogramm[];
+    ) as Subsidy[];
     config.set(calculationConfig);
     foerderprogramme.set(subsidies);
   }, [loadConfig.data]);
@@ -516,9 +518,9 @@ export function ConfigOverview() {
                   Erstellt
                 </Typography>
                 <Typography variant="body1">
-                  {new Date(String(selectedConfigMeta.createdAt)).toLocaleDateString(
-                    "de-DE",
-                  )}
+                  {new Date(
+                    String(selectedConfigMeta.createdAt),
+                  ).toLocaleDateString("de-DE")}
                 </Typography>
               </Box>
             )}
@@ -532,9 +534,9 @@ export function ConfigOverview() {
                   Veröffentlicht
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  {new Date(String(selectedConfigMeta.publishedAt)).toLocaleDateString(
-                    "de-DE",
-                  )}
+                  {new Date(
+                    String(selectedConfigMeta.publishedAt),
+                  ).toLocaleDateString("de-DE")}
                 </Typography>
               </Box>
             )}

@@ -6,9 +6,9 @@ import {
   patchApiAdminConfigVersionNameActivate,
   postApiAdminConfig,
 } from "@/api/api.gen";
-import type { Foerderprogramm } from "@/hooks/store";
 import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import type { SubsidyWrapper } from "./store";
 
 export type { GetApiAdminConfig200ConfigsItem as ConfigMeta } from "@/api/api.gen";
 
@@ -21,7 +21,7 @@ export function useSaveConfig() {
     }: {
       versionName: string;
       config: DETConfig;
-      subsidies: Foerderprogramm[];
+      subsidies: SubsidyWrapper[];
     }) =>
       postApiAdminConfig({
         versionName,
