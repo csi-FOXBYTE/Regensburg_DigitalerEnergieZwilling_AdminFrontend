@@ -164,9 +164,21 @@ export default function ComunityParameterSection({
             }
           />
 
-          <Box />
-          <Box />
-          <Box />
+          <Typography>
+            Elektr. Grundlast [kWh/m<sup>2</sup>a]
+          </Typography>
+          <TextField
+            size="small"
+            type="number"
+            inputProps={{ step: 0.1 }}
+            value={configStore.heat.electricalBaseLoadFromFloorAreaFactor}
+            onChange={(e) =>
+              updateSimpleValue(
+                "heat.electricalBaseLoadFromFloorAreaFactor",
+                parseFloat(e.target.value),
+              )
+            }
+          />
         </Box>
       </Box>
     </CollapsibleSection>
