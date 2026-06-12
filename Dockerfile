@@ -11,7 +11,9 @@ RUN chown -R 1000:1000 /app
 USER 1000:1000
 
 COPY --chown=1000:1000 package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
-RUN --mount=type=secret,id=github_token,env=PACKAGE_TOKEN pnpm install --frozen-lockfile
+RUN --mount=type=secret,id=github_token,env=PACKAGE_TOKEN \
+    pnpm config set "//npm.pkg.github.com/:_authToken" "$PACKAGE_TOKEN" && \
+    pnpm install --frozen-lockfile
 
 COPY --chown=1000:1000 . .
 RUN pnpm run build
