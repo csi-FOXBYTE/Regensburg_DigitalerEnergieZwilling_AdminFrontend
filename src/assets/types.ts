@@ -25,7 +25,10 @@ export const STATUS_LABELS: Record<RecordStatus, string> = {
 
 export interface BuildingRecord {
   id: string;
+  buildingId?: string;
   buildingAddress: string;
+  longitude?: number;
+  latitude?: number;
   receivedDate: string;
   status: RecordStatus;
   assignedTo: string | null;
