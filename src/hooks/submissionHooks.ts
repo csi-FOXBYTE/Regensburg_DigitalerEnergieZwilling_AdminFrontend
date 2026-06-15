@@ -6,14 +6,109 @@ import {
   patchApiAdminSubmissionsSubmissionIdAssignment,
   postApiAdminSubmissionsSubmissionIdAccept,
   postApiAdminSubmissionsSubmissionIdDecline,
+  type GetApiAdminSubmissions200DataItem,
+  type GetApiAdminSubmissions200DataItemSubmissionsItem,
+  type GetApiAdminSubmissionsSubmissionId200,
+  type GetApiAdminSubmissionsSubmissionId200HistoryItem,
+  type GetApiAdminSubmissionsSubmissionId200UsedConfig,
   type GetApiAdminSubmissionsParams,
 } from "@/api/api.gen";
+import type { DETInput } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import type { RecordStatus, SubmissionSummary } from "@/assets/types";
+
+export type SubmissionDetail = {
+  id: string;
+  buildingId: string;
+  buildingAddress: string;
+  longitude: number;
+  latitude: number;
+  receivedDate: string;
+  status: RecordStatus;
+  assignedToId: string | null;
+  assignedTo: string | null;
+  assignedAt: string | null;
+  otherSubmissionIds: string[];
+  history: GetApiAdminSubmissionsSubmissionId200HistoryItem[];
+  usedConfig: GetApiAdminSubmissionsSubmissionId200UsedConfig;
+  detInput: DETInput | undefined;
+};
+
+function toRecordStatus(
+  status: GetApiAdminSubmissions200DataItemSubmissionsItem["status"],
+): RecordStatus {
+  switch (status) {
+    case "NEW":
+      return "NEU";
+    case "ASSIGNED":
+      return "IN_PRUEFUNG";
+    case "ACCEPTED":
+      return "FREIGEGEBEN";
+    case "DECLINED":
+      return "ABGELEHNT";
+  }
+}
+
+export function toDetailStatus(
+  status: GetApiAdminSubmissionsSubmissionId200["status"],
+): RecordStatus {
+  switch (status) {
+    case "NEW":
+      return "NEU";
+    case "ASSIGNED":
+      return "IN_PRUEFUNG";
+    case "ACCEPTED":
+      return "FREIGEGEBEN";
+    case "DECLINED":
+      return "ABGELEHNT";
+  }
+}
+
+function groupToSummaries(group: GetApiAdminSubmissions200DataItem): SubmissionSummary[] {
+  const useVariants = group.submissions.length > 1;
+  return group.submissions.map((sub, i) => ({
+    id: sub.id,
+    buildingId: group.buildingId,
+    buildingAddress: group.address,
+    longitude: group.longitude,
+    latitude: group.latitude,
+    receivedDate: sub.createdAt,
+    status: toRecordStatus(sub.status),
+    assignedTo: sub.assignedToId,
+    ...(useVariants && {
+      variantGroup: group.buildingId,
+      variantLabel: `Einreichung ${String.fromCharCode(65 + i)}`,
+    }),
+  }));
+}
+
+function toSubmissionDetail(data: GetApiAdminSubmissionsSubmissionId200): SubmissionDetail {
+  return {
+    id: data.id,
+    buildingId: data.buildingId,
+    buildingAddress: data.address,
+    longitude: data.longitude,
+    latitude: data.latitude,
+    receivedDate: data.createdAt,
+    status: toDetailStatus(data.status),
+    assignedToId: data.assignedTo?.id ?? null,
+    assignedTo: data.assignedTo
+      ? [data.assignedTo.given_name, data.assignedTo.family_name].filter(Boolean).join(" ") || data.assignedTo.email
+      : null,
+    assignedAt: data.assignedAt,
+    otherSubmissionIds: data.otherSubmissionIds,
+    history: data.history,
+    usedConfig: data.usedConfig,
+    detInput: data.raw as DETInput | undefined,
+  };
+}
 
 export function useSubmissions(params?: GetApiAdminSubmissionsParams) {
   return useQuery({
     queryKey: ["submissions", params],
     queryFn: () => getApiAdminSubmissions(params),
+    select: (data) => data.data.flatMap(groupToSummaries),
+    staleTime: 30_000,
   });
 }
 
@@ -22,6 +117,8 @@ export function useSubmission(submissionId: string) {
     queryKey: ["submission", submissionId],
     queryFn: () => getApiAdminSubmissionsSubmissionId(submissionId),
     enabled: !!submissionId,
+    select: toSubmissionDetail,
+    staleTime: 30_000,
   });
 }
 

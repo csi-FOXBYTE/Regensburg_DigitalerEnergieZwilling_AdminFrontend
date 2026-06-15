@@ -7,6 +7,19 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 export type RecordStatus = "NEU" | "IN_PRUEFUNG" | "FREIGEGEBEN" | "ABGELEHNT" | "GELOESCHT";
 
+export interface SubmissionSummary {
+  id: string;
+  buildingId: string;
+  buildingAddress: string;
+  longitude: number;
+  latitude: number;
+  receivedDate: string;
+  status: RecordStatus;
+  assignedTo: string | null;
+  variantGroup?: string;
+  variantLabel?: string;
+}
+
 export const STATUS_COLORS: Record<RecordStatus, string> = {
   NEU: "#3b82f6",
   IN_PRUEFUNG: "#f59e0b",

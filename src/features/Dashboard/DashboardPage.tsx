@@ -1,8 +1,10 @@
+import { useSubmissions } from "@/hooks/submissionHooks";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DomainIcon from "@mui/icons-material/Domain";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import {
+  Alert,
   Box,
   Card,
   CardContent,
@@ -15,18 +17,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useContext, useMemo } from "react";
-import {
-  BUILDING_TYPE_SELECTIONS,
-  resolveLabel,
-} from "../../assets/labelResolver";
+import { useCallback, useMemo } from "react";
 import { STATUS_COLORS, statusConfig } from "../../assets/types";
 import { AppFooter } from "../../components/Footer";
-import { RecordsContext } from "../../components/RecordsContext";
 import BuildingMap from "./BuildingMap";
 
 export default function DashboardPage() {
-  const { records } = useContext(RecordsContext)!;
+  const { data: submissionsData = [], isError } = useSubmissions();
   const navigate = useNavigate();
 
   const statusCounts = useMemo(() => {
@@ -37,24 +34,15 @@ export default function DashboardPage() {
       ABGELEHNT: 0,
       GELOESCHT: 0,
     };
-    for (const r of records) counts[r.status]++;
-    return counts;
-  }, [records]);
 
-  const recentRecords = useMemo(
-    () =>
-      [...records]
-        .sort(
-          (a, b) =>
-            new Date(b.receivedDate).getTime() -
-            new Date(a.receivedDate).getTime(),
-        )
-        .slice(0, 5),
-    [records],
-  );
+    for (const submission of submissionsData) {
+      counts[submission.status]++;
+    }
+    return counts;
+  }, [submissionsData]);
 
   const handleBuildingClick = useCallback(
-    (r: (typeof records)[number]) =>
+    (r: (typeof submissionsData)[number]) =>
       navigate({ to: "/record/$id", params: { id: r.id } }),
     [navigate],
   );
@@ -62,7 +50,7 @@ export default function DashboardPage() {
   const stats = [
     {
       title: "Gesamt Gebäude",
-      value: records.length,
+      value: submissionsData.length,
       icon: <DomainIcon sx={{ fontSize: 28, color: "primary.main" }} />,
       bgColor: "primary.50",
     },
@@ -109,6 +97,12 @@ export default function DashboardPage() {
             Übersicht aller eingereichten Gebäudedaten
           </Typography>
         </Box>
+
+        {isError && (
+          <Alert severity="error">
+            Daten konnten nicht geladen werden. Bitte Seite neu laden.
+          </Alert>
+        )}
 
         {/* Stats cards */}
         <Box
@@ -177,17 +171,24 @@ export default function DashboardPage() {
                 Zuletzt übermittelte Gebäudedaten
               </Typography>
               <List disablePadding>
-                {recentRecords.map((record, i) => {
-                  const cfg = statusConfig[record.status];
+                {[...submissionsData]
+                  .sort(
+                    (a, b) =>
+                      new Date(b.receivedDate).getTime() -
+                      new Date(a.receivedDate).getTime(),
+                  )
+                  .slice(0, 5)
+                  .map((submission, i) => {
+                  const cfg = statusConfig[submission.status];
                   return (
-                    <Box key={record.id}>
+                    <Box key={submission.id}>
                       {i > 0 && <Divider />}
                       <ListItem disablePadding>
                         <ListItemButton
                           onClick={() =>
                             navigate({
                               to: "/record/$id",
-                              params: { id: record.id },
+                              params: { id: submission.id },
                             })
                           }
                           sx={{ p: 1.5 }}
@@ -204,7 +205,7 @@ export default function DashboardPage() {
                                 }}
                               >
                                 <Typography variant="body1">
-                                  {record.buildingAddress.split(",")[0]}
+                                  {submission.buildingAddress.split(",")[0]}
                                 </Typography>
                                 <Chip
                                   label={cfg.label}
@@ -217,18 +218,7 @@ export default function DashboardPage() {
                             secondary={
                               <Box component="span">
                                 <Typography component="span" variant="body2">
-                                  {resolveLabel(
-                                    BUILDING_TYPE_SELECTIONS,
-                                    record.detInput?.general.type,
-                                  ) ??
-                                    record.detInput?.general.type ??
-                                    "Unbekannt"}{" "}
-                                  • Baujahr{" "}
-                                  {record.detInput?.general.buildingYear != null
-                                    ? String(
-                                        record.detInput.general.buildingYear,
-                                      )
-                                    : "–"}
+                                  {`Gebäude-Id: ${submission.buildingId}`}
                                 </Typography>
                                 <br />
                                 <Typography
@@ -236,16 +226,15 @@ export default function DashboardPage() {
                                   variant="caption"
                                   color="#757575"
                                 >
-                                  {new Date(record.receivedDate).toLocaleString(
-                                    "de-DE",
-                                    {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    },
-                                  )}
+                                  {new Date(
+                                    submission.receivedDate,
+                                  ).toLocaleString("de-DE", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                                 </Typography>
                               </Box>
                             }
@@ -304,10 +293,16 @@ export default function DashboardPage() {
               </Box>
 
               {/* Map */}
-              <Box sx={{ height: 360, borderRadius: 1, overflow: "hidden" }}>
-                {/* }   <MapWithControls /> */}
+              <Box
+                sx={{
+                  height: 360,
+                  borderRadius: 1,
+                  overflow: "hidden",
+                  zIndex: 1,
+                }}
+              >
                 <BuildingMap
-                  buildings={records}
+                  submissions={submissionsData}
                   onBuildingClick={handleBuildingClick}
                 />
               </Box>

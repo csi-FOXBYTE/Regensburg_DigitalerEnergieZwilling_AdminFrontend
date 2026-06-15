@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
 import React from "react";
-import type { BuildingRecord } from "../../../assets/types";
+import type { SubmissionSummary } from "../../../assets/types";
 import { statusConfig } from "../../../assets/types";
 
 type SortField = "date" | "address" | "status" | "assignedTo";
@@ -43,7 +43,8 @@ function SortIcon({
 
 function TableView({
   records,
-  currentUserName,
+  currentUserId,
+  currentUserDisplayName,
   handleAssignToMe,
   setRecordToDelete,
   sortBy,
@@ -51,9 +52,10 @@ function TableView({
   toggleSort,
   variantGroupCounts,
 }: {
-  records: BuildingRecord[];
-  currentUserName?: string | null;
-  handleAssignToMe: (record: BuildingRecord) => void;
+  records: SubmissionSummary[];
+  currentUserId?: string | null;
+  currentUserDisplayName?: string | null;
+  handleAssignToMe: (record: SubmissionSummary) => void;
   setRecordToDelete: (id: string | null) => void;
   sortBy: SortField;
   sortOrder: "asc" | "desc";
@@ -194,15 +196,19 @@ function TableView({
                     variant="body1"
                     sx={{
                       fontWeight:
-                        record.assignedTo === currentUserName ? 600 : 400,
+                        record.assignedTo === currentUserId ? 600 : 400,
                       color: record.assignedTo
-                        ? record.assignedTo === currentUserName
+                        ? record.assignedTo === currentUserId
                           ? "secondary.main"
                           : "text.primary"
                         : "text.secondary",
                     }}
                   >
-                    {record.assignedTo ?? "Nicht zugewiesen"}
+                    {record.assignedTo
+                      ? record.assignedTo === currentUserId
+                        ? (currentUserDisplayName ?? "Ich")
+                        : "Anderer Prüfer"
+                      : "Nicht zugewiesen"}
                   </Typography>
                 </TableCell>
                 <TableCell align="right" sx={{ py: 0 }}>

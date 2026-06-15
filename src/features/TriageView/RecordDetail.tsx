@@ -1,8 +1,18 @@
 import { statusConfig } from "@/assets/types";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { AppFooter } from "@/components/Footer";
-import { RecordsContext } from "@/components/RecordsContext";
-import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
+import {
+  toDetailStatus,
+  useAcceptSubmission,
+  useAssignSubmission,
+  useDeclineSubmission,
+  useDeleteSubmission,
+  useSubmission,
+  useSubmissions,
+  useUnassignSubmission,
+} from "@/hooks/submissionHooks";
+import { postApiAdminSubmissionsSubmissionIdDecline } from "@/api/api.gen";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { GasMeter, LightbulbOutlineRounded, Power } from "@mui/icons-material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ApartmentIcon from "@mui/icons-material/Apartment";
@@ -26,12 +36,14 @@ import {
   CardContent,
   CardHeader,
   Chip,
+  CircularProgress,
   TextField,
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   BUILDING_TYPE_SELECTIONS,
@@ -44,42 +56,41 @@ import { config } from "../../hooks/store";
 export function RecordDetail({ id }: { id: string }) {
   const navigate = useNavigate();
   const currentUser = useCurrentUser();
-  const { records, updateRecord, setRecords } = useContext(RecordsContext)!;
+  const queryClient = useQueryClient();
   const cfg = useStore(config);
-  const record = useMemo(
-    () => records.find((r) => r.id === id) ?? null,
-    [id, records],
-  );
-  // key={id} on this component ensures a fresh mount per record, so lazy init is safe
-  const [notes, setNotes] = useState(() => record?.notes ?? "");
+
+  const { data: detail, isPending } = useSubmission(id);
+  const { data: submissions } = useSubmissions();
+  const [notes, setNotes] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const hasChangesRef = useRef(false);
+  const [freigebenPending, setFreigebenPending] = useState(false);
 
-  const updateRecordRef = useRef(updateRecord);
-  const snapshotRef = useRef({ record, notes, currentUser });
-
-  // Kept fresh after every render so the unmount cleanup sees current values
-  useEffect(() => {
-    updateRecordRef.current = updateRecord;
-    snapshotRef.current = { record, notes, currentUser };
-  });
+  const assignMutation = useAssignSubmission();
+  const unassignMutation = useUnassignSubmission();
+  const acceptMutation = useAcceptSubmission();
+  const declineMutation = useDeclineSubmission();
+  const deleteMutation = useDeleteSubmission();
 
   const variantSiblings = useMemo(() => {
-    if (!record?.variantGroup) return [];
-    return records.filter((r) => r.variantGroup === record.variantGroup);
-  }, [record, records]);
+    if (!detail?.otherSubmissionIds.length) return [];
+    const siblingIds = new Set([id, ...detail.otherSubmissionIds]);
+    return (submissions ?? []).filter((s) => siblingIds.has(s.id));
+  }, [submissions, detail, id]);
 
-  // Auto-save notes when navigating away
-  useEffect(() => {
-    return () => {
-      if (hasChangesRef.current && snapshotRef.current.record) {
-        const { record, notes } = snapshotRef.current;
-        updateRecordRef.current({ ...record, notes });
-      }
-    };
-  }, []);
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ["submissions"] });
+    void queryClient.invalidateQueries({ queryKey: ["submission", id] });
+  };
 
-  if (!record) {
+  if (isPending) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!detail) {
     return (
       <Box
         sx={{
@@ -95,7 +106,7 @@ export function RecordDetail({ id }: { id: string }) {
           </Typography>
           <Button
             variant="outlined"
-            onClick={() => navigate({ to: "/dashboard" })}
+            onClick={() => navigate({ to: "/maintenance" })}
           >
             Zurück zur Übersicht
           </Button>
@@ -104,84 +115,99 @@ export function RecordDetail({ id }: { id: string }) {
     );
   }
 
-  const isAssignedToMe = record.assignedTo === getDisplayName(currentUser);
-  const isAssignedToOther = !!record.assignedTo && !isAssignedToMe;
-  const canAssign =
-    record.status === "NEU" && !record.assignedTo && !!currentUser;
-  const canUnassign = isAssignedToMe && record.status === "IN_PRUEFUNG";
-  const canDecide = isAssignedToMe && record.status === "IN_PRUEFUNG";
-  const StatusIcon = statusConfig[record.status].icon;
+  const status = detail.status;
+  const isAssignedToMe = !!currentUser?.sub && detail.assignedToId === currentUser.sub;
+  const isAssignedToOther = !!detail.assignedToId && !isAssignedToMe;
+  const canAssign = status === "NEU" && !detail.assignedToId && !!currentUser;
+  const canUnassign = isAssignedToMe && status === "IN_PRUEFUNG";
+  const canDecide = isAssignedToMe && status === "IN_PRUEFUNG";
+  const StatusIcon = statusConfig[status].icon;
 
   const handleAssignToMe = () => {
-    if (!currentUser) return toast.error("Kein Benutzer — Token fehlt.");
-    updateRecord({
-      ...record,
-      status: "IN_PRUEFUNG",
-      assignedTo: getDisplayName(currentUser),
-      assignedAt: new Date(),
-    });
-    toast.success("Datensatz zugewiesen. Status: In Prüfung");
+    if (!currentUser?.sub) return toast.error("Kein Benutzer — Token fehlt.");
+    assignMutation.mutate(
+      { submissionId: id, userId: currentUser.sub },
+      {
+        onSuccess: () => {
+          invalidate();
+          toast.success("Datensatz zugewiesen. Status: In Prüfung");
+        },
+        onError: () => toast.error("Zuweisung fehlgeschlagen."),
+      },
+    );
   };
 
   const handleUnassign = () => {
-    updateRecord({
-      ...record,
-      status: "NEU",
-      assignedTo: null,
-      assignedAt: null,
-      notes: "",
-    });
-    setNotes("");
-    hasChangesRef.current = false;
-    toast.success("Zuweisung aufgehoben.");
+    unassignMutation.mutate(
+      { submissionId: id },
+      {
+        onSuccess: () => {
+          setNotes("");
+          invalidate();
+          toast.success("Zuweisung aufgehoben.");
+        },
+        onError: () => toast.error("Aufheben der Zuweisung fehlgeschlagen."),
+      },
+    );
   };
 
   const handleAblehnen = () => {
     if (!notes.trim())
       return toast.error("Ein Kommentar ist bei Ablehnung erforderlich.");
-    updateRecord({
-      ...record,
-      status: "ABGELEHNT",
-      notes,
-      resolvedAt: new Date(),
-      resolvedBy: currentUser?.name ?? null,
-    });
-    hasChangesRef.current = false;
-    toast.success("Datensatz abgelehnt.");
+    declineMutation.mutate(
+      { submissionId: id },
+      {
+        onSuccess: () => {
+          invalidate();
+          toast.success("Datensatz abgelehnt.");
+        },
+        onError: () => toast.error("Ablehnung fehlgeschlagen."),
+      },
+    );
   };
 
-  const handleFreigeben = () => {
-    const siblingsToAutoDecline = variantSiblings.filter(
-      (s) =>
-        s.id !== record.id &&
-        s.status !== "FREIGEGEBEN" &&
-        s.status !== "ABGELEHNT",
+  const handleFreigeben = async () => {
+    setFreigebenPending(true);
+    try {
+      await acceptMutation.mutateAsync({ submissionId: id });
+    } catch {
+      toast.error("Freigabe fehlgeschlagen.");
+      setFreigebenPending(false);
+      return;
+    }
+
+    const siblingsToDecline = variantSiblings.filter(
+      (s) => s.id !== id && s.status !== "FREIGEGEBEN" && s.status !== "ABGELEHNT",
     );
-    updateRecord({
-      ...record,
-      status: "FREIGEGEBEN",
-      notes,
-      resolvedAt: new Date(),
-      resolvedBy: currentUser?.name ?? null,
-    });
-    siblingsToAutoDecline.forEach((sibling) => {
-      updateRecord({
-        ...sibling,
-        status: "ABGELEHNT",
-        rejectedDueToApprovalOf: record.id,
-        rejectedDueToApprovalOfLabel: record.variantLabel ?? record.id,
-        resolvedAt: new Date(),
-        resolvedBy: null,
-      });
-    });
-    hasChangesRef.current = false;
-    toast.success("Datensatz freigegeben.");
+    if (siblingsToDecline.length > 0) {
+      try {
+        await Promise.all(
+          siblingsToDecline.map((s) => postApiAdminSubmissionsSubmissionIdDecline(s.id)),
+        );
+        toast.success("Datensatz freigegeben. Andere Einreichungen automatisch abgelehnt.");
+      } catch {
+        toast.warning("Datensatz freigegeben. Andere Einreichungen konnten nicht automatisch abgelehnt werden.");
+      }
+    } else {
+      toast.success("Datensatz freigegeben.");
+    }
+
+    invalidate();
+    setFreigebenPending(false);
   };
 
   const handleDelete = () => {
-    setRecords((prev) => prev.filter((r) => r.id !== record.id));
-    toast.success("Datensatz gelöscht.");
-    navigate({ to: "/dashboard" });
+    deleteMutation.mutate(
+      { submissionId: id },
+      {
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["submissions"] });
+          toast.success("Datensatz gelöscht.");
+          navigate({ to: "/maintenance" });
+        },
+        onError: () => toast.error("Löschen fehlgeschlagen."),
+      },
+    );
   };
 
   return (
@@ -216,13 +242,13 @@ export function RecordDetail({ id }: { id: string }) {
               Zurück
             </Button>
             <Box>
-              <Typography variant="h2">{record.buildingAddress}</Typography>
+              <Typography variant="h2">{detail.buildingAddress}</Typography>
               <Box
                 sx={{ display: "flex", alignItems: "center", gap: 2, mt: 0.5 }}
               >
                 <Typography variant="h4">
                   Eingegangen:{" "}
-                  {new Date(record.receivedDate).toLocaleString("de-DE", {
+                  {new Date(detail.receivedDate).toLocaleString("de-DE", {
                     day: "2-digit",
                     month: "2-digit",
                     year: "numeric",
@@ -231,21 +257,21 @@ export function RecordDetail({ id }: { id: string }) {
                   })}
                 </Typography>
                 <Typography variant="h4">•</Typography>
-                <Typography variant="h4">ID: {record.id}</Typography>
+                <Typography variant="h4">ID: {id}</Typography>
               </Box>
             </Box>
           </Box>
           <Chip
             icon={<StatusIcon />}
-            label={statusConfig[record.status].label}
-            color={statusConfig[record.status].chipColor}
+            label={statusConfig[status].label}
+            color={statusConfig[status].chipColor}
             sx={{ fontSize: "0.9rem", px: 1 }}
           />
         </Box>
 
         {isAssignedToOther && (
           <Alert severity="warning">
-            Dieser Datensatz ist bereits <strong>{record.assignedTo}</strong>{" "}
+            Dieser Datensatz ist bereits <strong>{detail?.assignedTo}</strong>{" "}
             zugewiesen.
           </Alert>
         )}
@@ -277,39 +303,23 @@ export function RecordDetail({ id }: { id: string }) {
                       py: 1.25,
                       borderRadius: 1,
                       border: "1px solid",
-                      borderColor: s.id === record.id ? "#E30613" : "divider",
+                      borderColor: s.id === id ? "#E30613" : "divider",
                       cursor: "pointer",
                       "&:hover": { bgcolor: "action.hover" },
                     }}
                   >
                     <Typography
                       variant="body1"
-                      fontWeight={s.id === record.id ? 600 : 400}
+                      fontWeight={s.id === id ? 600 : 400}
                     >
                       {s.variantLabel}
                     </Typography>
-                    {s.status === "FREIGEGEBEN" ? (
-                      <Chip
-                        label="✓ Freigegebene Einreichung"
-                        size="small"
-                        color="success"
-                        variant="outlined"
-                      />
-                    ) : s.rejectedDueToApprovalOf ? (
-                      <Chip
-                        label={`Automatisch abgelehnt durch ${s.rejectedDueToApprovalOfLabel}`}
-                        size="small"
-                        color="warning"
-                        variant="outlined"
-                      />
-                    ) : (
-                      <Chip
-                        label={statusConfig[s.status].label}
-                        size="small"
-                        color={statusConfig[s.status].chipColor}
-                        variant="outlined"
-                      />
-                    )}
+                    <Chip
+                      label={s.status === "FREIGEGEBEN" ? "✓ Freigegebene Einreichung" : statusConfig[s.status].label}
+                      size="small"
+                      color={statusConfig[s.status].chipColor}
+                      variant="outlined"
+                    />
                   </Box>
                 ))}
               </Box>
@@ -336,16 +346,16 @@ export function RecordDetail({ id }: { id: string }) {
                     variant="body1"
                     fontWeight={isAssignedToMe ? 600 : 400}
                   >
-                    {record.assignedTo ?? "Nicht zugewiesen"}
+                    {detail?.assignedTo ?? "Nicht zugewiesen"}
                   </Typography>
                 </Box>
-                {record.assignedAt && (
+                {detail?.assignedAt && (
                   <Box>
                     <Typography variant="h4" display="block">
                       Zugewiesen am
                     </Typography>
                     <Typography variant="body1">
-                      {new Date(record.assignedAt).toLocaleString("de-DE", {
+                      {new Date(detail.assignedAt).toLocaleString("de-DE", {
                         day: "2-digit",
                         month: "2-digit",
                         year: "numeric",
@@ -360,6 +370,9 @@ export function RecordDetail({ id }: { id: string }) {
                 <Button
                   variant="outlined"
                   onClick={canUnassign ? handleUnassign : handleAssignToMe}
+                  disabled={
+                    assignMutation.isPending || unassignMutation.isPending
+                  }
                   color="error"
                 >
                   {canUnassign ? "Zuweisung aufheben" : "Mir zuweisen"}
@@ -374,30 +387,30 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Gebäudetyp"
             value={fmt(
-              record.detInput?.general.type,
+              detail?.detInput?.general.type,
               undefined,
               BUILDING_TYPE_SELECTIONS,
             )}
           />
           <InfoItem
             label="Baujahr"
-            value={fmt(record.detInput?.general.buildingYear)}
+            value={fmt(detail?.detInput?.general.buildingYear)}
           />
           <InfoItem
             label="Wohnfläche"
-            value={fmt(record.detInput?.general.livingArea, "m²")}
+            value={fmt(detail?.detInput?.general.livingArea, "m²")}
           />
           <InfoItem
             label="Geschosse"
-            value={fmt(record.detInput?.general.numberOfStories)}
+            value={fmt(detail?.detInput?.general.numberOfStories)}
           />
           <InfoItem
             label="Gebäudehöhe"
-            value={fmt(record.detInput?.general.buildingHeight, "m")}
+            value={fmt(detail?.detInput?.general.buildingHeight, "m")}
           />
           <InfoItem
             label="Grundfläche"
-            value={fmt(record.detInput?.general.buildingBaseArea, "m²")}
+            value={fmt(detail?.detInput?.general.buildingBaseArea, "m²")}
           />
         </InfoCard>
 
@@ -405,64 +418,64 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={RoofingIcon} title="Dach" cols={3}>
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(record.detInput?.roof.year)}
+            value={fmt(detail?.detInput?.roof.year)}
           />
           <InfoItem
             label="Dachfläche"
-            value={fmt(record.detInput?.roof.area, "m²")}
+            value={fmt(detail?.detInput?.roof.area, "m²")}
           />
           <InfoItem
             label="Dachkonstruktion"
             value={fmt(
-              record.detInput?.roof.constructionType,
+              detail?.detInput?.roof.constructionType,
               undefined,
               cfg.roof.constructionTypes,
             )}
           />
           <InfoItem
             label="Gedämmt"
-            value={fmt(record.detInput?.roof.hasInsulation)}
+            value={fmt(detail?.detInput?.roof.hasInsulation)}
           />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(record.detInput?.roof.insulationThickness, "cm")}
+            value={fmt(detail?.detInput?.roof.insulationThickness, "cm")}
           />
           <InfoItem
             label="Dämmungstyp"
             value={fmt(
-              record.detInput?.roof.insulationType,
+              detail?.detInput?.roof.insulationType,
               undefined,
               ROOF_INSULATION_SELECTIONS,
             )}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(record.detInput?.roof.uValue, "W/(m²K)")}
+            value={fmt(detail?.detInput?.roof.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
         {/* Dachfenster */}
-        {(record.detInput?.roofWindows?.area ?? 0) > 0 && (
+        {(detail?.detInput?.roofWindows?.area ?? 0) > 0 && (
           <InfoCard icon={WindowIcon} title="Dachfenster" cols={2}>
             <InfoItem
               label="Fläche"
-              value={fmt(record.detInput?.roofWindows?.area, "m²")}
+              value={fmt(detail?.detInput?.roofWindows?.area, "m²")}
             />
             <InfoItem
               label="Baujahr / Letzte Sanierung"
-              value={fmt(record.detInput?.roofWindows?.year)}
+              value={fmt(detail?.detInput?.roofWindows?.year)}
             />
             <InfoItem
               label="Fenstertyp"
               value={fmt(
-                record.detInput?.roofWindows?.windowType,
+                detail?.detInput?.roofWindows?.windowType,
                 undefined,
                 cfg.windows.windowTypes,
               )}
             />
             <InfoItem
               label="U-Wert"
-              value={fmt(record.detInput?.roofWindows?.uValue, "W/(m²K)")}
+              value={fmt(detail?.detInput?.roofWindows?.uValue, "W/(m²K)")}
             />
           </InfoCard>
         )}
@@ -471,35 +484,35 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={BuildIcon} title="Außenwand" cols={3}>
           <InfoItem
             label="Fläche"
-            value={fmt(record.detInput?.outerWall.area, "m²")}
+            value={fmt(detail?.detInput?.outerWall.area, "m²")}
           />
           <InfoItem
             label="Angrenzende Wandfläche"
-            value={fmt(record.detInput?.outerWall.adjacentWallArea, "m²")}
+            value={fmt(detail?.detInput?.outerWall.adjacentWallArea, "m²")}
           />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(record.detInput?.outerWall.year)}
+            value={fmt(detail?.detInput?.outerWall.year)}
           />
           <InfoItem
             label="Konstruktionstyp"
             value={fmt(
-              record.detInput?.outerWall.constructionType,
+              detail?.detInput?.outerWall.constructionType,
               undefined,
               cfg.outerWall.constructionTypes,
             )}
           />
           <InfoItem
             label="Gedämmt"
-            value={fmt(record.detInput?.outerWall.hasInsulation)}
+            value={fmt(detail?.detInput?.outerWall.hasInsulation)}
           />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(record.detInput?.outerWall.insulationThickness, "cm")}
+            value={fmt(detail?.detInput?.outerWall.insulationThickness, "cm")}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(record.detInput?.outerWall.uValue, "W/(m²K)")}
+            value={fmt(detail?.detInput?.outerWall.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -507,23 +520,23 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={WindowIcon} title="Außenwandfenster" cols={2}>
           <InfoItem
             label="Fläche"
-            value={fmt(record.detInput?.exteriorWallWindows.area, "m²")}
+            value={fmt(detail?.detInput?.exteriorWallWindows.area, "m²")}
           />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(record.detInput?.exteriorWallWindows.year)}
+            value={fmt(detail?.detInput?.exteriorWallWindows.year)}
           />
           <InfoItem
             label="Fenstertyp"
             value={fmt(
-              record.detInput?.exteriorWallWindows.windowType,
+              detail?.detInput?.exteriorWallWindows.windowType,
               undefined,
               cfg.windows.windowTypes,
             )}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(record.detInput?.exteriorWallWindows.uValue, "W/(m²K)")}
+            value={fmt(detail?.detInput?.exteriorWallWindows.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -531,39 +544,39 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={LayersIcon} title="Oberste Geschossdecke" cols={3}>
           <InfoItem
             label="Fläche"
-            value={fmt(record.detInput?.topFloor.area, "m²")}
+            value={fmt(detail?.detInput?.topFloor.area, "m²")}
           />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(record.detInput?.topFloor.year)}
+            value={fmt(detail?.detInput?.topFloor.year)}
           />
           <InfoItem
             label="Deckenkonstruktion"
             value={fmt(
-              record.detInput?.topFloor.topFloorType,
+              detail?.detInput?.topFloor.topFloorType,
               undefined,
               cfg.topFloor.topFloorTypes,
             )}
           />
           <InfoItem
             label="Hat Dachgeschoss"
-            value={fmt(record.detInput?.topFloor.hasAttic)}
+            value={fmt(detail?.detInput?.topFloor.hasAttic)}
           />
           <InfoItem
             label="Dachgeschoss beheizt"
-            value={fmt(record.detInput?.topFloor.isAtticHeated)}
+            value={fmt(detail?.detInput?.topFloor.isAtticHeated)}
           />
           <InfoItem
             label="Gedämmt"
-            value={fmt(record.detInput?.topFloor.hasInsulation)}
+            value={fmt(detail?.detInput?.topFloor.hasInsulation)}
           />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(record.detInput?.topFloor.insulationThickness, "cm")}
+            value={fmt(detail?.detInput?.topFloor.insulationThickness, "cm")}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(record.detInput?.topFloor.uValue, "W/(m²K)")}
+            value={fmt(detail?.detInput?.topFloor.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -571,43 +584,43 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={FoundationIcon} title="Untere Geschossdecke" cols={3}>
           <InfoItem
             label="Fläche"
-            value={fmt(record.detInput?.bottomFloor.area, "m²")}
+            value={fmt(detail?.detInput?.bottomFloor.area, "m²")}
           />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(record.detInput?.bottomFloor.year)}
+            value={fmt(detail?.detInput?.bottomFloor.year)}
           />
           <InfoItem
             label="Konstruktionstyp"
             value={fmt(
-              record.detInput?.bottomFloor.constructionType,
+              detail?.detInput?.bottomFloor.constructionType,
               undefined,
               cfg.bottomFloor.constructionTypes,
             )}
           />
           <InfoItem
             label="Beheizt"
-            value={fmt(record.detInput?.bottomFloor.isHeated)}
+            value={fmt(detail?.detInput?.bottomFloor.isHeated)}
           />
           <InfoItem
             label="Gedämmt"
-            value={fmt(record.detInput?.bottomFloor.hasInsulation)}
+            value={fmt(detail?.detInput?.bottomFloor.hasInsulation)}
           />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(record.detInput?.bottomFloor.insulationThickness, "cm")}
+            value={fmt(detail?.detInput?.bottomFloor.insulationThickness, "cm")}
           />
           <InfoItem
             label="Hat Keller"
-            value={fmt(record.detInput?.bottomFloor.hasBasement)}
+            value={fmt(detail?.detInput?.bottomFloor.hasBasement)}
           />
           <InfoItem
             label="Keller beheizt"
-            value={fmt(record.detInput?.bottomFloor.isBasementHeated)}
+            value={fmt(detail?.detInput?.bottomFloor.isBasementHeated)}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(record.detInput?.bottomFloor.uValue, "W/(m²K)")}
+            value={fmt(detail?.detInput?.bottomFloor.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -615,15 +628,15 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={GasMeter} title="Wärmeversorgung" cols={2}>
           <InfoItem
             label="Gasanschluss vorhanden"
-            value={fmt(record.detInput?.heat.hasGasSupply)}
+            value={fmt(detail?.detInput?.heat.hasGasSupply)}
           />
           <InfoItem
             label="Biogas"
-            value={fmt(record.detInput?.heat.hasBioGas)}
+            value={fmt(detail?.detInput?.heat.hasBioGas)}
           />
           <InfoItem
             label="Speicher vorhanden"
-            value={fmt(record.detInput?.heat.hasStorage)}
+            value={fmt(detail?.detInput?.heat.hasStorage)}
           />
         </InfoCard>
 
@@ -631,12 +644,12 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={LocalFireDepartmentIcon} title="Heizung" cols={2}>
           <InfoItem
             label="Baujahr Heizungssystem"
-            value={fmt(record.detInput?.heat.heatingSystemConstructionYear)}
+            value={fmt(detail?.detInput?.heat.heatingSystemConstructionYear)}
           />
           <InfoItem
             label="Primärenergieträger"
             value={fmt(
-              record.detInput?.heat.primaryEnergyCarrier,
+              detail?.detInput?.heat.primaryEnergyCarrier,
               undefined,
               cfg.heat.primaryEnergyCarriers,
             )}
@@ -644,7 +657,7 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Heizungstyp"
             value={fmt(
-              record.detInput?.heat.heatingSystemType,
+              detail?.detInput?.heat.heatingSystemType,
               undefined,
               cfg.heat.heatingSystemTypes,
             )}
@@ -652,7 +665,7 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Wärmeabgabesystem"
             value={fmt(
-              record.detInput?.heat.heatingSurfaceType,
+              detail?.detInput?.heat.heatingSurfaceType,
               undefined,
               cfg.heat.heatingSurfaceTypes,
             )}
@@ -667,15 +680,15 @@ export function RecordDetail({ id }: { id: string }) {
         >
           <InfoItem
             label="Wärmepreis"
-            value={fmt(record.detInput?.heat.userThermalUnitRate, "€/kWh")}
+            value={fmt(detail?.detInput?.heat.userThermalUnitRate, "€/kWh")}
           />
           <InfoItem
             label="Grundpreis Wärme"
-            value={fmt(record.detInput?.heat.userThermalBaseRate, "€/Jahr")}
+            value={fmt(detail?.detInput?.heat.userThermalBaseRate, "€/Jahr")}
           />
           <InfoItem
             label="Jährliche Wärmekosten"
-            value={fmt(record.detInput?.heat.userThermalTotalCost, "€")}
+            value={fmt(detail?.detInput?.heat.userThermalTotalCost, "€")}
           />
         </InfoCard>
 
@@ -684,7 +697,7 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Stromart"
             value={fmt(
-              record.detInput?.electricity.electricityType,
+              detail?.detInput?.electricity.electricityType,
               undefined,
               cfg.heat.electricityTypes,
             )}
@@ -692,34 +705,40 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Strompreis"
             value={fmt(
-              record.detInput?.electricity.electricityUnitRate,
+              detail?.detInput?.electricity.electricityUnitRate,
               "€/kWh",
             )}
           />
           <InfoItem
             label="Grundpreis Strom"
-            value={fmt(record.detInput?.electricity.userElectricityBaseRate, "€/Jahr")}
+            value={fmt(
+              detail?.detInput?.electricity.userElectricityBaseRate,
+              "€/Jahr",
+            )}
           />
           <InfoItem
             label="Jährlicher Stromverbrauch"
             value={fmt(
-              record.detInput?.electricity.userElectricityConsumption,
+              detail?.detInput?.electricity.userElectricityConsumption,
               "kWh",
             )}
           />
         </InfoCard>
 
         {/* Vorsanierungswerte */}
-        {record.detInput?.preRenovationValues && (
+        {detail?.detInput?.preRenovationValues && (
           <InfoCard icon={HistoryIcon} title="Vorsanierungswerte" cols={2}>
             <InfoItem
               label="Gesamtenergiebedarf"
-              value={fmt(record.detInput.preRenovationValues.totalEnergyDemand, "kWh")}
+              value={fmt(
+                detail?.detInput?.preRenovationValues.totalEnergyDemand,
+                "kWh",
+              )}
             />
             <InfoItem
               label="Primärenergieträger"
               value={fmt(
-                record.detInput.preRenovationValues.primaryEnergyCarrier,
+                detail?.detInput?.preRenovationValues.primaryEnergyCarrier,
                 undefined,
                 cfg.heat.primaryEnergyCarriers,
               )}
@@ -727,24 +746,27 @@ export function RecordDetail({ id }: { id: string }) {
             <InfoItem
               label="Heizungstyp"
               value={fmt(
-                record.detInput.preRenovationValues.heatingSystemType,
+                detail?.detInput?.preRenovationValues.heatingSystemType,
                 undefined,
                 cfg.heat.heatingSystemTypes,
               )}
             />
             <InfoItem
               label="Strom-Offset"
-              value={fmt(record.detInput.preRenovationValues.electricityOffset, "kWh")}
+              value={fmt(
+                detail?.detInput?.preRenovationValues.electricityOffset,
+                "kWh",
+              )}
             />
             <InfoItem
               label="Interne Wärmegewinne"
-              value={fmt(record.detInput.preRenovationValues.hadInternalGains)}
+              value={fmt(detail?.detInput?.preRenovationValues.hadInternalGains)}
             />
           </InfoCard>
         )}
 
         {/* Prüfung und Freigabe / Audit-Protokoll */}
-        {record.status === "FREIGEGEBEN" || record.status === "ABGELEHNT" ? (
+        {status === "FREIGEGEBEN" || status === "ABGELEHNT" ? (
           <Card>
             <CardHeader
               title={<Typography variant="h4">Audit-Protokoll</Typography>}
@@ -755,35 +777,35 @@ export function RecordDetail({ id }: { id: string }) {
               }
             />
             <CardContent>
-              <Box
-                sx={{
-                  bgcolor: "grey.100",
-                  borderRadius: 1,
-                  p: 2,
-                  display: "flex",
-                  gap: 2,
-                  alignItems: "flex-start",
-                }}
-              >
-                <AccessTimeIcon
-                  sx={{ color: "text.secondary", fontSize: 20, mt: 0.25 }}
-                />
-                <Box>
-                  <Typography variant="body2" fontWeight={700}>
-                    STATUS_CHANGED
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {record.rejectedDueToApprovalOf
-                      ? `Automatisch abgelehnt - Einreichung "${record.rejectedDueToApprovalOfLabel}" wurde freigegeben`
-                      : `Status geändert von "In Prüfung" zu "${statusConfig[record.status].label}"`}
-                  </Typography>
-                  {record.resolvedAt && record.resolvedBy && (
-                    <Typography variant="caption" color="text.secondary">
-                      {new Date(record.resolvedAt).toLocaleString("de-DE")} von{" "}
-                      {record.resolvedBy}
-                    </Typography>
-                  )}
-                </Box>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                {(detail?.history ?? []).map((entry) => (
+                  <Box
+                    key={entry.id}
+                    sx={{
+                      bgcolor: "grey.100",
+                      borderRadius: 1,
+                      p: 2,
+                      display: "flex",
+                      gap: 2,
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <AccessTimeIcon
+                      sx={{ color: "text.secondary", fontSize: 20, mt: 0.25 }}
+                    />
+                    <Box>
+                      <Typography variant="body2" fontWeight={700}>
+                        {statusConfig[toDetailStatus(entry.from)].label}
+                        {" → "}
+                        {statusConfig[toDetailStatus(entry.to)].label}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(entry.createdAt).toLocaleString("de-DE")} von{" "}
+                        {[entry.by.given_name, entry.by.family_name].filter(Boolean).join(" ") || entry.by.email}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
               </Box>
             </CardContent>
           </Card>
@@ -813,7 +835,6 @@ export function RecordDetail({ id }: { id: string }) {
                 value={notes}
                 onChange={(e) => {
                   setNotes(e.target.value);
-                  hasChangesRef.current = true;
                 }}
                 disabled={!isAssignedToMe}
                 sx={{
@@ -830,7 +851,7 @@ export function RecordDetail({ id }: { id: string }) {
                   fullWidth
                   size="large"
                   startIcon={<TaskAltIcon />}
-                  disabled={!canDecide}
+                  disabled={!canDecide || freigebenPending}
                   onClick={handleFreigeben}
                   sx={{
                     "&.Mui-disabled": {
@@ -848,7 +869,7 @@ export function RecordDetail({ id }: { id: string }) {
                   fullWidth
                   size="large"
                   startIcon={<CancelIcon />}
-                  disabled={!canDecide}
+                  disabled={!canDecide || declineMutation.isPending}
                   onClick={handleAblehnen}
                   sx={{
                     "&.Mui-disabled": {
@@ -879,6 +900,7 @@ export function RecordDetail({ id }: { id: string }) {
               color="error"
               startIcon={<DeleteIcon />}
               onClick={() => setDeleteDialogOpen(true)}
+              disabled={deleteMutation.isPending}
               sx={{ mt: 1 }}
             >
               Gebäude löschen

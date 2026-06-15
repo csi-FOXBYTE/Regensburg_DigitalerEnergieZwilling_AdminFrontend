@@ -1,9 +1,14 @@
-import type { BuildingRecord } from "@/assets/types";
+import type { RecordStatus, SubmissionSummary } from "@/assets/types";
 import { AppFooter } from "@/components/Footer";
-import { RecordsContext } from "@/components/RecordsContext";
+import {
+  useAssignSubmission,
+  useDeleteSubmission,
+  useSubmissions,
+} from "@/hooks/submissionHooks";
 import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
-import { Box, Card, CardContent, Typography } from "@mui/material";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { Alert, Box, Card, CardContent, Typography } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "./parts/DeleteDialog";
 import FiltersControls from "./parts/FiltersControls";
@@ -11,8 +16,11 @@ import PaginationView from "./parts/Pagination";
 import TableView from "./parts/Table";
 
 export function Dashboard() {
-  const { records, updateRecord, setRecords } = useContext(RecordsContext)!;
   const currentUser = useCurrentUser();
+  const queryClient = useQueryClient();
+  const { data: records = [], isError } = useSubmissions();
+  const assignMutation = useAssignSubmission();
+  const deleteMutation = useDeleteSubmission();
 
   const [addressFilter, setAddressFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -32,8 +40,7 @@ export function Dashboard() {
         .includes(addressFilter.toLowerCase());
       const matchesStatus =
         statusFilter === "all" || record.status === statusFilter;
-      const matchesMe =
-        !myRecordsOn || record.assignedTo === getDisplayName(currentUser);
+      const matchesMe = !myRecordsOn || record.assignedTo === currentUser?.sub;
       return matchesAddress && matchesStatus && matchesMe;
     });
 
@@ -61,7 +68,7 @@ export function Dashboard() {
     sortBy,
     sortOrder,
     myRecordsOn,
-    currentUser,
+    currentUser?.sub,
   ]);
 
   const variantGroupCounts = useMemo(() => {
@@ -74,13 +81,24 @@ export function Dashboard() {
   }, [records]);
 
   const deduplicatedRecords = useMemo(() => {
-    const seen = new Set<string>();
-    return filteredAndSortedRecords.filter((r) => {
-      if (!r.variantGroup) return true;
-      if (seen.has(r.variantGroup)) return false;
-      seen.add(r.variantGroup);
-      return true;
-    });
+    const statusPriority: Record<RecordStatus, number> = {
+      IN_PRUEFUNG: 0,
+      NEU: 1,
+      FREIGEGEBEN: 2,
+      ABGELEHNT: 3,
+      GELOESCHT: 4,
+    };
+    const best = new Map<string, SubmissionSummary>();
+    for (const r of filteredAndSortedRecords) {
+      if (!r.variantGroup) continue;
+      const cur = best.get(r.variantGroup);
+      if (!cur || statusPriority[r.status] < statusPriority[cur.status]) {
+        best.set(r.variantGroup, r);
+      }
+    }
+    return filteredAndSortedRecords.filter(
+      (r) => !r.variantGroup || best.get(r.variantGroup)?.id === r.id,
+    );
   }, [filteredAndSortedRecords]);
 
   const totalPages = Math.ceil(deduplicatedRecords.length / itemsPerPage);
@@ -90,46 +108,48 @@ export function Dashboard() {
     return deduplicatedRecords.slice(startIndex, startIndex + itemsPerPage);
   }, [deduplicatedRecords, effectivePage, itemsPerPage]);
 
+  const invalidate = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ["submissions"] });
+  }, [queryClient]);
+
   const handleAssignToMe = useCallback(
-    (record: BuildingRecord) => {
-      if (!currentUser) return toast.error("Kein Benutzer — Token fehlt.");
-      if (
-        record.assignedTo &&
-        record.assignedTo !== getDisplayName(currentUser)
-      )
+    (record: SubmissionSummary) => {
+      if (!currentUser?.sub) return toast.error("Kein Benutzer — Token fehlt.");
+      if (record.assignedTo && record.assignedTo !== currentUser.sub)
         return toast.error(
           "Dieser Datensatz ist bereits einem anderen Prüfer zugewiesen.",
         );
       if (record.status !== "NEU")
         return toast.error("Nur neue Datensätze können zugewiesen werden.");
-      updateRecord({
-        ...record,
-        status: "IN_PRUEFUNG",
-        assignedTo: getDisplayName(currentUser),
-        assignedAt: new Date(),
-      });
-      toast.success("Datensatz zugewiesen. Status: In Prüfung");
+      assignMutation.mutate(
+        { submissionId: record.id, userId: currentUser.sub },
+        {
+          onSuccess: () => {
+            invalidate();
+            toast.success("Datensatz zugewiesen. Status: In Prüfung");
+          },
+          onError: () => toast.error("Zuweisung fehlgeschlagen."),
+        },
+      );
     },
-    [currentUser, updateRecord],
+    [currentUser, assignMutation, invalidate],
   );
-
-  const handleHardDelete = useCallback(
-    (id: string) => {
-      setRecords((prev) => prev.filter((r) => r.id !== id));
-    },
-    [setRecords],
-  );
-  void handleHardDelete;
 
   const handleDelete = useCallback(
     (id: string) => {
-      const record = records.find((r) => r.id === id);
-      if (!record) return;
-      updateRecord({ ...record, status: "GELOESCHT" });
-      setRecordToDelete(null);
-      toast.success("Datensatz wurde als gelöscht markiert.");
+      deleteMutation.mutate(
+        { submissionId: id },
+        {
+          onSuccess: () => {
+            invalidate();
+            setRecordToDelete(null);
+            toast.success("Datensatz wurde gelöscht.");
+          },
+          onError: () => toast.error("Löschen fehlgeschlagen."),
+        },
+      );
     },
-    [records, updateRecord],
+    [deleteMutation, invalidate],
   );
 
   const resetSort = useCallback(() => {
@@ -150,24 +170,8 @@ export function Dashboard() {
   );
 
   const refreshData = useCallback(() => {
-    records
-      .filter((record) => record.status === "IN_PRUEFUNG")
-      .forEach((record) => {
-        const hoursDifference =
-          (Date.now() - new Date(record.assignedAt!).getTime()) /
-          (1000 * 60 * 60);
-        if (hoursDifference > 72) {
-          updateRecord({
-            ...record,
-            status: "NEU",
-            assignedTo: null,
-            assignedAt: null,
-            notes: "",
-          });
-          toast.info(`Datensatz ${record.id} nach 72h zurückgesetzt.`);
-        }
-      });
-  }, [records, updateRecord]);
+    void queryClient.invalidateQueries({ queryKey: ["submissions"] });
+  }, [queryClient]);
 
   return (
     <Box sx={{ width: "full" }}>
@@ -192,7 +196,12 @@ export function Dashboard() {
           </Typography>
         </Box>
 
-        {/* Filters */}
+        {isError && (
+          <Alert severity="error">
+            Daten konnten nicht geladen werden. Bitte Seite neu laden.
+          </Alert>
+        )}
+
         <FiltersControls
           refreshData={refreshData}
           addressFilter={addressFilter}
@@ -218,12 +227,12 @@ export function Dashboard() {
           }}
         />
 
-        {/* Table + Pagination */}
         <Card>
           <CardContent sx={{ pt: 2 }}>
             <TableView
               records={paginatedRecords}
-              currentUserName={getDisplayName(currentUser)}
+              currentUserId={currentUser?.sub}
+              currentUserDisplayName={getDisplayName(currentUser)}
               handleAssignToMe={handleAssignToMe}
               setRecordToDelete={setRecordToDelete}
               sortBy={sortBy}
