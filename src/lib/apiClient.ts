@@ -14,7 +14,6 @@ export const apiClient = async <T>(
   options?: RequestInit,
 ): Promise<T> => {
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(options?.headers as Record<string, string>),
   };
 
