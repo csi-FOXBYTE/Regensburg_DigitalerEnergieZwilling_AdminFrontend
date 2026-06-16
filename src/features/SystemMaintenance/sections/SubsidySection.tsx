@@ -1,3 +1,7 @@
+import type {
+  Subsidy,
+  SubsidyBenefit,
+} from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import {
   BoldItalicUnderlineToggles,
   ListsToggle,
@@ -23,6 +27,7 @@ import {
   FormControl,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
@@ -36,10 +41,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import type {
-  Subsidy,
-  SubsidyBenefit,
-} from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { useStore } from "@nanostores/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -54,18 +55,17 @@ import {
 import { CollapsibleSection } from "../CollapsibleSection";
 import type { DeleteConfirmState } from "../ConfigOverview";
 
-type BenefitType = "range" | "upTo" | "exactly";
+type FoerderartType = "euro" | "percent";
 
 type FormState = {
   title: string;
   content: string;
   href: string;
-  benefitType: BenefitType;
-  benefitUnit: string;
-  benefitFor: string;
-  benefitValue: number;
-  benefitFrom: number;
-  benefitTo: number;
+  foerderart: FoerderartType;
+  betrag: number | "";
+  beitrag: number | "";
+  maximalbetrag: number | "";
+  hinweis: string;
   isActive: boolean;
 };
 
@@ -73,26 +73,40 @@ const EMPTY_FORM: FormState = {
   title: "",
   content: "",
   href: "",
-  benefitType: "exactly",
-  benefitUnit: "€",
-  benefitFor: "",
-  benefitValue: 0,
-  benefitFrom: 0,
-  benefitTo: 0,
+  foerderart: "euro",
+  betrag: "",
+  beitrag: "",
+  maximalbetrag: "",
+  hinweis: "",
   isActive: true,
 };
 
 function toWrapper(form: FormState): SubsidyWrapper {
-  const base = {
-    unit: form.benefitUnit,
-    ...(form.benefitFor ? { for: form.benefitFor } : {}),
-  };
-  const benefits: SubsidyBenefit =
-    form.benefitType === "range"
-      ? { ...base, type: "range", from: form.benefitFrom, to: form.benefitTo }
-      : { ...base, type: form.benefitType, value: form.benefitValue };
+  const base = form.hinweis ? { for: form.hinweis } : {};
+  let benefits: SubsidyBenefit;
+  if (form.foerderart === "euro") {
+    benefits = {
+      ...base,
+      type: "exactly",
+      unit: "€",
+      value: Number(form.betrag) || 0,
+    };
+  } else {
+    benefits = {
+      ...base,
+      type: "range",
+      unit: "%",
+      from: Number(form.beitrag) || 0,
+      to: Number(form.maximalbetrag) || 0,
+    };
+  }
   return {
-    subsidy: { title: form.title, content: form.content, href: form.href, benefits },
+    subsidy: {
+      title: form.title,
+      content: form.content,
+      href: form.href,
+      benefits,
+    },
     isActive: form.isActive,
   };
 }
@@ -100,16 +114,22 @@ function toWrapper(form: FormState): SubsidyWrapper {
 function fromWrapper(w: SubsidyWrapper): FormState {
   const s = w.subsidy;
   const b = s.benefits;
+  const isPercent = b.type === "range" || b.unit === "%";
+  const foerderart: FoerderartType = isPercent ? "percent" : "euro";
   return {
     title: s.title,
     content: s.content,
     href: s.href,
-    benefitType: b.type,
-    benefitUnit: b.unit,
-    benefitFor: b.for ?? "",
-    benefitValue: b.type !== "range" ? b.value : 0,
-    benefitFrom: b.type === "range" ? b.from : 0,
-    benefitTo: b.type === "range" ? b.to : 0,
+    foerderart,
+    betrag: !isPercent ? (b as { value: number }).value : "",
+    beitrag:
+      b.type === "range"
+        ? b.from
+        : isPercent
+          ? (b as { value: number }).value
+          : "",
+    maximalbetrag: b.type === "range" && b.to ? b.to : "",
+    hinweis: b.for ?? "",
     isActive: w.isActive,
   };
 }
@@ -140,15 +160,18 @@ function FoerderprogrammDialog({
   const handleSave = () => {
     const newErrors: Record<string, string> = {};
     if (!form.title.trim()) newErrors.title = "Name ist erforderlich";
-    if (!form.benefitUnit.trim()) newErrors.benefitUnit = "Einheit ist erforderlich";
-    if (form.benefitType === "range") {
-      if (isNaN(form.benefitFrom) || form.benefitFrom < 0)
-        newErrors.benefitFrom = "Ungültiger Wert";
-      if (isNaN(form.benefitTo) || form.benefitTo < 0)
-        newErrors.benefitTo = "Ungültiger Wert";
+    if (form.foerderart === "euro") {
+      if (form.betrag === "" || Number(form.betrag) < 0)
+        newErrors.betrag = "Gültigen Betrag in € angeben";
     } else {
-      if (isNaN(form.benefitValue) || form.benefitValue < 0)
-        newErrors.benefitValue = "Ungültiger Betrag";
+      if (
+        form.beitrag === "" ||
+        Number(form.beitrag) < 0 ||
+        Number(form.beitrag) > 100
+      )
+        newErrors.beitrag = "Gültigen Beitrag in % angeben";
+      if (form.maximalbetrag !== "" && Number(form.maximalbetrag) < 0)
+        newErrors.maximalbetrag = "Ungültiger Maximalbetrag";
     }
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -173,7 +196,133 @@ function FoerderprogrammDialog({
         {initial ? "Förderprogramm bearbeiten" : "Neues Förderprogramm"}
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
+          {/* Name */}
+          <TextField
+            label="Name"
+            value={form.title}
+            onChange={(e) => set("title", e.target.value)}
+            required
+            fullWidth
+            error={!!errors.title}
+            helperText={errors.title}
+          />
+
+          {/* Link */}
+          <TextField
+            label="Link (optional)"
+            value={form.href}
+            onChange={(e) => set("href", e.target.value)}
+            fullWidth
+            placeholder="https://..."
+          />
+
+          {/* Förderart + Beträge */}
+          <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+            <FormControl sx={{ minWidth: 130 }}>
+              <InputLabel>Förderart</InputLabel>
+              <Select
+                label="Förderart"
+                value={form.foerderart}
+                onChange={(e) => {
+                  set("foerderart", e.target.value as FoerderartType);
+                  set("betrag", "");
+                  set("beitrag", "");
+                  set("maximalbetrag", "");
+                }}
+              >
+                <MenuItem value="euro">€ Absolut</MenuItem>
+                <MenuItem value="percent">% Prozentual</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Box sx={{ flex: 1, display: "flex", gap: 2 }}>
+              {form.foerderart === "euro" ? (
+                <TextField
+                  label="Betrag"
+                  type="number"
+                  value={form.betrag}
+                  onChange={(e) =>
+                    set(
+                      "betrag",
+                      e.target.value === "" ? "" : parseFloat(e.target.value),
+                    )
+                  }
+                  sx={{ flex: "0 0 calc(50% - 8px)" }}
+                  required
+                  error={!!errors.betrag}
+                  helperText={errors.betrag}
+                  slotProps={{
+                    htmlInput: { min: 0 },
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">€</InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              ) : (
+                <>
+                  <TextField
+                    label="Beitrag"
+                    type="number"
+                    value={form.beitrag}
+                    onChange={(e) =>
+                      set(
+                        "beitrag",
+                        e.target.value === "" ? "" : parseFloat(e.target.value),
+                      )
+                    }
+                    sx={{ flex: 1 }}
+                    required
+                    error={!!errors.beitrag}
+                    helperText={errors.beitrag}
+                    slotProps={{
+                      htmlInput: { min: 0 },
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">%</InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                  <TextField
+                    label="Maximalbetrag"
+                    type="number"
+                    value={form.maximalbetrag}
+                    onChange={(e) =>
+                      set(
+                        "maximalbetrag",
+                        e.target.value === "" ? "" : parseFloat(e.target.value),
+                      )
+                    }
+                    sx={{ flex: 1 }}
+                    error={!!errors.maximalbetrag}
+                    helperText={errors.maximalbetrag}
+                    slotProps={{
+                      htmlInput: { min: 0 },
+                      input: {
+                        endAdornment: (
+                          <InputAdornment position="end">€</InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                </>
+              )}
+            </Box>
+          </Box>
+
+          {/* Hinweis / for */}
+          <TextField
+            label="Hinweis (optional)"
+            value={form.hinweis}
+            onChange={(e) => set("hinweis", e.target.value)}
+            fullWidth
+            placeholder="z. B. pro m²"
+          />
+
+          {/* Aktiv-Toggle */}
           <FormControlLabel
             control={
               <Switch
@@ -184,104 +333,8 @@ function FoerderprogrammDialog({
             }
             label="Aktiv"
           />
-          <TextField
-            label="Name"
-            value={form.title}
-            onChange={(e) => set("title", e.target.value)}
-            required
-            fullWidth
-            error={!!errors.title}
-            helperText={errors.title}
-          />
-          <TextField
-            label="Link (optional)"
-            value={form.href}
-            onChange={(e) => set("href", e.target.value)}
-            fullWidth
-            placeholder="https://..."
-          />
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <FormControl sx={{ minWidth: 140 }}>
-              <InputLabel>Förderart</InputLabel>
-              <Select
-                label="Förderart"
-                value={form.benefitType}
-                onChange={(e) =>
-                  set("benefitType", e.target.value as BenefitType)
-                }
-              >
-                <MenuItem value="exactly">Genau</MenuItem>
-                <MenuItem value="upTo">Bis zu</MenuItem>
-                <MenuItem value="range">Bereich</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              label="Einheit"
-              value={form.benefitUnit}
-              onChange={(e) => set("benefitUnit", e.target.value)}
-              sx={{ width: 100 }}
-              placeholder="€ / %"
-              error={!!errors.benefitUnit}
-              helperText={errors.benefitUnit}
-            />
-            {form.benefitType === "range" ? (
-              <>
-                <TextField
-                  label="Von"
-                  type="number"
-                  value={form.benefitFrom || ""}
-                  onChange={(e) =>
-                    set(
-                      "benefitFrom",
-                      e.target.value === "" ? 0 : parseFloat(e.target.value),
-                    )
-                  }
-                  fullWidth
-                  error={!!errors.benefitFrom}
-                  helperText={errors.benefitFrom}
-                  slotProps={{ htmlInput: { min: 0 } }}
-                />
-                <TextField
-                  label="Bis"
-                  type="number"
-                  value={form.benefitTo || ""}
-                  onChange={(e) =>
-                    set(
-                      "benefitTo",
-                      e.target.value === "" ? 0 : parseFloat(e.target.value),
-                    )
-                  }
-                  fullWidth
-                  error={!!errors.benefitTo}
-                  helperText={errors.benefitTo}
-                  slotProps={{ htmlInput: { min: 0 } }}
-                />
-              </>
-            ) : (
-              <TextField
-                label="Betrag"
-                type="number"
-                value={form.benefitValue || ""}
-                onChange={(e) =>
-                  set(
-                    "benefitValue",
-                    e.target.value === "" ? 0 : parseFloat(e.target.value),
-                  )
-                }
-                fullWidth
-                error={!!errors.benefitValue}
-                helperText={errors.benefitValue}
-                slotProps={{ htmlInput: { min: 0 } }}
-              />
-            )}
-          </Box>
-          <TextField
-            label="Hinweis (optional)"
-            value={form.benefitFor}
-            onChange={(e) => set("benefitFor", e.target.value)}
-            fullWidth
-            placeholder="z. B. max. 37.500 €"
-          />
+
+          {/* Beschreibung */}
           <Box
             sx={{
               border: "1px solid rgba(0,0,0,0.23)",
@@ -304,7 +357,7 @@ function FoerderprogrammDialog({
             </Typography>
             <MDXEditor
               key={`desc-${open}-${initial?.subsidy.title ?? "new"}`}
-              markdown={form.content ?? ""}
+              markdown={form.content}
               onChange={(val) => set("content", val)}
               contentEditableClassName="mdx-editor-content"
               plugins={[
@@ -341,11 +394,13 @@ function FoerderprogrammDialog({
 
 function formatPromotion(f: Subsidy): string {
   const b = f.benefits;
+  const forStr = b.for ? ` ${b.for}` : "";
   if (b.type === "range") {
-    return `${b.from.toLocaleString("de-DE")}–${b.to.toLocaleString("de-DE")} ${b.unit}`;
+    const maxStr = b.to ? ` (max. ${b.to.toLocaleString("de-DE")} €)` : "";
+    return `${b.from.toLocaleString("de-DE")} %${forStr}${maxStr}`;
   }
   const prefix = b.type === "upTo" ? "bis " : "";
-  return `${prefix}${b.value.toLocaleString("de-DE")} ${b.unit}`;
+  return `${prefix}${b.value.toLocaleString("de-DE")} ${b.unit}${forStr}`;
 }
 
 export default function FoerderprogrammeSection({

@@ -5,18 +5,7 @@ export const mockSubsidies: SubsidyWrapper[] = [
     subsidy: {
       title: "BEG WG – Effizienzhaus-Kredit (KfW 261)",
       href: "https://www.kfw.de/261",
-      benefits: { unit: "%", type: "upTo", value: 25, for: "max. 37.500 €" },
-      content:
-        "Zinsgünstiger Kredit + nicht rückzahlbarer Tilgungszuschuss für die Komplettsanierung zum Effizienzhaus-Standard. Antrag über Hausbank.\n\nTilgungszuschuss je Effizienzhaus- Stufe: \nEH 85: 5 % | EH 70: 10 % | EH 55: 15 % | EH 40: 20 %\n\nBoni(kumulierbar): \n + 5 % Erneuerbare - Energien - Klasse(EE) \n + 10 % Worst Performing Building(WPB: schlechtestes Quartil) \n + 15 % Seriell - Sanierung(vorgefertigte Fassadenmodule) \n\nMax.Kreditbetrag: 120.000 €/WE (150.000 €/WE mit EE -/NH-Klasse) \n\nBedingungen: \n - Bestandsgebäude ≥ 5 Jahre alt\n - Energieeffizienz - Experte(dena - Liste) verpflichtend\n - Antrag vor Auftragsvergabe\n - Nicht kombinierbar mit §35c EStG für dieselben Maßnahmen",
-    },
-    isActive: true,
-  },
-
-  {
-    subsidy: {
-      title: "BEG WG – Effizienzhaus-Kredit (KfW 261)",
-      href: "https://www.kfw.de/261",
-      benefits: { unit: "%", type: "upTo", value: 25, for: "max. 37.500 €" },
+      benefits: { unit: "%", type: "range", from: 25, to: 37500 },
       content:
         "Zinsgünstiger Kredit + nicht rückzahlbarer Tilgungszuschuss für die Komplettsanierung zum Effizienzhaus-Standard. Antrag über Hausbank.\n\nTilgungszuschuss je Effizienzhaus- Stufe: \nEH 85: 5 % | EH 70: 10 % | EH 55: 15 % | EH 40: 20 %\n\nBoni(kumulierbar): \n + 5 % Erneuerbare - Energien - Klasse(EE) \n + 10 % Worst Performing Building(WPB: schlechtestes Quartil) \n + 15 % Seriell - Sanierung(vorgefertigte Fassadenmodule) \n\nMax.Kreditbetrag: 120.000 €/WE (150.000 €/WE mit EE -/NH-Klasse) \n\nBedingungen: \n - Bestandsgebäude ≥ 5 Jahre alt\n - Energieeffizienz - Experte(dena - Liste) verpflichtend\n - Antrag vor Auftragsvergabe\n - Nicht kombinierbar mit §35c EStG für dieselben Maßnahmen",
     },
@@ -26,7 +15,7 @@ export const mockSubsidies: SubsidyWrapper[] = [
     subsidy: {
       title: "Heizungsförderung – Wohngebäude (KfW 458)",
       href: "https://www.kfw.de/458",
-      benefits: { unit: "%", type: "upTo", value: 70, for: "max. 21.000 €" },
+      benefits: { unit: "%", type: "range", from: 70, to: 21000 },
       content:
         'Direktzuschuss für den Austausch alter Heizsysteme gegen erneuerbare Alternativen (Wärmepumpe, Solarthermie, Biomasse, Fernwärme).\n\nZuschuss-Bausteine:\n30 % Grundförderung (immer)\n+5 % Effizienzbonus (Wärmepumpe mit Wasser-/Erdreich-/Abwasserquelle oder Kältemittel R290)\n+20 % Klimageschwindigkeitsbonus (Ersatz von Öl-/Kohle-/Gasetagenheizung, Nachtspeicher oder Gas-/Biomasse-Heizung ≥ 20 Jahre alt)\n+30 % Einkommensbonus (Haushaltseinkommen ≤ 40.000 €/Jahr, nur Eigennutzer)\nMaximum: 70 %\n\nFörderfähige Kosten: max. 30.000 €/WE (1. WE), 15.000 € (WE 2–6), 8.000 € (WE 7+)\n\nBedingungen:\n- Bestandsgebäude ≥ 5 Jahre alt\n- Hydraulischer Abgleich als Nebenmaßnahme erforderlich\n- Direktantrag über KfW-Portal „Meine KfW"\n- Für Vermieter: max. 50 % (kein Einkommensbonus)\n- Nicht kombinierbar mit §35c EStG für dieselbe Maßnahme',
     },
@@ -46,7 +35,7 @@ export const mockSubsidies: SubsidyWrapper[] = [
     subsidy: {
       title: "BEG Einzelmaßnahmen – Zuschuss (BAFA)",
       href: "https://www.bafa.de/DE/Energie/Effiziente_Gebaeude/Sanierung_Wohngebaeude",
-      benefits: { unit: "%", type: "upTo", value: 20, for: "max. 12.000 €" },
+      benefits: { unit: "%", type: "range", from: 20, to: 12000 },
       content:
         "Direktzuschuss für einzelne energetische Maßnahmen ohne Effizienzhaus-Ziel.\n\nFörderfähige Maßnahmen:\n- Gebäudehülle: Außenwanddämmung, Dachdämmung, OGD, Kellerdecke, Fenster/Türen (U ≤ 0,95 W/m²K), Sonnenschutz\n- Anlagentechnik: Lüftungsanlage mit WRG, Gebäudeautomation (Klasse B)\n- Heizungsoptimierung: Hydraulischer Abgleich, Pumpentausch, Rohrdämmung\n\nZuschuss:\n15 % Grundförderung\n+5 % iSFP-Bonus (bei Maßnahme aus individuellem Sanierungsfahrplan, max. 15 Jahre nach iSFP-Erstellung)\n\nFörderfähige Kosten: max. 60.000 €/WE (mit iSFP), sonst 30.000 €/WE\n\nTechnische Mindest-U-Werte:\nAußenwand: ≤ 0,20 W/m²K | Dach: ≤ 0,14 W/m²K | Fenster: ≤ 0,95 W/m²K\n\nBedingungen:\n- Bestandsgebäude ≥ 5 Jahre alt\n- Antrag vor Auftragsvergabe\n- Kombinierbar mit KfW 358/359 (Ergänzungskredit)\n- Nicht kombinierbar mit §35c EStG für dieselbe Maßnahme",
     },
@@ -56,7 +45,7 @@ export const mockSubsidies: SubsidyWrapper[] = [
     subsidy: {
       title: "Steuerermäßigung energetische Sanierung (§35c EStG)",
       href: "https://www.bundesfinanzministerium.de",
-      benefits: { unit: "%", type: "upTo", value: 20, for: "max. 40.000 €" },
+      benefits: { unit: "%", type: "range", from: 20, to: 40000 },
       content:
         "Direkte Minderung der Einkommensteuer für energetische Sanierungsmaßnahmen an selbstgenutztem Wohneigentum – kein separater Antrag, über Steuererklärung.\n\nSteuerbonus: 20 % der Sanierungskosten verteilt auf 3 Jahre:\nJahr 1 + 2: je 7 % (max. 14.000 €/Jahr)\nJahr 3: 6 % (max. 12.000 €)\nGesamtmaximum: 40.000 € je Objekt (auf Basis von max. 200.000 € Kosten)\n\nFörderfähige Maßnahmen: Dämmung, Fenster/Türen, Lüftung, Heizungserneuerung, Gebäudeautomation (nicht: PV-Anlage, Batteriespeicher)\n\nBedingungen:\n- Nur Eigennutzer (Vermieter ausgeschlossen)\n- Gebäude bei Maßnahmenbeginn ≥ 10 Jahre alt\n- Ausführung durch zertifiziertes Fachunternehmen + BMF-Bescheinigung\n- Maßnahme bis 31.12.2029 abgeschlossen\n- Nicht kombinierbar mit BEG WG oder BEG EM für dieselbe Maßnahme\n- Kombinierbar mit BEG EM für andere Maßnahmen am selben Gebäude",
     },
@@ -66,7 +55,7 @@ export const mockSubsidies: SubsidyWrapper[] = [
     subsidy: {
       title: "Energieberatung Wohngebäude inkl. iSFP (BAFA)",
       href: "https://www.bafa.de/DE/Energie/Energieberatung/Energieberatung_Wohngebaeude",
-      benefits: { unit: "%", type: "upTo", value: 50, for: "max. 1.100 €" },
+      benefits: { unit: "%", type: "range", from: 50, to: 1100 },
       content:
         "Zuschuss für Vor-Ort-Energieberatung und Erstellung eines individuellen Sanierungsfahrplans (iSFP).\n\nZuschusshöhe (50 % der Beratungskosten):\n- Ein-/Zweifamilienhaus: max. 650 €\n- Gebäude ≥ 3 Wohneinheiten: max. 850 €\n- Zusatz bei WEG-Präsentation: +250 €\n\nStrategischer Vorteil: Ein erstellter iSFP aktiviert den +5 %-iSFP-Bonus bei allen nachfolgenden BEG-EM-Maßnahmen (innerhalb von 15 Jahren).\n\nBedingungen:\n- Durchführung durch zugelassenen Energieberater (dena-/BfEE-Expertenliste)\n- Förderzeitraum bis 31.12.2026",
     },
