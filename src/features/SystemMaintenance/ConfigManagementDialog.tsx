@@ -56,10 +56,17 @@ export function ConfigManagementDialog({
   const [page, setPage] = useState(0);
   const [activeErrorOpen, setActiveErrorOpen] = useState(false);
 
+  const sortedConfigs = activeVersionName
+    ? [
+        ...configs.filter((c) => c.versionName === activeVersionName),
+        ...configs.filter((c) => c.versionName !== activeVersionName),
+      ]
+    : configs;
+
   const pageSize = 3;
-  const maxPage = Math.max(0, Math.ceil(configs.length / pageSize) - 1);
+  const maxPage = Math.max(0, Math.ceil(sortedConfigs.length / pageSize) - 1);
   const safePage = Math.min(page, maxPage);
-  const paginated = configs.slice(safePage * pageSize, safePage * pageSize + pageSize);
+  const paginated = sortedConfigs.slice(safePage * pageSize, safePage * pageSize + pageSize);
 
   const handleDeleteClick = (versionName: string, isActive: boolean) => {
     if (isActive) {
@@ -204,7 +211,7 @@ export function ConfigManagementDialog({
                   </TableRow>
                 );
               })}
-              {configs.length === 0 && (
+              {sortedConfigs.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
                     <Typography variant="body2" color="text.secondary">
@@ -217,7 +224,7 @@ export function ConfigManagementDialog({
           </Table>
           <TablePagination
             component="div"
-            count={configs.length}
+            count={sortedConfigs.length}
             page={safePage}
             rowsPerPage={pageSize}
             rowsPerPageOptions={[]}
