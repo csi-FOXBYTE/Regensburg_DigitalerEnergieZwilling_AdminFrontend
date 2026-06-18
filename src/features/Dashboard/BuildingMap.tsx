@@ -77,14 +77,15 @@ export default function BuildingMap({
 
       const marker = L.marker(coords, { icon })
         .addTo(mapInstanceRef.current!)
-        .bindPopup(
+        .bindTooltip(
           `<div style="font-family:system-ui,sans-serif;min-width:180px">
-            <strong style="font-size:13px">${submission.buildingAddress.split(",")[0]}</strong><br/>
-            <span style="font-size:11px;color:#555">${submission.buildingAddress.split(",").slice(1).join(",").trim()}</span><br/><br/>
+            <strong style="font-size:13px">${submission.buildingAddress.split(",")[0]}</strong><br/><br/>
             <span style="font-size:12px;color:#333">Status: <strong>${STATUS_LABELS[submission.status]}</strong></span><br/>
-            <span style="font-size:11px;color:#777">Eingereicht: ${new Date(submission.receivedDate).toLocaleDateString("de-DE")}</span>
+            <span style="font-size:12px;color:#444">Eingereicht: ${new Date(submission.receivedDate).toLocaleDateString("de-DE")}</span>
           </div>`,
         );
+      marker.on("mouseover", () => marker.openTooltip());
+      marker.on("mouseout", () => marker.closeTooltip());
       marker.on("click", () => onBuildingClickRef.current?.(submission));
 
       markersRef.current.push(marker);
