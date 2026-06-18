@@ -1,6 +1,7 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
+
+import { MapContainer, Marker, TileLayer, Tooltip } from "react-leaflet";
 import {
   STATUS_COLORS,
   STATUS_LABELS,
@@ -44,7 +45,7 @@ export default function BuildingMap({
         const size = isSelected ? 24 : 18;
         const border = isSelected ? 4 : 3;
         const icon = createIcon(STATUS_COLORS[submission.status], size, border);
-        const [street, ...rest] = submission.buildingAddress.split(",");
+        const street = submission.buildingAddress.split(",")[0];
 
         return (
           <Marker
@@ -53,15 +54,11 @@ export default function BuildingMap({
             icon={icon}
             eventHandlers={{ click: () => onBuildingClick?.(submission) }}
           >
-            <Popup>
+            <Tooltip>
               <div
                 style={{ fontFamily: "system-ui, sans-serif", minWidth: 180 }}
               >
                 <strong style={{ fontSize: 13 }}>{street}</strong>
-                <br />
-                <span style={{ fontSize: 11, color: "#555" }}>
-                  {rest.join(",").trim()}
-                </span>
                 <br />
                 <br />
                 <span style={{ fontSize: 12, color: "#333" }}>
@@ -75,7 +72,7 @@ export default function BuildingMap({
                   )}
                 </span>
               </div>
-            </Popup>
+            </Tooltip>
           </Marker>
         );
       })}
