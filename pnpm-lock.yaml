@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore':
-        specifier: 0.12.0
-        version: 0.12.0(zod@3.25.76)
+        specifier: ^0.13.1
+        version: 0.13.1(zod@3.25.76)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.14)(react@19.2.4)
@@ -377,8 +377,8 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.12.0':
-    resolution: {integrity: sha512-X5eV7FhS6LXxro3tnsSw88UBBCUqK4ixP0ck5BZWWGJl4XXEwQosHdgIO7dPQxRsViUqUtZQM3roP+aaf//WHQ==, tarball: https://npm.pkg.github.com/download/@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore/0.12.0/25e4744fc60c5e59fb7d1503d52c2d22ec11917c}
+  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.13.1':
+    resolution: {integrity: sha512-O9RjoBCZcSXIP4TVZLqpP/f3OP7IbwDc156vsGQz9JhLA0tvdymVDjhixyf3yFNaF3jRvl3JpyRBfNIWgJVq1g==, tarball: https://npm.pkg.github.com/download/@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore/0.13.1/d97812b9cf1336830871a5a51d4a8690f21e7b70}
     peerDependencies:
       zod: ^3.24.0
 
@@ -4301,7 +4301,7 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.12.0(zod@3.25.76)':
+  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.13.1(zod@3.25.76)':
     dependencies:
       zod: 3.25.76
 
