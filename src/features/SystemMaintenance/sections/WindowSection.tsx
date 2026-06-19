@@ -11,7 +11,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useStore } from "@nanostores/react";
+import { Fragment } from "react";
 import {
+  updateConfig,
   updateSimpleValue,
   updateWindowDefaultType,
   updateWindowsUValue,
@@ -19,7 +21,6 @@ import {
 import {
   formatBand,
   getValueForBand,
-  lookUpForNames,
   sortBands,
   type BandEntry,
   type YearBand,
@@ -194,7 +195,14 @@ export default function WindowSection({
                   windowTypeIndex: number,
                 ) => (
                   <TableRow key={windowType.key}>
-                    <TableCell>{lookUpForNames(windowType.key)}</TableCell>
+                    <TableCell>
+                      {
+                        configStore.windows.windowTypes.find(
+                          (wt: { value: string }) =>
+                            wt.value === windowType.key,
+                        ).localization.de
+                      }
+                    </TableCell>
                     {yearBands.map((band, bandIndex) => (
                       <TableCell key={bandIndex} align="center">
                         <TextField
@@ -223,6 +231,46 @@ export default function WindowSection({
             </TableBody>
           </Table>
         </TableContainer>
+
+        <Typography variant="body1" fontWeight={"bold"} mb={1} mt={3}>
+          Bezeichnungen
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "auto 1fr",
+            gap: 1.5,
+            alignItems: "center",
+            maxWidth: 600,
+          }}
+        >
+          {configStore.windows.windowTypes.map(
+            (
+              wt: { value: string; localization: Record<string, string> },
+              i: number,
+            ) => (
+              <Fragment key={wt.value}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "monospace", color: "text.secondary" }}
+                >
+                  {wt.value}
+                </Typography>
+                <TextField
+                  size="small"
+                  value={wt.localization.de ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    updateConfig((draft) => {
+                      const item = draft.windows.windowTypes[i];
+                      if (item) item.localization.de = val;
+                    });
+                  }}
+                />
+              </Fragment>
+            ),
+          )}
+        </Box>
       </Box>
     </CollapsibleSection>
   );

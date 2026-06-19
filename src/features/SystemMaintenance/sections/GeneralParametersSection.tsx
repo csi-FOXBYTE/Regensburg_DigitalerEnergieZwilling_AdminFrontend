@@ -11,7 +11,6 @@ import {
   updateNetFloorAreaFromUsableFloorAreaFactor,
   updateSimpleValue,
 } from "../../../hooks/store";
-import { lookUpForNames } from "../../../lib/buildingTypes";
 import { CollapsibleSection } from "../CollapsibleSection";
 import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
@@ -40,7 +39,13 @@ export function GeneralParametersSection({
       fields: [
         { key: "from", label: "Von", value: item.from ?? "", type: "number" },
         { key: "to", label: "Bis", value: item.to ?? "", type: "number" },
-        { key: "value", label: "Faktor", value: item.value, type: "number", required: true },
+        {
+          key: "value",
+          label: "Faktor",
+          value: item.value,
+          type: "number",
+          required: true,
+        },
       ],
       onSave: (_, numbers) => {
         updateCorrectionFactor(index, (draft) => {
@@ -78,6 +83,13 @@ export function GeneralParametersSection({
       },
     });
   };
+
+  const NAME_TABLE: Record<string, string> = {
+    singleFamily: "Einfamilienhaus",
+    multiFamily: "Mehrfamilienhaus",
+  };
+
+  const lookUpForNames = (key: string): string => NAME_TABLE[key] ?? key;
 
   const gridSx = {
     display: "grid",
