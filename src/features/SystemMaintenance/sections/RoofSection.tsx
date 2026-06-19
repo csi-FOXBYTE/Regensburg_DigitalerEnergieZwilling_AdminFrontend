@@ -114,6 +114,47 @@ export default function RoofSection({
           />
         </Box>
 
+        <Typography variant="body1" fontWeight={"bold"} mb={1} mt={1}>
+          Bezeichnungen
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 2fr",
+            gap: 1.5,
+            alignItems: "center",
+            maxWidth: 800,
+            mb: 3,
+          }}
+        >
+          {configStore.roof.constructionTypes.map(
+            (
+              ct: { value: string; localization: Record<string, string> },
+              i: number,
+            ) => (
+              <Fragment key={ct.value}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "monospace", color: "text.secondary" }}
+                >
+                  {ct.value}
+                </Typography>
+                <TextField
+                  size="small"
+                  value={ct.localization.de ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    updateConfig((draft) => {
+                      const item = draft.roof.constructionTypes[i];
+                      if (item) item.localization.de = val;
+                    });
+                  }}
+                />
+              </Fragment>
+            ),
+          )}
+        </Box>
+
         <Typography variant="body1" fontWeight={"bold"} mb={1}>
           Pauschalwerte für den Wärmedurchgangskoeffizienten in W/(m² · K)
         </Typography>
@@ -175,46 +216,6 @@ export default function RoofSection({
             </TableBody>
           </Table>
         </TableContainer>
-
-        <Typography variant="body1" fontWeight={"bold"} mb={1} mt={3}>
-          Bezeichnungen
-        </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "auto 1fr",
-            gap: 1.5,
-            alignItems: "center",
-            maxWidth: 600,
-          }}
-        >
-          {configStore.roof.constructionTypes.map(
-            (
-              ct: { value: string; localization: Record<string, string> },
-              i: number,
-            ) => (
-              <Fragment key={ct.value}>
-                <Typography
-                  variant="body2"
-                  sx={{ fontFamily: "monospace", color: "text.secondary" }}
-                >
-                  {ct.value}
-                </Typography>
-                <TextField
-                  size="small"
-                  value={ct.localization.de ?? ""}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    updateConfig((draft) => {
-                      const item = draft.roof.constructionTypes[i];
-                      if (item) item.localization.de = val;
-                    });
-                  }}
-                />
-              </Fragment>
-            ),
-          )}
-        </Box>
       </Box>
     </CollapsibleSection>
   );

@@ -292,6 +292,27 @@ export function PrimaryEnergyCarrierSection({
                           Brennstoffdaten gemäß GEG/EnEV
                         </Typography>
                         <Box sx={{ ...gridSx, mb: 2 }}>
+                          <Typography variant="body2">Mengeneinheit</Typography>
+                          <TextField
+                            size="small"
+                            placeholder="z.B. kWh, rm, l"
+                            value={
+                              configStore.heat.primaryEnergyCarrierData.find(
+                                (c) => c.key === item.value,
+                              )?.value.unit ?? ""
+                            }
+                            onChange={(e) =>
+                              updatePrimaryEnergyCarrierData(
+                                item.value,
+                                (draft) => {
+                                  draft.unit = e.target.value;
+                                },
+                              )
+                            }
+                          />
+
+                          <Box />
+
                           <Typography variant="body2">
                             {(() => {
                               const unit =
@@ -321,8 +342,6 @@ export function PrimaryEnergyCarrierSection({
                             }
                           />
 
-                          <Box />
-
                           <Typography variant="body2">
                             {(() => {
                               const unit =
@@ -350,6 +369,8 @@ export function PrimaryEnergyCarrierSection({
                             }
                           />
 
+                          <Box />
+
                           <Typography variant="body2">
                             Grundpreis [€/a]
                           </Typography>
@@ -370,10 +391,6 @@ export function PrimaryEnergyCarrierSection({
                               )
                             }
                           />
-
-                          <Box />
-                          <Box />
-                          <Box />
                         </Box>
 
                         <Typography variant="body2" fontWeight={"bold"} mb={1}>
@@ -457,27 +474,6 @@ export function PrimaryEnergyCarrierSection({
                                 );
                               })}
                           </TextField>
-
-                          <Box />
-
-                          <Typography variant="body2">Mengeneinheit</Typography>
-                          <TextField
-                            size="small"
-                            placeholder="z.B. kWh, rm, l"
-                            value={
-                              configStore.heat.primaryEnergyCarrierData.find(
-                                (c) => c.key === item.value,
-                              )?.value.unit ?? ""
-                            }
-                            onChange={(e) =>
-                              updatePrimaryEnergyCarrierData(
-                                item.value,
-                                (draft) => {
-                                  draft.unit = e.target.value;
-                                },
-                              )
-                            }
-                          />
                         </Box>
                       </Box>
                     </Collapse>

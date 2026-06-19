@@ -122,6 +122,47 @@ export default function WindowSection({
           />
         </Box>
 
+        <Typography variant="body1" fontWeight="600" mb={1} mt={1}>
+          Bezeichnungen
+        </Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 2fr",
+            gap: 1.5,
+            alignItems: "center",
+            maxWidth: 800,
+            mb: 3,
+          }}
+        >
+          {configStore.windows.windowTypes.map(
+            (
+              wt: { value: string; localization: Record<string, string> },
+              i: number,
+            ) => (
+              <Fragment key={wt.value}>
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "monospace", color: "text.secondary" }}
+                >
+                  {wt.value}
+                </Typography>
+                <TextField
+                  size="small"
+                  value={wt.localization.de ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    updateConfig((draft) => {
+                      const item = draft.windows.windowTypes[i];
+                      if (item) item.localization.de = val;
+                    });
+                  }}
+                />
+              </Fragment>
+            ),
+          )}
+        </Box>
+
         <Typography variant="body1" fontWeight="600" mb={1}>
           Standard‑Fenstertyp nach Baujahr
         </Typography>
@@ -231,46 +272,6 @@ export default function WindowSection({
             </TableBody>
           </Table>
         </TableContainer>
-
-        <Typography variant="body1" fontWeight={"bold"} mb={1} mt={3}>
-          Bezeichnungen
-        </Typography>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "auto 1fr",
-            gap: 1.5,
-            alignItems: "center",
-            maxWidth: 600,
-          }}
-        >
-          {configStore.windows.windowTypes.map(
-            (
-              wt: { value: string; localization: Record<string, string> },
-              i: number,
-            ) => (
-              <Fragment key={wt.value}>
-                <Typography
-                  variant="body2"
-                  sx={{ fontFamily: "monospace", color: "text.secondary" }}
-                >
-                  {wt.value}
-                </Typography>
-                <TextField
-                  size="small"
-                  value={wt.localization.de ?? ""}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    updateConfig((draft) => {
-                      const item = draft.windows.windowTypes[i];
-                      if (item) item.localization.de = val;
-                    });
-                  }}
-                />
-              </Fragment>
-            ),
-          )}
-        </Box>
       </Box>
     </CollapsibleSection>
   );
