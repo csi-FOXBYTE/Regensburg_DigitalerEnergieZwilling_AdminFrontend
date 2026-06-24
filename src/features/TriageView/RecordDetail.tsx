@@ -1,3 +1,4 @@
+import { postApiAdminSubmissionsSubmissionIdDecline } from "@/api/api.gen";
 import { statusConfig } from "@/assets/types";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { AppFooter } from "@/components/Footer";
@@ -11,8 +12,11 @@ import {
   useSubmissions,
   useUnassignSubmission,
 } from "@/hooks/submissionHooks";
-import { postApiAdminSubmissionsSubmissionIdDecline } from "@/api/api.gen";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import {
+  calculate,
+  type DETConfig,
+} from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { GasMeter, LightbulbOutlineRounded, Power } from "@mui/icons-material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import ApartmentIcon from "@mui/icons-material/Apartment";
@@ -51,6 +55,7 @@ import {
   resolveLabel,
   type LocalizableSelection,
 } from "../../assets/labelResolver";
+import { useLoadConfig } from "../../hooks/configHooks";
 import { config } from "../../hooks/store";
 
 export function RecordDetail({ id }: { id: string }) {
@@ -61,6 +66,21 @@ export function RecordDetail({ id }: { id: string }) {
 
   const { data: detail, isPending } = useSubmission(id);
   const { data: submissions } = useSubmissions();
+  const { data: configData } = useLoadConfig(
+    detail?.usedConfig.versionName ?? "",
+  );
+
+  const raw = detail?.detInput;
+  let detInput = raw;
+  if (raw && configData?.calculationConfig) {
+    try {
+      const parsedConfig = JSON.parse(configData.calculationConfig) as DETConfig;
+      detInput = calculate(parsedConfig, raw).resolvedInput;
+    } catch {
+      // keep raw
+    }
+  }
+
   const [notes, setNotes] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [freigebenPending, setFreigebenPending] = useState(false);
@@ -116,7 +136,8 @@ export function RecordDetail({ id }: { id: string }) {
   }
 
   const status = detail.status;
-  const isAssignedToMe = !!currentUser?.sub && detail.assignedToId === currentUser.sub;
+  const isAssignedToMe =
+    !!currentUser?.sub && detail.assignedToId === currentUser.sub;
   const isAssignedToOther = !!detail.assignedToId && !isAssignedToMe;
   const canAssign = status === "NEU" && !detail.assignedToId && !!currentUser;
   const canUnassign = isAssignedToMe && status === "IN_PRUEFUNG";
@@ -177,16 +198,23 @@ export function RecordDetail({ id }: { id: string }) {
     }
 
     const siblingsToDecline = variantSiblings.filter(
-      (s) => s.id !== id && s.status !== "FREIGEGEBEN" && s.status !== "ABGELEHNT",
+      (s) =>
+        s.id !== id && s.status !== "FREIGEGEBEN" && s.status !== "ABGELEHNT",
     );
     if (siblingsToDecline.length > 0) {
       try {
         await Promise.all(
-          siblingsToDecline.map((s) => postApiAdminSubmissionsSubmissionIdDecline(s.id)),
+          siblingsToDecline.map((s) =>
+            postApiAdminSubmissionsSubmissionIdDecline(s.id),
+          ),
         );
-        toast.success("Datensatz freigegeben. Andere Einreichungen automatisch abgelehnt.");
+        toast.success(
+          "Datensatz freigegeben. Andere Einreichungen automatisch abgelehnt.",
+        );
       } catch {
-        toast.warning("Datensatz freigegeben. Andere Einreichungen konnten nicht automatisch abgelehnt werden.");
+        toast.warning(
+          "Datensatz freigegeben. Andere Einreichungen konnten nicht automatisch abgelehnt werden.",
+        );
       }
     } else {
       toast.success("Datensatz freigegeben.");
@@ -315,7 +343,11 @@ export function RecordDetail({ id }: { id: string }) {
                       {s.variantLabel}
                     </Typography>
                     <Chip
-                      label={s.status === "FREIGEGEBEN" ? "✓ Freigegebene Einreichung" : statusConfig[s.status].label}
+                      label={
+                        s.status === "FREIGEGEBEN"
+                          ? "✓ Freigegebene Einreichung"
+                          : statusConfig[s.status].label
+                      }
                       size="small"
                       color={statusConfig[s.status].chipColor}
                       variant="outlined"
@@ -387,30 +419,30 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Gebäudetyp"
             value={fmt(
-              detail?.detInput?.general.type,
+              detInput?.general.type,
               undefined,
               BUILDING_TYPE_SELECTIONS,
             )}
           />
           <InfoItem
             label="Baujahr"
-            value={fmt(detail?.detInput?.general.buildingYear)}
+            value={fmt(detInput?.general.buildingYear)}
           />
           <InfoItem
             label="Wohnfläche"
-            value={fmt(detail?.detInput?.general.livingArea, "m²")}
+            value={fmt(detInput?.general.livingArea, "m²")}
           />
           <InfoItem
             label="Geschosse"
-            value={fmt(detail?.detInput?.general.numberOfStories)}
+            value={fmt(detInput?.general.numberOfStories)}
           />
           <InfoItem
             label="Gebäudehöhe"
-            value={fmt(detail?.detInput?.general.buildingHeight, "m")}
+            value={fmt(detInput?.general.buildingHeight, "m")}
           />
           <InfoItem
             label="Grundfläche"
-            value={fmt(detail?.detInput?.general.buildingBaseArea, "m²")}
+            value={fmt(detInput?.general.buildingBaseArea, "m²")}
           />
         </InfoCard>
 
@@ -418,64 +450,58 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={RoofingIcon} title="Dach" cols={3}>
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(detail?.detInput?.roof.year)}
+            value={fmt(detInput?.roof.year)}
           />
-          <InfoItem
-            label="Dachfläche"
-            value={fmt(detail?.detInput?.roof.area, "m²")}
-          />
+          <InfoItem label="Dachfläche" value={fmt(detInput?.roof.area, "m²")} />
           <InfoItem
             label="Dachkonstruktion"
             value={fmt(
-              detail?.detInput?.roof.constructionType,
+              detInput?.roof.constructionType,
               undefined,
               cfg.roof.constructionTypes,
             )}
           />
-          <InfoItem
-            label="Gedämmt"
-            value={fmt(detail?.detInput?.roof.hasInsulation)}
-          />
+          <InfoItem label="Gedämmt" value={fmt(detInput?.roof.hasInsulation)} />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(detail?.detInput?.roof.insulationThickness, "cm")}
+            value={fmt(detInput?.roof.insulationThickness, "cm")}
           />
           <InfoItem
             label="Dämmungstyp"
             value={fmt(
-              detail?.detInput?.roof.insulationType,
+              detInput?.roof.insulationType,
               undefined,
               ROOF_INSULATION_SELECTIONS,
             )}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(detail?.detInput?.roof.uValue, "W/(m²K)")}
+            value={fmt(detInput?.roof.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
         {/* Dachfenster */}
-        {(detail?.detInput?.roofWindows?.area ?? 0) > 0 && (
+        {(detInput?.roofWindows?.area ?? 0) > 0 && (
           <InfoCard icon={WindowIcon} title="Dachfenster" cols={2}>
             <InfoItem
               label="Fläche"
-              value={fmt(detail?.detInput?.roofWindows?.area, "m²")}
+              value={fmt(detInput?.roofWindows?.area, "m²")}
             />
             <InfoItem
               label="Baujahr / Letzte Sanierung"
-              value={fmt(detail?.detInput?.roofWindows?.year)}
+              value={fmt(detInput?.roofWindows?.year)}
             />
             <InfoItem
               label="Fenstertyp"
               value={fmt(
-                detail?.detInput?.roofWindows?.windowType,
+                detInput?.roofWindows?.windowType,
                 undefined,
                 cfg.windows.windowTypes,
               )}
             />
             <InfoItem
               label="U-Wert"
-              value={fmt(detail?.detInput?.roofWindows?.uValue, "W/(m²K)")}
+              value={fmt(detInput?.roofWindows?.uValue, "W/(m²K)")}
             />
           </InfoCard>
         )}
@@ -484,35 +510,35 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={BuildIcon} title="Außenwand" cols={3}>
           <InfoItem
             label="Fläche"
-            value={fmt(detail?.detInput?.outerWall.area, "m²")}
+            value={fmt(detInput?.outerWall.area, "m²")}
           />
           <InfoItem
             label="Angrenzende Wandfläche"
-            value={fmt(detail?.detInput?.outerWall.adjacentWallArea, "m²")}
+            value={fmt(detInput?.outerWall.adjacentWallArea, "m²")}
           />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(detail?.detInput?.outerWall.year)}
+            value={fmt(detInput?.outerWall.year)}
           />
           <InfoItem
             label="Konstruktionstyp"
             value={fmt(
-              detail?.detInput?.outerWall.constructionType,
+              detInput?.outerWall.constructionType,
               undefined,
               cfg.outerWall.constructionTypes,
             )}
           />
           <InfoItem
             label="Gedämmt"
-            value={fmt(detail?.detInput?.outerWall.hasInsulation)}
+            value={fmt(detInput?.outerWall.hasInsulation)}
           />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(detail?.detInput?.outerWall.insulationThickness, "cm")}
+            value={fmt(detInput?.outerWall.insulationThickness, "cm")}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(detail?.detInput?.outerWall.uValue, "W/(m²K)")}
+            value={fmt(detInput?.outerWall.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -520,63 +546,60 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={WindowIcon} title="Außenwandfenster" cols={2}>
           <InfoItem
             label="Fläche"
-            value={fmt(detail?.detInput?.exteriorWallWindows.area, "m²")}
+            value={fmt(detInput?.exteriorWallWindows.area, "m²")}
           />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(detail?.detInput?.exteriorWallWindows.year)}
+            value={fmt(detInput?.exteriorWallWindows.year)}
           />
           <InfoItem
             label="Fenstertyp"
             value={fmt(
-              detail?.detInput?.exteriorWallWindows.windowType,
+              detInput?.exteriorWallWindows.windowType,
               undefined,
               cfg.windows.windowTypes,
             )}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(detail?.detInput?.exteriorWallWindows.uValue, "W/(m²K)")}
+            value={fmt(detInput?.exteriorWallWindows.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
         {/* Oberste Geschossdecke */}
         <InfoCard icon={LayersIcon} title="Oberste Geschossdecke" cols={3}>
-          <InfoItem
-            label="Fläche"
-            value={fmt(detail?.detInput?.topFloor.area, "m²")}
-          />
+          <InfoItem label="Fläche" value={fmt(detInput?.topFloor.area, "m²")} />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(detail?.detInput?.topFloor.year)}
+            value={fmt(detInput?.topFloor.year)}
           />
           <InfoItem
             label="Deckenkonstruktion"
             value={fmt(
-              detail?.detInput?.topFloor.topFloorType,
+              detInput?.topFloor.topFloorType,
               undefined,
               cfg.topFloor.topFloorTypes,
             )}
           />
           <InfoItem
             label="Hat Dachgeschoss"
-            value={fmt(detail?.detInput?.topFloor.hasAttic)}
+            value={fmt(detInput?.topFloor.hasAttic)}
           />
           <InfoItem
             label="Dachgeschoss beheizt"
-            value={fmt(detail?.detInput?.topFloor.isAtticHeated)}
+            value={fmt(detInput?.topFloor.isAtticHeated)}
           />
           <InfoItem
             label="Gedämmt"
-            value={fmt(detail?.detInput?.topFloor.hasInsulation)}
+            value={fmt(detInput?.topFloor.hasInsulation)}
           />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(detail?.detInput?.topFloor.insulationThickness, "cm")}
+            value={fmt(detInput?.topFloor.insulationThickness, "cm")}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(detail?.detInput?.topFloor.uValue, "W/(m²K)")}
+            value={fmt(detInput?.topFloor.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -584,43 +607,43 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={FoundationIcon} title="Untere Geschossdecke" cols={3}>
           <InfoItem
             label="Fläche"
-            value={fmt(detail?.detInput?.bottomFloor.area, "m²")}
+            value={fmt(detInput?.bottomFloor.area, "m²")}
           />
           <InfoItem
             label="Baujahr / Letzte Sanierung"
-            value={fmt(detail?.detInput?.bottomFloor.year)}
+            value={fmt(detInput?.bottomFloor.year)}
           />
           <InfoItem
             label="Konstruktionstyp"
             value={fmt(
-              detail?.detInput?.bottomFloor.constructionType,
+              detInput?.bottomFloor.constructionType,
               undefined,
               cfg.bottomFloor.constructionTypes,
             )}
           />
           <InfoItem
             label="Beheizt"
-            value={fmt(detail?.detInput?.bottomFloor.isHeated)}
+            value={fmt(detInput?.bottomFloor.isHeated)}
           />
           <InfoItem
             label="Gedämmt"
-            value={fmt(detail?.detInput?.bottomFloor.hasInsulation)}
+            value={fmt(detInput?.bottomFloor.hasInsulation)}
           />
           <InfoItem
             label="Dämmdicke"
-            value={fmt(detail?.detInput?.bottomFloor.insulationThickness, "cm")}
+            value={fmt(detInput?.bottomFloor.insulationThickness, "cm")}
           />
           <InfoItem
             label="Hat Keller"
-            value={fmt(detail?.detInput?.bottomFloor.hasBasement)}
+            value={fmt(detInput?.bottomFloor.hasBasement)}
           />
           <InfoItem
             label="Keller beheizt"
-            value={fmt(detail?.detInput?.bottomFloor.isBasementHeated)}
+            value={fmt(detInput?.bottomFloor.isBasementHeated)}
           />
           <InfoItem
             label="U-Wert"
-            value={fmt(detail?.detInput?.bottomFloor.uValue, "W/(m²K)")}
+            value={fmt(detInput?.bottomFloor.uValue, "W/(m²K)")}
           />
         </InfoCard>
 
@@ -628,15 +651,12 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={GasMeter} title="Wärmeversorgung" cols={2}>
           <InfoItem
             label="Gasanschluss vorhanden"
-            value={fmt(detail?.detInput?.heat.hasGasSupply)}
+            value={fmt(detInput?.heat.hasGasSupply)}
           />
-          <InfoItem
-            label="Biogas"
-            value={fmt(detail?.detInput?.heat.hasBioGas)}
-          />
+          <InfoItem label="Biogas" value={fmt(detInput?.heat.hasBioGas)} />
           <InfoItem
             label="Speicher vorhanden"
-            value={fmt(detail?.detInput?.heat.hasStorage)}
+            value={fmt(detInput?.heat.hasStorage)}
           />
         </InfoCard>
 
@@ -644,12 +664,12 @@ export function RecordDetail({ id }: { id: string }) {
         <InfoCard icon={LocalFireDepartmentIcon} title="Heizung" cols={2}>
           <InfoItem
             label="Baujahr Heizungssystem"
-            value={fmt(detail?.detInput?.heat.heatingSystemConstructionYear)}
+            value={fmt(detInput?.heat.heatingSystemConstructionYear)}
           />
           <InfoItem
             label="Primärenergieträger"
             value={fmt(
-              detail?.detInput?.heat.primaryEnergyCarrier,
+              detInput?.heat.primaryEnergyCarrier,
               undefined,
               cfg.heat.primaryEnergyCarriers,
             )}
@@ -657,7 +677,7 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Heizungstyp"
             value={fmt(
-              detail?.detInput?.heat.heatingSystemType,
+              detInput?.heat.heatingSystemType,
               undefined,
               cfg.heat.heatingSystemTypes,
             )}
@@ -665,7 +685,7 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Wärmeabgabesystem"
             value={fmt(
-              detail?.detInput?.heat.heatingSurfaceType,
+              detInput?.heat.heatingSurfaceType,
               undefined,
               cfg.heat.heatingSurfaceTypes,
             )}
@@ -680,15 +700,15 @@ export function RecordDetail({ id }: { id: string }) {
         >
           <InfoItem
             label="Wärmepreis"
-            value={fmt(detail?.detInput?.heat.userThermalUnitRate, "€/kWh")}
+            value={fmt(detInput?.heat.userThermalUnitRate, "€/kWh")}
           />
           <InfoItem
             label="Grundpreis Wärme"
-            value={fmt(detail?.detInput?.heat.userThermalBaseRate, "€/Jahr")}
+            value={fmt(detInput?.heat.userThermalBaseRate, "€/Jahr")}
           />
           <InfoItem
             label="Jährliche Wärmekosten"
-            value={fmt(detail?.detInput?.heat.userThermalTotalCost, "€")}
+            value={fmt(detInput?.heat.userThermalTotalCost, "€")}
           />
         </InfoCard>
 
@@ -697,48 +717,39 @@ export function RecordDetail({ id }: { id: string }) {
           <InfoItem
             label="Stromart"
             value={fmt(
-              detail?.detInput?.electricity.electricityType,
+              detInput?.electricity.electricityType,
               undefined,
               cfg.heat.electricityTypes,
             )}
           />
           <InfoItem
             label="Strompreis"
-            value={fmt(
-              detail?.detInput?.electricity.electricityUnitRate,
-              "€/kWh",
-            )}
+            value={fmt(detInput?.electricity.electricityUnitRate, "€/kWh")}
           />
           <InfoItem
             label="Grundpreis Strom"
-            value={fmt(
-              detail?.detInput?.electricity.userElectricityBaseRate,
-              "€/Jahr",
-            )}
+            value={fmt(detInput?.electricity.userElectricityBaseRate, "€/Jahr")}
           />
           <InfoItem
             label="Jährlicher Stromverbrauch"
-            value={fmt(
-              detail?.detInput?.electricity.userElectricityConsumption,
-              "kWh",
-            )}
+            value={fmt(detInput?.electricity.userElectricityConsumption, "kWh")}
           />
         </InfoCard>
 
         {/* Vorsanierungswerte */}
-        {detail?.detInput?.preRenovationValues && (
+        {detInput?.preRenovationValues && (
           <InfoCard icon={HistoryIcon} title="Vorsanierungswerte" cols={2}>
             <InfoItem
               label="Gesamtenergiebedarf"
               value={fmt(
-                detail?.detInput?.preRenovationValues.totalEnergyDemand,
+                detInput?.preRenovationValues.totalEnergyDemand,
                 "kWh",
               )}
             />
             <InfoItem
               label="Primärenergieträger"
               value={fmt(
-                detail?.detInput?.preRenovationValues.primaryEnergyCarrier,
+                detInput?.preRenovationValues.primaryEnergyCarrier,
                 undefined,
                 cfg.heat.primaryEnergyCarriers,
               )}
@@ -746,7 +757,7 @@ export function RecordDetail({ id }: { id: string }) {
             <InfoItem
               label="Heizungstyp"
               value={fmt(
-                detail?.detInput?.preRenovationValues.heatingSystemType,
+                detInput?.preRenovationValues.heatingSystemType,
                 undefined,
                 cfg.heat.heatingSystemTypes,
               )}
@@ -754,13 +765,13 @@ export function RecordDetail({ id }: { id: string }) {
             <InfoItem
               label="Strom-Offset"
               value={fmt(
-                detail?.detInput?.preRenovationValues.electricityOffset,
+                detInput?.preRenovationValues.electricityOffset,
                 "kWh",
               )}
             />
             <InfoItem
               label="Interne Wärmegewinne"
-              value={fmt(detail?.detInput?.preRenovationValues.hadInternalGains)}
+              value={fmt(detInput?.preRenovationValues.hadInternalGains)}
             />
           </InfoCard>
         )}
@@ -801,7 +812,9 @@ export function RecordDetail({ id }: { id: string }) {
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {new Date(entry.createdAt).toLocaleString("de-DE")} von{" "}
-                        {[entry.by.given_name, entry.by.family_name].filter(Boolean).join(" ") || entry.by.email}
+                        {[entry.by.given_name, entry.by.family_name]
+                          .filter(Boolean)
+                          .join(" ") || entry.by.email}
                       </Typography>
                     </Box>
                   </Box>
