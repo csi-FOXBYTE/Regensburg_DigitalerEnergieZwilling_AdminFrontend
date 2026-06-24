@@ -12,7 +12,7 @@
     "gen:api": "orval --config orval.config.ts"
   },
   "dependencies": {
-    "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore": "0.13.1",
+    "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore": "0.13.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mdxeditor/editor": "^3.55.0",
