@@ -930,11 +930,13 @@ function fmt(
   if (typeof value === "boolean") return value ? "Ja" : "Nein";
   if (typeof value === "object") {
     const { from, to } = value as { from?: number; to?: number };
-    if (from != null && to != null) return `${from} – ${to}`;
-    if (from != null) return `ab ${from}`;
-    if (to != null) return `bis ${to}`;
+    const r = (n: number) => +n.toFixed(2);
+    if (from != null && to != null) return `${r(from)} – ${r(to)}`;
+    if (from != null) return `ab ${r(from)}`;
+    if (to != null) return `bis ${r(to)}`;
     return "Nicht angegeben";
   }
+  if (typeof value === "number") value = +value.toFixed(2);
   const str = String(value);
   const translated = selections ? (resolveLabel(selections, str) ?? str) : str;
   return suffix ? `${translated} ${suffix}` : translated;
