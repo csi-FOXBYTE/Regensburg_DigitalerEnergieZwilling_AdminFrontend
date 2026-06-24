@@ -294,8 +294,8 @@ export function PrimaryEnergyCarrierSection({
                         <Box sx={{ ...gridSx, mb: 2 }}>
                           <Typography variant="body2">Mengeneinheit</Typography>
                           <TextField
+                            select
                             size="small"
-                            placeholder="z.B. kWh, rm, l"
                             value={
                               configStore.heat.primaryEnergyCarrierData.find(
                                 (c) => c.key === item.value,
@@ -309,7 +309,13 @@ export function PrimaryEnergyCarrierSection({
                                 },
                               )
                             }
-                          />
+                          >
+                            {["rm", "kg", "kWh", "m³", "L"].map((u) => (
+                              <MenuItem key={u} value={u}>
+                                {u}
+                              </MenuItem>
+                            ))}
+                          </TextField>
 
                           <Box />
 
