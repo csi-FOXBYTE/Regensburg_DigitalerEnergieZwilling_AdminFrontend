@@ -320,6 +320,12 @@ export function ConfigOverview() {
 
   const saveConfig = useSaveConfig();
 
+  useEffect(() => {
+    if (activeConfig.isSuccess && activeConfig.data?.versionName && !selectedConfigFile) {
+      setSelectedConfigFile(activeConfig.data.versionName);
+    }
+  }, [activeConfig.isSuccess, activeConfig.data?.versionName, selectedConfigFile]);
+
   const autoInitDone = useRef(false);
   useEffect(() => {
     if (!configVersions.isSuccess) return;
