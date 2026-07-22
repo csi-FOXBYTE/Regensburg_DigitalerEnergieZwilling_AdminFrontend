@@ -14,7 +14,7 @@ import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling
 import CheckIcon from "@mui/icons-material/Check";
 import { Box, Button, Chip, Paper, Typography } from "@mui/material";
 import { useStore } from "@nanostores/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDeleteDialog } from "../../components/ConfirmDeleteDialog";
 import { EditDialog } from "../../components/EditDialog";
@@ -321,38 +321,18 @@ export function ConfigOverview() {
   const saveConfig = useSaveConfig();
 
   useEffect(() => {
-    if (activeConfig.isSuccess && activeConfig.data?.versionName && !selectedConfigFile) {
+    if (
+      activeConfig.isSuccess &&
+      activeConfig.data?.versionName &&
+      !selectedConfigFile
+    ) {
       setSelectedConfigFile(activeConfig.data.versionName);
     }
-  }, [activeConfig.isSuccess, activeConfig.data?.versionName, selectedConfigFile]);
-
-  const autoInitDone = useRef(false);
-  useEffect(() => {
-    if (!configVersions.isSuccess) return;
-    if (configVersions.data.configs.length > 0) return;
-    if (autoInitDone.current) return;
-    autoInitDone.current = true;
-    const init = async () => {
-      try {
-        await saveConfig.mutateAsync({
-          versionName: "default",
-          config: configStore,
-          subsidies: foerderprogramme.get(),
-        });
-        setSelectedConfigFile("default");
-      } catch {
-        toast.error("Standard-Konfiguration konnte nicht erstellt werden");
-      }
-      try {
-        await publishConfig.mutateAsync({ versionName: "default" });
-        await configVersions.refetch();
-        await activeConfig.refetch();
-      } catch {
-        toast.error("Standard-Konfiguration konnte nicht aktiviert werden");
-      }
-    };
-    void init();
-  });
+  }, [
+    activeConfig.isSuccess,
+    activeConfig.data?.versionName,
+    selectedConfigFile,
+  ]);
 
   const handleSaveAll = async (fileName: string, autoActivate: boolean) => {
     try {
@@ -367,12 +347,9 @@ export function ConfigOverview() {
       if (autoActivate) {
         try {
           await publishConfig.mutateAsync({ versionName: fileName });
-          await activeConfig.refetch();
-        } catch (err) {
-          toast.error(
-            "Config konnte nicht aktiviert werden: " +
-              (err instanceof Error ? err.message : String(err)),
-          );
+          await Promise.all([activeConfig.refetch(), configVersions.refetch()]);
+        } catch {
+          toast.error("Config konnte nicht aktiviert werden");
         }
       }
     } catch (err) {
@@ -387,12 +364,9 @@ export function ConfigOverview() {
   const activateConfig = async (fileName: string) => {
     try {
       await publishConfig.mutateAsync({ versionName: fileName });
-      await activeConfig.refetch();
-    } catch (err) {
-      toast.error(
-        "Config konnte nicht aktiviert werden: " +
-          (err instanceof Error ? err.message : String(err)),
-      );
+      await Promise.all([activeConfig.refetch(), configVersions.refetch()]);
+    } catch {
+      toast.error("Config konnte nicht aktiviert werden");
     }
   };
 
@@ -408,11 +382,12 @@ export function ConfigOverview() {
           await deleteConfig.mutateAsync({ versionName });
           toast.success(`Konfiguration „${versionName}" gelöscht`);
           if (selectedConfigFile === versionName) setSelectedConfigFile("");
-          await configVersions.refetch();
-          await activeConfig.refetch();
+          await Promise.all([configVersions.refetch(), activeConfig.refetch()]);
         } catch (err) {
           if ((err as { status?: number }).status === 409) {
             toast.error("Aktive Konfiguration kann nicht gelöscht werden");
+          } else if ((err as { status?: number }).status === 403) {
+            toast.error("Die DEFAULT-Konfiguration kann nicht gelöscht werden");
           } else {
             toast.error("Löschen fehlgeschlagen");
           }

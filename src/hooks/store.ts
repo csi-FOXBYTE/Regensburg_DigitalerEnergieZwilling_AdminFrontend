@@ -1,4 +1,3 @@
-import { mockSubsidies } from "@/assets/mockSubsidies";
 import type {
   CarrierSelection,
   DETConfig,
@@ -899,7 +898,7 @@ export const toggleAllowedBottomFloorConstructionType = (
 
 // Subsidies //
 
-export const foerderprogramme = atom<SubsidyWrapper[]>(mockSubsidies);
+export const foerderprogramme = atom<SubsidyWrapper[]>([]);
 
 export const addFoerderprogramm = (entry: SubsidyWrapper) => {
   foerderprogramme.set([...foerderprogramme.get(), entry]);
