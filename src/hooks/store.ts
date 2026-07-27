@@ -3,6 +3,7 @@ import type {
   DETConfig,
   ElectricityTypeData,
   HeatFlowDirection,
+  OuterWallConstructionType,
   PrimaryEnergyCarrierData,
   RangeKey,
   Selection,
@@ -791,11 +792,11 @@ export const updateTopFloorUValue = (
 
 export const updateOuterWallConstructionType = (
   index: number,
-  updater: (draft: Selection) => void,
+  updater: (draft: OuterWallConstructionType) => void,
 ) => {
   updateConfig((draft) => {
     const item = draft.outerWall.constructionTypes[index];
-    if (item) updater(item as Selection);
+    if (item) updater(item as OuterWallConstructionType);
   });
 };
 

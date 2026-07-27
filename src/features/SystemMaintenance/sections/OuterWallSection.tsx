@@ -1,5 +1,7 @@
 import {
   Box,
+  Checkbox,
+  FormControlLabel,
   MenuItem,
   Table,
   TableBody,
@@ -14,6 +16,7 @@ import { useStore } from "@nanostores/react";
 import { Fragment } from "react";
 import {
   updateConfig,
+  updateOuterWallConstructionType,
   updateOuterWallDefaultConstructionType,
   updateOuterWallUValue,
   updateSimpleValue,
@@ -101,16 +104,20 @@ export default function OuterWallSection({
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "1fr 2fr",
+            gridTemplateColumns: "1fr 2fr auto",
             gap: 1.5,
             alignItems: "center",
-            maxWidth: 800,
+            maxWidth: 900,
             mb: 3,
           }}
         >
           {configStore.outerWall.constructionTypes.map(
             (
-              ct: { value: string; localization: Record<string, string> },
+              ct: {
+                value: string;
+                localization: Record<string, string>;
+                allowsAdditionalInsulation?: boolean;
+              },
               i: number,
             ) => (
               <Fragment key={ct.value}>
@@ -130,6 +137,25 @@ export default function OuterWallSection({
                       if (item) item.localization.de = val;
                     });
                   }}
+                />
+                <FormControlLabel
+                  sx={{ whiteSpace: "nowrap", mr: 0 }}
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={!!ct.allowsAdditionalInsulation}
+                      onChange={(e) =>
+                        updateOuterWallConstructionType(i, (draft) => {
+                          draft.allowsAdditionalInsulation = e.target.checked;
+                        })
+                      }
+                    />
+                  }
+                  label={
+                    <Typography variant="body2">
+                      Zusätzliche Dämmung möglich
+                    </Typography>
+                  }
                 />
               </Fragment>
             ),

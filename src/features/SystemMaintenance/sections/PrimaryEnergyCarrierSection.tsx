@@ -244,6 +244,27 @@ export function PrimaryEnergyCarrierSection({
                           Daten zum Energieträger
                         </Typography>
 
+                        <FormControlLabel
+                          sx={{ mb: 1.5 }}
+                          control={
+                            <Checkbox
+                              size="small"
+                              checked={!!item.excludeFromSystemRenewal}
+                              onChange={(e) =>
+                                updatePrimaryEnergyCarrier(index, (draft) => {
+                                  draft.excludeFromSystemRenewal =
+                                    e.target.checked;
+                                })
+                              }
+                            />
+                          }
+                          label={
+                            <Typography variant="body2">
+                              Von Systemerneuerung ausschließen
+                            </Typography>
+                          }
+                        />
+
                         <Box sx={{ ...gridSx, mb: 1.5 }}>
                           <Typography variant="body2">
                             Primärenergiefaktor

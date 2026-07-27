@@ -16,6 +16,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import {
   calculate,
   type DETConfig,
+  type ResolvedDETInput,
 } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { GasMeter, LightbulbOutlineRounded, Power } from "@mui/icons-material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -71,7 +72,7 @@ export function RecordDetail({ id }: { id: string }) {
   );
 
   const raw = detail?.detInput;
-  let detInput = raw;
+  let detInput: ResolvedDETInput | typeof raw = raw;
   if (raw && configData?.calculationConfig) {
     try {
       const parsedConfig = JSON.parse(configData.calculationConfig) as DETConfig;
@@ -540,6 +541,13 @@ export function RecordDetail({ id }: { id: string }) {
             label="U-Wert"
             value={fmt(detInput?.outerWall.uValue, "W/(m²K)")}
           />
+          <InfoItem
+            label="Zusätzliche Dämmung möglich"
+            value={fmt(
+              (detInput?.outerWall as ResolvedDETInput["outerWall"] | undefined)
+                ?.allowsAdditionalInsulation,
+            )}
+          />
         </InfoCard>
 
         {/* Außenwandfenster */}
@@ -653,7 +661,6 @@ export function RecordDetail({ id }: { id: string }) {
             label="Gasanschluss vorhanden"
             value={fmt(detInput?.heat.hasGasSupply)}
           />
-          <InfoItem label="Biogas" value={fmt(detInput?.heat.hasBioGas)} />
           <InfoItem
             label="Speicher vorhanden"
             value={fmt(detInput?.heat.hasStorage)}
