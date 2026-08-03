@@ -17,11 +17,15 @@ RUN --mount=type=secret,id=github_token,env=PACKAGE_TOKEN \
 
 COPY --chown=1000:1000 . .
 RUN pnpm run build
+RUN cp LICENSE COPYING COPYING.LESSER NOTICE /app/dist/
 
 # ==========================================
 # Stage 2: Production (nginx non-root)
 # ==========================================
 FROM nginxinc/nginx-unprivileged:alpine
+
+LABEL org.opencontainers.image.licenses="LGPL-3.0-or-later" \
+      org.opencontainers.image.source="https://github.com/csi-FOXBYTE/Regensburg_DigitalerEnergieZwilling_AdminFrontend"
 
 COPY --chown=101:101 nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder --chown=101:101 /app/dist /usr/share/nginx/html
