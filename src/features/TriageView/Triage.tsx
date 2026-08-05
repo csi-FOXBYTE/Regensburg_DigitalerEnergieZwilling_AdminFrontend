@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "./parts/DeleteDialog";
 import FiltersControls from "./parts/FiltersControls";
 import PaginationView from "./parts/Pagination";
+import { consumePendingStatusFilter } from "./statusFilterHandoff";
 import TableView from "./parts/Table";
 
 export function Dashboard() {
@@ -23,7 +24,9 @@ export function Dashboard() {
   const deleteMutation = useDeleteSubmission();
 
   const [addressFilter, setAddressFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>(
+    () => consumePendingStatusFilter() ?? "all",
+  );
   const [sortBy, setSortBy] = useState<
     "date" | "address" | "status" | "assignedTo"
   >("date");

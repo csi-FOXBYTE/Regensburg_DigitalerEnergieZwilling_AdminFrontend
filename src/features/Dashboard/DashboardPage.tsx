@@ -20,6 +20,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { STATUS_COLORS, statusConfig } from "../../assets/types";
 import { AppFooter } from "../../components/Footer";
+import { setPendingStatusFilter } from "../TriageView/statusFilterHandoff";
 import BuildingMap from "./BuildingMap";
 
 export default function DashboardPage() {
@@ -47,7 +48,13 @@ export default function DashboardPage() {
     [navigate],
   );
 
-  const stats = [
+  const stats: {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+    bgColor: string;
+    status?: keyof typeof statusCounts;
+  }[] = [
     {
       title: "Gesamt Gebäude",
       value: submissionsData.length,
@@ -59,6 +66,7 @@ export default function DashboardPage() {
       value: statusCounts.NEU,
       icon: <ErrorOutlineIcon sx={{ fontSize: 28, color: "primary.main" }} />,
       bgColor: "primary.50",
+      status: "NEU",
     },
     {
       title: "Freigegeben",
@@ -67,14 +75,24 @@ export default function DashboardPage() {
         <CheckCircleOutlineIcon sx={{ fontSize: 28, color: "success.main" }} />
       ),
       bgColor: "success.50",
+      status: "FREIGEGEBEN",
     },
     {
       title: "In Prüfung",
       value: statusCounts.IN_PRUEFUNG,
       icon: <HourglassEmptyIcon sx={{ fontSize: 28, color: "warning.main" }} />,
       bgColor: "warning.50",
+      status: "IN_PRUEFUNG",
     },
   ];
+
+  const handleStatCardClick = useCallback(
+    (status?: keyof typeof statusCounts) => {
+      setPendingStatusFilter(status);
+      navigate({ to: "/maintenance" });
+    },
+    [navigate],
+  );
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -117,7 +135,12 @@ export default function DashboardPage() {
           }}
         >
           {stats.map((stat) => (
-            <Card key={stat.title} elevation={2}>
+            <Card
+              key={stat.title}
+              elevation={2}
+              onClick={() => handleStatCardClick(stat.status)}
+              sx={{ cursor: "pointer" }}
+            >
               <CardContent
                 sx={{
                   display: "flex",
