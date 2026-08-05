@@ -1,4 +1,5 @@
 import type { RecordStatus, SubmissionSummary } from "@/assets/types";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { AppFooter } from "@/components/Footer";
 import {
   useAssignSubmission,
@@ -10,7 +11,6 @@ import { Alert, Box, Card, CardContent, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { DeleteConfirmationDialog } from "./parts/DeleteDialog";
 import FiltersControls from "./parts/FiltersControls";
 import PaginationView from "./parts/Pagination";
 import { consumePendingStatusFilter } from "./statusFilterHandoff";
@@ -252,10 +252,11 @@ export function Dashboard() {
         </Card>
       </Box>
 
-      <DeleteConfirmationDialog
-        recordToDelete={recordToDelete}
-        setRecordToDelete={setRecordToDelete}
-        handleDelete={handleDelete}
+      <ConfirmDeleteDialog
+        open={!!recordToDelete}
+        title="Sind Sie sicher, dass Sie diesen unplausiblen Datensatz löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+        onConfirm={() => recordToDelete && handleDelete(recordToDelete)}
+        onCancel={() => setRecordToDelete(null)}
       />
       <AppFooter
         sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1200 }}

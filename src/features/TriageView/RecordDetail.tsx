@@ -75,7 +75,9 @@ export function RecordDetail({ id }: { id: string }) {
   let detInput: ResolvedDETInput | typeof raw = raw;
   if (raw && configData?.calculationConfig) {
     try {
-      const parsedConfig = JSON.parse(configData.calculationConfig) as DETConfig;
+      const parsedConfig = JSON.parse(
+        configData.calculationConfig,
+      ) as DETConfig;
       detInput = calculate(parsedConfig, raw).resolvedInput;
     } catch {
       // keep raw
@@ -923,7 +925,7 @@ export function RecordDetail({ id }: { id: string }) {
               disabled={deleteMutation.isPending}
               sx={{ mt: 1 }}
             >
-              Gebäude löschen
+              Einreichung löschen
             </Button>
           </CardContent>
         </Card>
@@ -934,6 +936,7 @@ export function RecordDetail({ id }: { id: string }) {
       <AppFooter />
       <ConfirmDeleteDialog
         open={deleteDialogOpen}
+        title="Sind Sie sicher, dass Sie diesen Datensatz löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
         onConfirm={handleDelete}
         onCancel={() => setDeleteDialogOpen(false)}
       />
