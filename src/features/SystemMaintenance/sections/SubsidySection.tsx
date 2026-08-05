@@ -63,7 +63,6 @@ type FormState = {
   href: string;
   foerderart: FoerderartType;
   betrag: number | "";
-  beitrag: number | "";
   maximalbetrag: number | "";
   hinweis: string;
   isActive: boolean;
@@ -75,7 +74,6 @@ const EMPTY_FORM: FormState = {
   href: "",
   foerderart: "euro",
   betrag: "",
-  beitrag: "",
   maximalbetrag: "",
   hinweis: "",
   isActive: true,
@@ -96,7 +94,7 @@ function toWrapper(form: FormState): SubsidyWrapper {
       ...base,
       type: "range",
       unit: "%",
-      from: Number(form.beitrag) || 0,
+      from: Number(form.betrag) || 0,
       to: Number(form.maximalbetrag) || 0,
     };
   }
@@ -121,13 +119,7 @@ function fromWrapper(w: SubsidyWrapper): FormState {
     content: s.content,
     href: s.href,
     foerderart,
-    betrag: !isPercent ? (b as { value: number }).value : "",
-    beitrag:
-      b.type === "range"
-        ? b.from
-        : isPercent
-          ? (b as { value: number }).value
-          : "",
+    betrag: b.type === "range" ? b.from : (b as { value: number }).value,
     maximalbetrag: b.type === "range" && b.to ? b.to : "",
     hinweis: b.for ?? "",
     isActive: w.isActive,
@@ -160,16 +152,17 @@ function FoerderprogrammDialog({
   const handleSave = () => {
     const newErrors: Record<string, string> = {};
     if (!form.title.trim()) newErrors.title = "Name ist erforderlich";
-    if (form.foerderart === "euro") {
+    const isPercent = form.foerderart === "percent";
+    if (!isPercent) {
       if (form.betrag === "" || Number(form.betrag) < 0)
         newErrors.betrag = "Gültigen Betrag in € angeben";
     } else {
       if (
-        form.beitrag === "" ||
-        Number(form.beitrag) < 0 ||
-        Number(form.beitrag) > 100
+        form.betrag === "" ||
+        Number(form.betrag) < 0 ||
+        Number(form.betrag) > 100
       )
-        newErrors.beitrag = "Gültigen Beitrag in % angeben";
+        newErrors.betrag = "Gültigen Betrag in % angeben";
       if (form.maximalbetrag !== "" && Number(form.maximalbetrag) < 0)
         newErrors.maximalbetrag = "Ungültiger Maximalbetrag";
     }
@@ -227,7 +220,6 @@ function FoerderprogrammDialog({
                 onChange={(e) => {
                   set("foerderart", e.target.value as FoerderartType);
                   set("betrag", "");
-                  set("beitrag", "");
                   set("maximalbetrag", "");
                 }}
               >
@@ -264,19 +256,19 @@ function FoerderprogrammDialog({
               ) : (
                 <>
                   <TextField
-                    label="Beitrag"
+                    label="Betrag"
                     type="number"
-                    value={form.beitrag}
+                    value={form.betrag}
                     onChange={(e) =>
                       set(
-                        "beitrag",
+                        "betrag",
                         e.target.value === "" ? "" : parseFloat(e.target.value),
                       )
                     }
                     sx={{ flex: 1 }}
                     required
-                    error={!!errors.beitrag}
-                    helperText={errors.beitrag}
+                    error={!!errors.betrag}
+                    helperText={errors.betrag}
                     slotProps={{
                       htmlInput: { min: 0 },
                       input: {
