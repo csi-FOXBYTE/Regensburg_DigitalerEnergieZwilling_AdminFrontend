@@ -66,7 +66,10 @@ export function toDetailStatus(
 
 function groupToSummaries(group: GetApiAdminSubmissions200DataItem): SubmissionSummary[] {
   const useVariants = group.submissions.length > 1;
-  return group.submissions.map((sub, i) => ({
+  const orderedSubmissions = [...group.submissions].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+  return orderedSubmissions.map((sub, i) => ({
     id: sub.id,
     buildingId: group.buildingId,
     buildingAddress: group.address,

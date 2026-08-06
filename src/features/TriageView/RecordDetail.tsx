@@ -97,7 +97,11 @@ export function RecordDetail({ id }: { id: string }) {
   const variantSiblings = useMemo(() => {
     if (!detail?.otherSubmissionIds.length) return [];
     const siblingIds = new Set([id, ...detail.otherSubmissionIds]);
-    return (submissions ?? []).filter((s) => siblingIds.has(s.id));
+    return (submissions ?? [])
+      .filter((s) => siblingIds.has(s.id))
+      .sort(
+        (a, b) => new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime(),
+      );
   }, [submissions, detail, id]);
 
   const invalidate = () => {
