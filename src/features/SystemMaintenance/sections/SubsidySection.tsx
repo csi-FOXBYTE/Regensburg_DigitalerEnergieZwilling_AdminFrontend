@@ -57,6 +57,8 @@ import type { DeleteConfirmState } from "../ConfigOverview";
 
 type FoerderartType = "euro" | "percent";
 
+type FinanzierungType = "kredit" | "zuschuss";
+
 type FormState = {
   title: string;
   content: string;
@@ -64,6 +66,7 @@ type FormState = {
   foerderart: FoerderartType;
   betrag: number | "";
   maximalbetrag: number | "";
+  finanzierung: FinanzierungType;
   hinweis: string;
   isActive: boolean;
 };
@@ -75,6 +78,7 @@ const EMPTY_FORM: FormState = {
   foerderart: "euro",
   betrag: "",
   maximalbetrag: "",
+  finanzierung: "kredit",
   hinweis: "",
   isActive: true,
 };
@@ -101,6 +105,7 @@ function toWrapper(form: FormState): SubsidyWrapper {
   return {
     subsidy: {
       title: form.title,
+      financing: form.finanzierung === "kredit" ? "loan" : "grant",
       content: form.content,
       href: form.href,
       benefits,
@@ -123,6 +128,7 @@ function fromWrapper(w: SubsidyWrapper): FormState {
     maximalbetrag: b.type === "range" && b.to ? b.to : "",
     hinweis: b.for ?? "",
     isActive: w.isActive,
+    finanzierung: s.financing === "loan" ? "kredit" : "zuschuss",
   };
 }
 
@@ -313,18 +319,35 @@ function FoerderprogrammDialog({
             fullWidth
             placeholder="z. B. pro m²"
           />
+          <Box
+            sx={{ display: "flex", flex: 1, gap: 2, alignItems: "flex-start" }}
+          >
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Finanzierung</InputLabel>
+              <Select
+                label="Finanzierung"
+                value={form.finanzierung}
+                onChange={(e) => {
+                  set("finanzierung", e.target.value as FinanzierungType);
+                }}
+              >
+                <MenuItem value="kredit">Kredit</MenuItem>
+                <MenuItem value="zuschuss">Zuschuss</MenuItem>
+              </Select>
+            </FormControl>
 
-          {/* Aktiv-Toggle */}
-          <FormControlLabel
-            control={
-              <Switch
-                checked={form.isActive}
-                onChange={(e) => set("isActive", e.target.checked)}
-                color="error"
-              />
-            }
-            label="Aktiv"
-          />
+            {/* Aktiv-Toggle */}
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={form.isActive}
+                  onChange={(e) => set("isActive", e.target.checked)}
+                  color="error"
+                />
+              }
+              label="Aktiv"
+            />
+          </Box>
 
           {/* Beschreibung */}
           <Box
@@ -480,6 +503,7 @@ export default function FoerderprogrammeSection({
                   <TableCell sx={{ fontWeight: 700 }} align="right">
                     Förderung
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 700 }}>Finanzierung</TableCell>
                   <TableCell sx={{ fontWeight: 700 }} align="center">
                     Status
                   </TableCell>
@@ -529,6 +553,9 @@ export default function FoerderprogrammeSection({
                       sx={{ whiteSpace: "nowrap", fontWeight: 500 }}
                     >
                       {formatPromotion(w.subsidy)}
+                    </TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      {w.subsidy.financing === "loan" ? "Kredit" : "Zuschuss"}
                     </TableCell>
                     <TableCell align="center">
                       <Chip
