@@ -29,8 +29,12 @@ export interface EnergyEfficiencyEntry {
   color: string;
 }
 
+export type StoredSubsidy = Omit<Subsidy, "financing"> & {
+  financing?: Subsidy["financing"];
+};
+
 export interface SubsidyWrapper {
-  subsidy: Subsidy;
+  subsidy: StoredSubsidy;
   isActive: boolean;
 }
 

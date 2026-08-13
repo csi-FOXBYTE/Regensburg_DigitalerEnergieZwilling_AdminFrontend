@@ -319,7 +319,7 @@ export default function DashboardPage() {
               <Box
                 sx={{
                   height: 360,
-                  borderRadius: 1,
+                  borderRadius: 0,
                   overflow: "hidden",
                   zIndex: 1,
                 }}

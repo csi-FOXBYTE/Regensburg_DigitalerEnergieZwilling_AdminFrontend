@@ -1,7 +1,4 @@
-import type {
-  Subsidy,
-  SubsidyBenefit,
-} from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
+import type { SubsidyBenefit } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import {
   BoldItalicUnderlineToggles,
   ListsToggle,
@@ -57,7 +54,7 @@ import type { DeleteConfirmState } from "../ConfigOverview";
 
 type FoerderartType = "euro" | "percent";
 
-type FinanzierungType = "kredit" | "zuschuss";
+type FinanzierungType = "keine" | "kredit" | "zuschuss";
 
 type FormState = {
   title: string;
@@ -78,7 +75,7 @@ const EMPTY_FORM: FormState = {
   foerderart: "euro",
   betrag: "",
   maximalbetrag: "",
-  finanzierung: "kredit",
+  finanzierung: "keine",
   hinweis: "",
   isActive: true,
 };
@@ -102,10 +99,16 @@ function toWrapper(form: FormState): SubsidyWrapper {
       to: Number(form.maximalbetrag) || 0,
     };
   }
+  const financing =
+    form.finanzierung === "kredit"
+      ? { financing: "loan" as const }
+      : form.finanzierung === "zuschuss"
+        ? { financing: "grant" as const }
+        : {};
   return {
     subsidy: {
       title: form.title,
-      financing: form.finanzierung === "kredit" ? "loan" : "grant",
+      ...financing,
       content: form.content,
       href: form.href,
       benefits,
@@ -128,7 +131,12 @@ function fromWrapper(w: SubsidyWrapper): FormState {
     maximalbetrag: b.type === "range" && b.to ? b.to : "",
     hinweis: b.for ?? "",
     isActive: w.isActive,
-    finanzierung: s.financing === "loan" ? "kredit" : "zuschuss",
+    finanzierung:
+      s.financing === "loan"
+        ? "kredit"
+        : s.financing === "grant"
+          ? "zuschuss"
+          : "keine",
   };
 }
 
@@ -331,6 +339,7 @@ function FoerderprogrammDialog({
                   set("finanzierung", e.target.value as FinanzierungType);
                 }}
               >
+                <MenuItem value="keine">Keine</MenuItem>
                 <MenuItem value="kredit">Kredit</MenuItem>
                 <MenuItem value="zuschuss">Zuschuss</MenuItem>
               </Select>
@@ -407,7 +416,7 @@ function FoerderprogrammDialog({
   );
 }
 
-function formatPromotion(f: Subsidy): string {
+function formatPromotion(f: SubsidyWrapper["subsidy"]): string {
   const b = f.benefits;
   const forStr = b.for ? ` ${b.for}` : "";
   if (b.type === "range") {
@@ -555,7 +564,11 @@ export default function FoerderprogrammeSection({
                       {formatPromotion(w.subsidy)}
                     </TableCell>
                     <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {w.subsidy.financing === "loan" ? "Kredit" : "Zuschuss"}
+                      {w.subsidy.financing === "loan"
+                        ? "Kredit"
+                        : w.subsidy.financing === "grant"
+                          ? "Zuschuss"
+                          : "Keine"}
                     </TableCell>
                     <TableCell align="center">
                       <Chip
