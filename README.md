@@ -11,6 +11,17 @@ cp .env.development.local.example .env.development.local
 pnpm dev
 ```
 
+## Tests
+
+The unit tests use the built-in Node.js test runner and require no additional
+test framework. Run the complete suite with:
+
+```bash
+pnpm test
+```
+
+Test files live under `tests/` and use the `*.test.ts` suffix.
+
 ## Dev auth (temporary)
 
 Real OIDC/Keycloak login is not yet wired. For local development, a JWT generated
