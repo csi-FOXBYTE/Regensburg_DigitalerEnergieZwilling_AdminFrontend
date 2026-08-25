@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore':
-        specifier: 0.18.2
-        version: 0.18.2(zod@3.25.76)
+        specifier: 0.18.3
+        version: 0.18.3(zod@3.25.76)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.14)(react@19.2.4)
@@ -374,8 +374,8 @@ packages:
     peerDependencies:
       commander: ~14.0.0
 
-  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.18.2':
-    resolution: {integrity: sha512-uWoZXsmfsD5mEdxTo1YCEK9I3+NhJzrN6Zxnw493oMcbpCxvLSHhaMO0u1jWcX5lMBbDTHGY5yxzADpg9Etu2w==, tarball: https://npm.pkg.github.com/download/@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore/0.18.2/4bd99e1a2104745f0a88e03e36e69b4f8ad4c72d}
+  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.18.3':
+    resolution: {integrity: sha512-Bvzgj6AI2Q2fTJkZm9hclwCfagcPZ5C4Yeg4v/ng1+yUXsyBKncuci9a5f16/303caRO/WTlHVx62UjR44/C/Q==, tarball: https://npm.pkg.github.com/download/@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore/0.18.3/4d6d0c8380f2b77a15a9cf2d5a24e86eaed3ab60}
     hasBin: true
     peerDependencies:
       zod: ^3.24.0
@@ -2356,6 +2356,7 @@ packages:
   eslint@9.39.3:
     resolution: {integrity: sha512-VmQ+sifHUbI/IcSopBCF/HO3YiHQx/AVd3UVyYL6weuwW+HvON9VYn5l6Zl1WZzPWXPNZrSQpxwkkZ/VuvJZzg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -4285,7 +4286,7 @@ snapshots:
     dependencies:
       commander: 14.0.3
 
-  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.18.2(zod@3.25.76)':
+  '@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore@0.18.3(zod@3.25.76)':
     dependencies:
       zod: 3.25.76
 
