@@ -29,7 +29,9 @@ import {
   updateDefaultHeatingSystemType,
   updatePrimaryEnergyCarrier,
   updatePrimaryEnergyCarrierData,
+  updatePrimaryEnergyCarrierDate,
   updatePrimaryEnergyCarrierEfficiencyFactor,
+  updatePrimaryEnergyCarrierSource,
 } from "../../../hooks/store";
 import { CollapsibleSection } from "../CollapsibleSection";
 import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
@@ -199,7 +201,12 @@ export function PrimaryEnergyCarrierSection({
           </TableHead>
 
           <TableBody>
-            {configStore.heat.primaryEnergyCarriers.map((item, index) => (
+            {configStore.heat.primaryEnergyCarriers.map((item, index) => {
+              const carrierData = configStore.heat.primaryEnergyCarrierData.find(
+                (c) => c.key === item.value,
+              )?.value;
+
+              return (
               <Fragment key={index}>
                 <TableRow hover>
                   <TableCell sx={{ fontSize: "medium" }}>
@@ -310,9 +317,35 @@ export function PrimaryEnergyCarrierSection({
                         </Box>
 
                         <Typography variant="body2" fontWeight={"bold"} mb={1}>
-                          Brennstoffdaten gemäß GEG/EnEV
+                          Brennstoffdaten gemäß{" "}
+                          {carrierData?.source || "unbekannter Quelle"}
                         </Typography>
                         <Box sx={{ ...gridSx, mb: 2 }}>
+                          <Typography variant="body2">Quelle</Typography>
+                          <TextField
+                            size="small"
+                            value={carrierData?.source ?? ""}
+                            onChange={(e) =>
+                              updatePrimaryEnergyCarrierSource(
+                                item.value,
+                                e.target.value,
+                              )
+                            }
+                          />
+                          <Box />
+                          <Typography variant="body2">Datum</Typography>
+                          <TextField
+                            size="small"
+                            type="date"
+                            value={carrierData?.date ?? ""}
+                            onChange={(e) =>
+                              updatePrimaryEnergyCarrierDate(
+                                item.value,
+                                e.target.value,
+                              )
+                            }
+                          />
+
                           <Typography variant="body2">Mengeneinheit</Typography>
                           <TextField
                             select
@@ -507,7 +540,8 @@ export function PrimaryEnergyCarrierSection({
                   </TableCell>
                 </TableRow>
               </Fragment>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

@@ -225,6 +225,8 @@ export const addPrimaryEnergyCarrier = (entry: CarrierSelection) => {
         baseRate: 0,
         co2Factor: 0,
         primaryEnergyFactor: 0,
+        source: "",
+        date: "",
       },
     });
     draft.heat.allowedHeatingSystemTypesByCarrier.push({
@@ -296,6 +298,30 @@ export const updateCO2Factor = (carrierKey: string, value: number) => {
   });
 };
 
+export const updatePrimaryEnergyCarrierSource = (
+  carrierKey: string,
+  value: string,
+) => {
+  updateConfig((draft) => {
+    const data = draft.heat.primaryEnergyCarrierData.find(
+      (d) => d.key === carrierKey,
+    );
+    if (data) data.value.source = value;
+  });
+};
+
+export const updatePrimaryEnergyCarrierDate = (
+  carrierKey: string,
+  value: string,
+) => {
+  updateConfig((draft) => {
+    const data = draft.heat.primaryEnergyCarrierData.find(
+      (d) => d.key === carrierKey,
+    );
+    if (data) data.value.date = value;
+  });
+};
+
 // Stromtypen //
 
 export const addElectricityType = (entry: Selection) => {
@@ -303,7 +329,14 @@ export const addElectricityType = (entry: Selection) => {
     draft.heat.electricityTypes.push(entry);
     draft.heat.electricityTypeData.push({
       key: entry.value,
-      value: { co2Factor: 0, unitRate: 0, baseRate: 0, primaryEnergyFactor: 0 },
+      value: {
+        co2Factor: 0,
+        unitRate: 0,
+        baseRate: 0,
+        primaryEnergyFactor: 0,
+        source: "",
+        date: "",
+      },
     });
   });
 };
@@ -339,6 +372,20 @@ export const updateElectricityTypeData = (
   updateConfig((draft) => {
     const data = draft.heat.electricityTypeData.find((d) => d.key === key);
     if (data) updater(data.value);
+  });
+};
+
+export const updateElectricityTypeSource = (key: string, value: string) => {
+  updateConfig((draft) => {
+    const data = draft.heat.electricityTypeData.find((d) => d.key === key);
+    if (data) data.value.source = value;
+  });
+};
+
+export const updateElectricityTypeDate = (key: string, value: string) => {
+  updateConfig((draft) => {
+    const data = draft.heat.electricityTypeData.find((d) => d.key === key);
+    if (data) data.value.date = value;
   });
 };
 
