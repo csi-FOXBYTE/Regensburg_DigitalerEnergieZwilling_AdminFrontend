@@ -22,6 +22,8 @@ import {
   updateConfig,
   updateElectricityType,
   updateElectricityTypeData,
+  updateElectricityTypeDate,
+  updateElectricityTypeSource,
 } from "../../../hooks/store";
 import { CollapsibleSection } from "../CollapsibleSection";
 import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
@@ -221,6 +223,31 @@ export default function ElectricityTypesSection({
                       <Collapse in={!!expandedTypes[index]} unmountOnExit>
                         <Box sx={{ p: 2 }}>
                           <Box sx={{ ...gridSx, mb: 1.5 }}>
+                            <Typography variant="body2">Quelle</Typography>
+                            <TextField
+                              size="small"
+                              value={data?.source ?? ""}
+                              onChange={(e) =>
+                                updateElectricityTypeSource(
+                                  item.value,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                            <Box />
+                            <Typography variant="body2">Datum</Typography>
+                            <TextField
+                              size="small"
+                              type="date"
+                              value={data?.date ?? ""}
+                              onChange={(e) =>
+                                updateElectricityTypeDate(
+                                  item.value,
+                                  e.target.value,
+                                )
+                              }
+                            />
+
                             <Typography variant="body2">
                               Primärenergiefaktor
                             </Typography>

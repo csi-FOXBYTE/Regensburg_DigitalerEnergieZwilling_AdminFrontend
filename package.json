@@ -9,11 +9,12 @@
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
+    "test": "node --test \"tests/**/*.test.ts\"",
     "preview": "vite preview",
     "gen:api": "orval --config orval.config.ts"
   },
   "dependencies": {
-    "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore": "0.18.3",
+    "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore": "0.19.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mdxeditor/editor": "^3.55.0",
