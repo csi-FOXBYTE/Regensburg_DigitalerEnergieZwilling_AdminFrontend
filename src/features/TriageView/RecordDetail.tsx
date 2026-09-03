@@ -248,14 +248,14 @@ export function RecordDetail({ id }: { id: string }) {
   return (
     <Box sx={{ width: "100%" }}>
       <Box
-        sx={{
-          maxWidth: 1170,
+        sx={(theme) => ({
+          maxWidth: theme.layout.contentMaxWidth,
           mx: "auto",
           py: 3,
           display: "flex",
           flexDirection: "column",
           gap: 3,
-        }}
+        })}
       >
         {/* Header */}
         <Box
@@ -269,7 +269,6 @@ export function RecordDetail({ id }: { id: string }) {
             <Button
               variant="outlined"
               size="small"
-              color="error"
               startIcon={<ArrowBackIcon />}
               onClick={() => navigate({ to: "/maintenance" })}
               sx={{ mt: 0.5 }}
@@ -338,7 +337,7 @@ export function RecordDetail({ id }: { id: string }) {
                       py: 1.25,
                       borderRadius: 1,
                       border: "1px solid",
-                      borderColor: s.id === id ? "#E30613" : "divider",
+                      borderColor: s.id === id ? "primary.main" : "divider",
                       cursor: "pointer",
                       "&:hover": { bgcolor: "action.hover" },
                     }}
@@ -412,7 +411,6 @@ export function RecordDetail({ id }: { id: string }) {
                   disabled={
                     assignMutation.isPending || unassignMutation.isPending
                   }
-                  color="error"
                 >
                   {canUnassign ? "Zuweisung aufheben" : "Mir zuweisen"}
                 </Button>
@@ -882,7 +880,7 @@ export function RecordDetail({ id }: { id: string }) {
                   sx={{
                     "&.Mui-disabled": {
                       bgcolor: "success.main",
-                      color: "white",
+                      color: "common.white",
                       opacity: 0.38,
                     },
                   }}
@@ -900,7 +898,7 @@ export function RecordDetail({ id }: { id: string }) {
                   sx={{
                     "&.Mui-disabled": {
                       bgcolor: "error.main",
-                      color: "white",
+                      color: "common.white",
                       opacity: 0.38,
                     },
                   }}
@@ -983,7 +981,7 @@ function InfoCard({
   return (
     <Card>
       <CardHeader
-        avatar={<Icon sx={{ fontSize: 26, color: "error.main" }} />}
+        avatar={<Icon sx={{ fontSize: 26, color: "primary.main" }} />}
         title={<Typography variant="h3">{title}</Typography>}
       />
       <CardContent>

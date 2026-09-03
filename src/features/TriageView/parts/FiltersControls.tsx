@@ -33,10 +33,10 @@ const sharedTextFieldSx = {
       transition: "border-color 0.2s",
     },
     "&:hover fieldset": {
-      borderColor: "#e30613",
+      borderColor: "primary.main",
     },
     "&.Mui-focused fieldset": {
-      borderColor: "#e30613",
+      borderColor: "primary.main",
       borderWidth: "1.5px",
     },
   },
@@ -77,7 +77,7 @@ export function FiltersControls({
   }, [addressFilter]);
 
   return (
-    <Paper sx={{ p: 2, boxShadow: "0 0 8px 0 #0000001a" }}>
+    <Paper sx={(theme) => ({ p: 2, boxShadow: theme.customShadows.card })}>
       <Box>
         <Box sx={{ mb: 2 }}>
           <Typography variant="h3">Filter und Suche</Typography>
@@ -160,7 +160,6 @@ export function FiltersControls({
                 size="small"
                 sx={{
                   color: "text.disabled",
-                  "&.Mui-checked": { color: "#e30613" },
                 }}
               />
             }

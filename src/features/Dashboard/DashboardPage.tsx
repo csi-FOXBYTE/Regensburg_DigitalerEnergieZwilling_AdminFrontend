@@ -97,15 +97,15 @@ export default function DashboardPage() {
   return (
     <Box sx={{ width: "100%" }}>
       <Box
-        sx={{
-          maxWidth: 1170,
+        sx={(theme) => ({
+          maxWidth: theme.layout.contentMaxWidth,
           mx: "auto",
           py: 3,
           pb: 10,
           display: "flex",
           flexDirection: "column",
           gap: 3,
-        }}
+        })}
       >
         <Box>
           <Typography variant="h2" gutterBottom>
@@ -247,7 +247,7 @@ export default function DashboardPage() {
                                 <Typography
                                   component="span"
                                   variant="caption"
-                                  color="#757575"
+                                  color="text.secondary"
                                 >
                                   {new Date(
                                     submission.receivedDate,

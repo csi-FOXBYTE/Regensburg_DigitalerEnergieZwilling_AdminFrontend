@@ -2,6 +2,15 @@
 
 Vite + React SPA for the admin interface of the Digital Energy Twin platform.
 
+## Municipality theming
+
+The municipality-wide visual configuration lives in
+[`src/config/theme.ts`](src/config/theme.ts). Its `municipalityDesign` object is
+the customization entry point for brand and semantic colors, typography,
+corner shapes, shared layout dimensions, and shadows. MUI component defaults
+are derived from those values in the same file, so application components
+should use palette roles and theme values instead of city-specific literals.
+
 ## Getting started
 
 ```bash

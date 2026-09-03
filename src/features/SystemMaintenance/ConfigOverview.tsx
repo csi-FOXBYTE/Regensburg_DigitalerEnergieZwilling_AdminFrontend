@@ -443,14 +443,14 @@ export function ConfigOverview() {
   return (
     <Box sx={{ width: "100%" }}>
       <Box
-        sx={{
-          maxWidth: 1170,
+        sx={(theme) => ({
+          maxWidth: theme.layout.contentMaxWidth,
           mx: "auto",
           py: 3,
           display: "flex",
           flexDirection: "column",
           gap: 3,
-        }}
+        })}
       >
         <Box
           sx={{
@@ -469,7 +469,6 @@ export function ConfigOverview() {
           </Box>
           <Button
             variant="outlined"
-            color="error"
             onClick={() => setConfigManagementOpen(true)}
           >
             Configs verwalten
@@ -532,7 +531,7 @@ export function ConfigOverview() {
 
         <Box
           sx={{
-            bgcolor: "white",
+            bgcolor: "background.paper",
             display: "flex",
             flexDirection: "column",
             gap: 1,
@@ -635,14 +634,14 @@ export function ConfigOverview() {
         sx={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1200 }}
       >
         <Box
-          sx={{
-            maxWidth: 1170,
+          sx={(theme) => ({
+            maxWidth: theme.layout.contentMaxWidth,
             mx: "auto",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             width: "100%",
-          }}
+          })}
         >
           {!canSave && (
             <Typography sx={{ color: "error.main" }} variant="body2">
@@ -669,7 +668,6 @@ export function ConfigOverview() {
             <Button
               variant="contained"
               sx={{ mb: 1.5 }}
-              color="error"
               disabled={!canSave}
               onClick={() => setSaveDialogOpen(true)}
             >

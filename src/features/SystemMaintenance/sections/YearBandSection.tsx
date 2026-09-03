@@ -85,7 +85,6 @@ export function YearBandSection({
       action={
         <Button
           variant="outlined"
-          color="error"
           onClick={(e) => {
             e.stopPropagation();
             handleAddYearBand();

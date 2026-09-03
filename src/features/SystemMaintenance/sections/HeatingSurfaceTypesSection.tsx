@@ -139,7 +139,6 @@ export default function HeatingSurfaceTypesSection({
       action={
         <Button
           variant="outlined"
-          color="error"
           onClick={(e) => {
             e.stopPropagation();
             handleAddHeatingSurfaceType();

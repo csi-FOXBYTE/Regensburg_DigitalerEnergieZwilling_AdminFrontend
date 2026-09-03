@@ -54,10 +54,6 @@ export function SaveDialog({
       onClose={onClose}
       maxWidth="xs"
       fullWidth
-      slotProps={{
-        backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.1)" } },
-        paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
-      }}
     >
       <DialogTitle>
         <Typography variant="h4">Konfiguration speichern</Typography>
@@ -90,10 +86,10 @@ export function SaveDialog({
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="outlined" color="error">
+        <Button onClick={onClose} variant="outlined">
           Abbrechen
         </Button>
-        <Button onClick={handleSave} variant="contained" color="error">
+        <Button onClick={handleSave} variant="contained">
           Speichern
         </Button>
       </DialogActions>

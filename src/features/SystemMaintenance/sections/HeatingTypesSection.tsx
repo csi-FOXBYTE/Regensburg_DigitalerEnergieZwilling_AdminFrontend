@@ -16,6 +16,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
 import { CollapsibleSection } from "../CollapsibleSection";
@@ -68,6 +69,7 @@ function InlineNumberCell({
   value: number;
   onCommit: (v: number) => void;
 }) {
+  const theme = useTheme();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
@@ -111,12 +113,12 @@ function InlineNumberCell({
       style={{
         width: 68,
         textAlign: "center",
-        border: "1px solid #1976d2",
+        border: `1px solid ${theme.palette.primary.main}`,
         borderRadius: 4,
         padding: "2px 6px",
         fontSize: "inherit",
         outline: "none",
-        background: "#fff",
+        background: theme.palette.background.paper,
       }}
     />
   );
@@ -131,6 +133,7 @@ function InlineYearBandCell({
   to?: number;
   onCommit: (from?: number, to?: number) => void;
 }) {
+  const theme = useTheme();
   const [editing, setEditing] = useState(false);
   const [draftFrom, setDraftFrom] = useState("");
   const [draftTo, setDraftTo] = useState("");
@@ -166,12 +169,12 @@ function InlineYearBandCell({
   const inputStyle: React.CSSProperties = {
     width: 52,
     textAlign: "center",
-    border: "1px solid #1976d2",
+    border: `1px solid ${theme.palette.primary.main}`,
     borderRadius: 4,
     padding: "2px 4px",
     fontSize: "inherit",
     outline: "none",
-    background: "#fff",
+    background: theme.palette.background.paper,
   };
 
   return (
@@ -416,7 +419,6 @@ export default function HeatingTypesSection({
       action={
         <Button
           variant="outlined"
-          color="error"
           onClick={(e) => {
             e.stopPropagation();
             handleAddHeatingSystemType();

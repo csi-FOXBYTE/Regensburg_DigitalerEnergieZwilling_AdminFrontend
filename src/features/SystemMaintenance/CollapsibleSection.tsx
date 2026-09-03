@@ -25,15 +25,16 @@ export function CollapsibleSection({
           p: 2,
           display: "flex",
           justifyContent: "space-between",
-          color: "#e30613",
-          borderBottom: "2px solid black",
+          color: "primary.main",
+          borderBottom: "2px solid",
+          borderColor: "common.black",
           cursor: "pointer",
         }}
         onClick={() => toggleSection(sectionKey)}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {expandedSections[sectionKey] ? <ExpandMore /> : <ChevronRight />}
-          <Typography variant="h3" color="#e30613">
+          <Typography variant="h3" color="primary">
             {title}
           </Typography>
         </Box>

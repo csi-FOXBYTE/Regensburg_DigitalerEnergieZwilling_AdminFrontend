@@ -83,10 +83,6 @@ export function ConfigManagementDialog({
         onClose={onClose}
         maxWidth="md"
         fullWidth
-        slotProps={{
-          backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.1)" } },
-          paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
-        }}
       >
         <DialogTitle>
           <Box
@@ -240,10 +236,6 @@ export function ConfigManagementDialog({
       <Dialog
         open={activeErrorOpen}
         onClose={() => setActiveErrorOpen(false)}
-        slotProps={{
-          backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.1)" } },
-          paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
-        }}
       >
         <DialogTitle>Löschen nicht möglich</DialogTitle>
         <DialogContent>
@@ -256,7 +248,6 @@ export function ConfigManagementDialog({
           <Button
             onClick={() => setActiveErrorOpen(false)}
             variant="contained"
-            color="error"
           >
             Verstanden
           </Button>

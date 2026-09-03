@@ -1,3 +1,4 @@
+import { municipalityDesign } from "@/config/theme";
 import type { DETInput } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -21,11 +22,11 @@ export interface SubmissionSummary {
 }
 
 export const STATUS_COLORS: Record<RecordStatus, string> = {
-  NEU: "#3b82f6",
-  IN_PRUEFUNG: "#f59e0b",
-  FREIGEGEBEN: "#22c55e",
-  ABGELEHNT: "#C1272D",
-  GELOESCHT: "#9e9e9e",
+  NEU: municipalityDesign.colors.status.new,
+  IN_PRUEFUNG: municipalityDesign.colors.status.inReview,
+  FREIGEGEBEN: municipalityDesign.colors.status.approved,
+  ABGELEHNT: municipalityDesign.colors.status.rejected,
+  GELOESCHT: municipalityDesign.colors.status.deleted,
 };
 
 export const STATUS_LABELS: Record<RecordStatus, string> = {
@@ -88,4 +89,3 @@ export const statusConfig = {
     iconColor: "text.disabled",
   },
 };
-

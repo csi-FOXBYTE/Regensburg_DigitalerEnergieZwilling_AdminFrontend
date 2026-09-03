@@ -216,7 +216,7 @@ export default function WindowSection({
 
         <TableContainer sx={{ overflowX: "auto" }}>
           <Table size="small">
-            <TableHead sx={{ "& .MuiTableCell-root": { fontWeight: "bold" } }}>
+            <TableHead>
               <TableRow>
                 <TableCell>Konstruktion \ Baualtersklasse</TableCell>
                 {yearBands.map((band, bandIndex) => (

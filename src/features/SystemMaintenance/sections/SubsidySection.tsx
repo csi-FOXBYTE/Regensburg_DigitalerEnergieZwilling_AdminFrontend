@@ -194,10 +194,6 @@ function FoerderprogrammDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      slotProps={{
-        backdrop: { sx: { bgcolor: "rgba(0,0,0,0.1)" } },
-        paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
-      }}
     >
       <DialogTitle>
         {initial ? "Förderprogramm bearbeiten" : "Neues Förderprogramm"}
@@ -351,7 +347,6 @@ function FoerderprogrammDialog({
                 <Switch
                   checked={form.isActive}
                   onChange={(e) => set("isActive", e.target.checked)}
-                  color="error"
                 />
               }
               label="Aktiv"
@@ -361,10 +356,11 @@ function FoerderprogrammDialog({
           {/* Beschreibung */}
           <Box
             sx={{
-              border: "1px solid rgba(0,0,0,0.23)",
+              border: "1px solid",
+              borderColor: "action.disabled",
               borderRadius: 1,
               overflow: "hidden",
-              "&:hover": { borderColor: "rgba(0,0,0,0.87)" },
+              "&:hover": { borderColor: "text.primary" },
             }}
           >
             <Typography
@@ -405,10 +401,10 @@ function FoerderprogrammDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="outlined" color="error">
+        <Button onClick={onClose} variant="outlined">
           Abbrechen
         </Button>
-        <Button onClick={handleSave} variant="contained" color="error">
+        <Button onClick={handleSave} variant="contained">
           Speichern
         </Button>
       </DialogActions>
@@ -486,7 +482,6 @@ export default function FoerderprogrammeSection({
         action={
           <Button
             variant="outlined"
-            color="error"
             onClick={(e) => {
               e.stopPropagation();
               openAdd();
@@ -507,16 +502,16 @@ export default function FoerderprogrammeSection({
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>Name</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Beschreibung</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">
+                  <TableCell>Name</TableCell>
+                  <TableCell>Beschreibung</TableCell>
+                  <TableCell align="right">
                     Förderung
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Finanzierung</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="center">
+                  <TableCell>Finanzierung</TableCell>
+                  <TableCell align="center">
                     Status
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 700 }} align="right">
+                  <TableCell align="right">
                     Aktionen
                   </TableCell>
                 </TableRow>

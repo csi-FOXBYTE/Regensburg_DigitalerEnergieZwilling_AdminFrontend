@@ -153,7 +153,6 @@ export default function ElectricityTypesSection({
       action={
         <Button
           variant="outlined"
-          color="error"
           onClick={(e) => {
             e.stopPropagation();
             handleAddElectricityType();

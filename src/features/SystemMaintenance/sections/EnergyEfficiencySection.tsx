@@ -52,7 +52,7 @@ export function EnergyEfficiencySection({
         value: string;
       }[]
     ).find((c) => c.key === item.value);
-    const color = colorEntry?.value ?? "#000000";
+    const color = colorEntry?.value ?? municipalityDesign.colors.black;
 
     setEditState({
       open: true,
@@ -135,7 +135,7 @@ export function EnergyEfficiencySection({
         {
           key: "color",
           label: "Farbe",
-          value: "#22c55e",
+          value: municipalityDesign.colors.status.approved,
           type: "color" as const,
           required: true,
         },
@@ -160,7 +160,6 @@ export function EnergyEfficiencySection({
       action={
         <Button
           variant="outlined"
-          color="error"
           onClick={(e) => {
             e.stopPropagation();
             handleAddEnergyEfficiencyClass();
@@ -207,7 +206,7 @@ export function EnergyEfficiencySection({
                         sx={{
                           minWidth: 50,
                           bgcolor: color,
-                          color: "white",
+                          color: "common.white",
                           fontWeight: "600",
                         }}
                       />
@@ -222,7 +221,8 @@ export function EnergyEfficiencySection({
                             height: 20,
                             borderRadius: 0.5,
                             bgcolor: color,
-                            border: "1px solid rgba(0,0,0,0.15)",
+                            border: "1px solid",
+                            borderColor: "divider",
                           }}
                         />
                         <Typography variant="body1">{color}</Typography>
@@ -266,3 +266,4 @@ export function EnergyEfficiencySection({
     </CollapsibleSection>
   );
 }
+import { municipalityDesign } from "@/config/theme";

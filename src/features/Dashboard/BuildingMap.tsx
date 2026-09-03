@@ -90,9 +90,10 @@ function BuildingMarker({
             sx: {
               bgcolor: "background.paper",
               color: "text.primary",
-              border: "1px solid rgb(0 0 0 / 14%)",
+              border: "1px solid",
+              borderColor: "divider",
               borderRadius: 0,
-              boxShadow: "0 4px 14px rgb(0 0 0 / 18%)",
+              boxShadow: (theme) => theme.customShadows.floating,
             },
           },
           arrow: {
@@ -129,7 +130,7 @@ function BuildingMarker({
           aria-expanded={hasVariants ? Boolean(menuAnchor) : undefined}
           aria-pressed={isSelected}
           onClick={handleClick}
-          sx={{
+          sx={(theme) => ({
             position: "relative",
             display: "block",
             appearance: "none",
@@ -137,19 +138,20 @@ function BuildingMarker({
             height: 30,
             p: 0,
             borderRadius: "50%",
-            border: isSelected ? "5px solid white" : "3px solid white",
+            border: `${isSelected ? 5 : 3}px solid`,
+            borderColor: "common.white",
             bgcolor: STATUS_COLORS[representative.status],
             boxShadow: isSelected
-              ? "0 0 0 3px #191919, 0 2px 7px rgb(0 0 0 / 40%)"
-              : "0 2px 7px rgb(0 0 0 / 35%)",
+              ? theme.customShadows.selectedMapMarker
+              : theme.customShadows.mapMarker,
             cursor: "pointer",
             transition: "transform 120ms ease, box-shadow 120ms ease",
             "&:hover": { transform: "scale(1.12)" },
             "&:focus-visible": {
-              outline: "3px solid #191919",
+              outline: `3px solid ${theme.palette.text.primary}`,
               outlineOffset: 3,
             },
-          }}
+          })}
         >
           {hasVariants && (
             <Box
@@ -164,8 +166,8 @@ function BuildingMarker({
                 height: 18,
                 px: 0.5,
                 borderRadius: 9,
-                bgcolor: "#191919",
-                color: "white",
+                bgcolor: "text.primary",
+                color: "common.white",
                 fontSize: 11,
                 fontWeight: 700,
                 lineHeight: 1,
@@ -187,9 +189,10 @@ function BuildingMarker({
             paper: {
               sx: {
                 color: "text.primary",
-                border: "1px solid rgb(0 0 0 / 14%)",
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: 0,
-                boxShadow: "0 4px 14px rgb(0 0 0 / 18%)",
+                boxShadow: (theme) => theme.customShadows.floating,
               },
             },
           }}

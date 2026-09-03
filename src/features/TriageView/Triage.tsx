@@ -179,8 +179,8 @@ export function Dashboard() {
   return (
     <Box sx={{ width: "full" }}>
       <Box
-        sx={{
-          maxWidth: 1170,
+        sx={(theme) => ({
+          maxWidth: theme.layout.contentMaxWidth,
           mx: "auto",
           py: 3,
           pb: 10,
@@ -188,7 +188,7 @@ export function Dashboard() {
           flexDirection: "column",
           gap: 3,
           minHeight: "90vh",
-        }}
+        })}
       >
         <Box>
           <Typography variant="h2" gutterBottom>

@@ -161,12 +161,10 @@ function TableView({
                       <Chip
                         label={`${variantCount} Einreichungen`}
                         size="small"
-                        color="info"
+                        color="primary"
                         variant="outlined"
                         sx={{
                           p: 1.7,
-                          borderColor: "#e30613",
-                          color: "#e30613",
                         }}
                       />
                     )}
@@ -226,7 +224,6 @@ function TableView({
                       <Button
                         size="small"
                         variant="outlined"
-                        color="error"
                         onClick={() => handleAssignToMe(record)}
                       >
                         Zuweisen

@@ -177,7 +177,6 @@ export function PrimaryEnergyCarrierSection({
       action={
         <Button
           variant="outlined"
-          color="error"
           onClick={(e) => {
             e.stopPropagation();
             handleAddPrimaryEnergyCarrier();

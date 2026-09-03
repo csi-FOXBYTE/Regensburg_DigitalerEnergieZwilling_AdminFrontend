@@ -1,4 +1,5 @@
 import { Box, type SxProps, type Theme } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { type ReactNode } from "react";
 
 function getVersionString(): string {
@@ -15,8 +16,8 @@ export function AppFooter({ children, sx }: AppFooterProps) {
     <Box
       component="footer"
       sx={{
-        bgcolor: "#191919",
-        color: "rgba(255,255,255,0.8)",
+        bgcolor: "text.primary",
+        color: (theme) => alpha(theme.palette.common.white, 0.8),
         position: "relative",
         flexShrink: 0,
         px: { xs: "20px", md: "28px" },

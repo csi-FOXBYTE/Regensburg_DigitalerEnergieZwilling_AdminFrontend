@@ -1,5 +1,4 @@
 import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
-import theme from "@/theme/theme";
 import {
   Box,
   Button,
@@ -39,33 +38,34 @@ export function AppHeader() {
 
   return (
     <Box
-      sx={{
-        bgcolor: "white",
+      sx={(theme) => ({
+        bgcolor: "background.paper",
         borderBottom: 1,
         borderColor: "divider",
         position: "sticky",
         top: 0,
         zIndex: 10,
-        boxShadow: "0px 4px 10px 0px rgba(0, 0, 0, 0.12)",
-      }}
+        boxShadow: theme.customShadows.header,
+      })}
     >
       {/* Top section — 123 px */}
       <Box
-        sx={{
-          maxWidth: 1170,
+        sx={(theme) => ({
+          maxWidth: theme.layout.contentMaxWidth,
           mx: "auto",
           pl: 0,
-          height: 123,
+          height: theme.layout.headerTitleHeight,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: "2px solid rgb(229, 229, 229)",
-        }}
+          borderBottom: "2px solid",
+          borderColor: "divider",
+        })}
       >
         <Typography
           variant="h3"
           sx={{
-            color: theme.palette.error.main,
+            color: "primary.main",
             whiteSpace: "nowrap",
             fontWeight: 700,
           }}
@@ -88,9 +88,9 @@ export function AppHeader() {
             sx={{
               fontSize: 14,
               lineHeight: "22px",
-              color: "#757575",
+              color: "text.secondary",
               cursor: "pointer",
-              "&:hover": { color: theme.palette.error.main },
+              "&:hover": { color: "primary.main" },
             }}
           >
             {getDisplayName(currentUser)}
@@ -109,44 +109,16 @@ export function AppHeader() {
 
       {/* Bottom nav section — 68 px */}
       <Box
-        sx={{
-          maxWidth: 1170,
+        sx={(theme) => ({
+          maxWidth: theme.layout.contentMaxWidth,
           mx: "auto",
-          height: 68,
+          height: theme.layout.headerNavigationHeight,
           display: "flex",
-        }}
+        })}
       >
         <Tabs
           value={tabValue}
           onChange={(_, v) => navigate({ to: NAV_ITEMS[v]?.path })}
-          sx={{
-            height: 68,
-            minHeight: 68,
-            "& .MuiTabs-indicator": {
-              backgroundColor: "error.main",
-              height: 3,
-              left: 0,
-              right: "24px",
-            },
-            "& .MuiTab-root": {
-              fontSize: 16,
-              lineHeight: "26px",
-              color: "#191919",
-              textTransform: "none",
-              height: 68,
-              minHeight: 68,
-              paddingLeft: 0,
-              paddingRight: 0,
-              transition: "color 0.2s",
-              "&:hover": {
-                color: "#e30613",
-              },
-            },
-            "& .MuiTab-root.Mui-selected": { color: "#e30613" },
-            "& .MuiTabs-flexContainer": {
-              gap: "24px",
-            },
-          }}
         >
           {NAV_ITEMS.map((item) => (
             <Tab key={item.path} label={item.label} />
@@ -164,18 +136,12 @@ export function AppHeader() {
         <DialogActions>
           <Button
             variant="outlined"
-            color="error"
             onClick={() => setLogoutOpen(false)}
           >
             Abbrechen
           </Button>
-          <Button color="error" variant="contained" href="/logout">
-            <a
-              href="/logout"
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
-              Abmelden
-            </a>
+          <Button variant="contained" href="/logout">
+            Abmelden
           </Button>
         </DialogActions>
       </Dialog>

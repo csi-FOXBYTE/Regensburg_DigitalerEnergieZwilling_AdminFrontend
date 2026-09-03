@@ -9,6 +9,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { municipalityDesign } from "@/config/theme";
 import { useState } from "react";
 
 interface EditDialogProps {
@@ -80,17 +81,13 @@ export function EditDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      slotProps={{
-        backdrop: { sx: { bgcolor: "rgba(0, 0, 0, 0.1)" } },
-        paper: { elevation: 0, sx: { border: "1px solid rgba(0,0,0,0.12)" } },
-      }}
     >
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
           {fields.map((field) => {
             if (field.type === "color") {
-              const colorValue = values[field.key] ?? "#000000";
+              const colorValue = values[field.key] ?? municipalityDesign.colors.black;
               return (
                 <Box key={field.key} sx={{ position: "relative" }}>
                   <Typography
@@ -117,9 +114,10 @@ export function EditDialog({
                       gap: 1.5,
                       px: 1.5,
                       py: 1.25,
-                      border: "1px solid rgba(0,0,0,0.23)",
+                      border: "1px solid",
+                      borderColor: "action.disabled",
                       borderRadius: 1,
-                      "&:hover": { borderColor: "rgba(0,0,0,0.87)" },
+                      "&:hover": { borderColor: "text.primary" },
                     }}
                   >
                     <Box sx={{ position: "relative", flexShrink: 0 }}>
@@ -129,8 +127,10 @@ export function EditDialog({
                           height: 36,
                           borderRadius: 1,
                           bgcolor: colorValue,
-                          border: "1px solid rgba(0,0,0,0.15)",
-                          boxShadow: "inset 0 1px 3px rgba(0,0,0,0.2)",
+                          border: "1px solid",
+                          borderColor: "divider",
+                          boxShadow: (theme) =>
+                            `inset 0 1px 3px ${theme.palette.action.disabled}`,
                         }}
                       />
                       <input
@@ -220,10 +220,10 @@ export function EditDialog({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} variant="outlined" color="error">
+        <Button onClick={onClose} variant="outlined">
           Abbrechen
         </Button>
-        <Button onClick={handleSave} variant="contained" color="error">
+        <Button onClick={handleSave} variant="contained">
           Speichern
         </Button>
       </DialogActions>

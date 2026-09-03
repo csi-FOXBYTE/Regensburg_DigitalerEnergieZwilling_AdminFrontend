@@ -1,3 +1,5 @@
+import { municipalityDesign } from "@/config/theme";
+import { alpha, useTheme } from "@mui/material/styles";
 import L, {
   type FitBoundsOptions,
   type LatLngExpression,
@@ -153,8 +155,6 @@ const attributionStyle: CSSProperties = {
   bottom: 0,
   zIndex: 1000,
   padding: "1px 5px",
-  background: "rgb(255 255 255 / 80%)",
-  color: "#333",
   fontSize: 11,
   lineHeight: 1.5,
 };
@@ -173,6 +173,7 @@ export function LeafletPortalMap({
   className,
   style,
 }: LeafletPortalMapProps) {
+  const theme = useTheme();
   const [initialConfig] = useState<InitialMapConfiguration>(() => ({
     initialCenter,
     initialZoom,
@@ -236,7 +237,15 @@ export function LeafletPortalMap({
           />
         ))}
 
-      <div style={attributionStyle}>{attribution}</div>
+      <div
+        style={{
+          ...attributionStyle,
+          background: alpha(theme.palette.common.white, 0.8),
+          color: municipalityDesign.colors.map.attributionText,
+        }}
+      >
+        {attribution}
+      </div>
     </div>
   );
 }
