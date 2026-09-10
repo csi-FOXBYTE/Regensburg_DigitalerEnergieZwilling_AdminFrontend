@@ -349,7 +349,7 @@ export function ConfigOverview() {
           await publishConfig.mutateAsync({ versionName: fileName });
           await Promise.all([activeConfig.refetch(), configVersions.refetch()]);
         } catch {
-          toast.error("Config konnte nicht aktiviert werden");
+          toast.error("Konfiguration konnte nicht aktiviert werden");
         }
       }
     } catch (err) {
@@ -366,7 +366,7 @@ export function ConfigOverview() {
       await publishConfig.mutateAsync({ versionName: fileName });
       await Promise.all([activeConfig.refetch(), configVersions.refetch()]);
     } catch {
-      toast.error("Config konnte nicht aktiviert werden");
+      toast.error("Konfiguration konnte nicht aktiviert werden");
     }
   };
 
@@ -471,7 +471,7 @@ export function ConfigOverview() {
             variant="outlined"
             onClick={() => setConfigManagementOpen(true)}
           >
-            Configs verwalten
+            Konfigurationen verwalten
           </Button>
         </Box>
 
