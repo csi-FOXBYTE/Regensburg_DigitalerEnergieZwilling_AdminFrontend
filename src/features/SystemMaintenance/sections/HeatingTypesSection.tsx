@@ -5,6 +5,7 @@ import {
   Checkbox,
   Collapse,
   FormControlLabel,
+  MenuItem,
   IconButton,
   TextField as MuiTextField,
   Paper,
@@ -20,14 +21,14 @@ import { useTheme } from "@mui/material/styles";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
 import { CollapsibleSection } from "../CollapsibleSection";
+import { InterpolationEditor } from "../InterpolationEditor";
+import { NumberField } from "../NumberField";
 import {
-  addHeatingPerformanceFactorColumn,
   addHeatingPerformanceFactorRow,
   addHeatingSystemType,
   addTemperatureControlColumn,
   addTemperatureControlRow,
   config,
-  deleteHeatingPerformanceFactorColumn,
   deleteHeatingPerformanceFactorRow,
   deleteHeatingSystemType,
   deleteTemperatureControlColumn,
@@ -52,14 +53,6 @@ function formatYearBand(e: RangeEntry): string {
   if (e.to != null) return `bis ${e.to}`;
   if (e.from != null) return `ab ${e.from}`;
   return "alle";
-}
-
-function formatPowerRange(r: RangeEntry | null): string {
-  if (r == null) return "Alle Leistungen";
-  if (r.from != null && r.to != null) return `${r.from}–${r.to} kW`;
-  if (r.to != null) return `≤ ${r.to} kW`;
-  if (r.from != null) return `> ${r.from} kW`;
-  return "Alle Leistungen";
 }
 
 function InlineNumberCell({
@@ -370,20 +363,6 @@ export default function HeatingTypesSection({
     });
   };
 
-  const openAddPerfColumnDialog = (itemValue: string) => {
-    setEditState({
-      open: true,
-      title: "Leistungsstufe hinzufügen",
-      fields: [
-        { key: "from", label: "Von kW (optional)", value: "", type: "number" },
-        { key: "to", label: "Bis kW (optional)", value: "", type: "number" },
-      ],
-      onSave: (_, numbers) => {
-        addHeatingPerformanceFactorColumn(itemValue, buildYearBand(numbers));
-      },
-    });
-  };
-
   const openAddTempColumnDialog = (
     itemValue: string,
     existingKeys: string[],
@@ -457,15 +436,6 @@ export default function HeatingTypesSection({
                       (e) => e.key === item.value,
                     );
 
-                  const rawPowerBands = perfEntry
-                    ? (perfEntry.value[0].value as RangeEntry[])
-                    : [];
-                  const powerCols: (RangeEntry | null)[] =
-                    rawPowerBands.length === 1 ? [null] : rawPowerBands;
-
-                  type YearPerfRow = RangeEntry & {
-                    value: { value: number }[];
-                  };
                   type YearTempRow = RangeEntry & {
                     value: { key: string; value: number }[];
                   };
@@ -525,180 +495,94 @@ export default function HeatingTypesSection({
                               >
                                 Heizleistungsfaktoren (Aufwandzahl e)
                               </Typography>
-                              {perfEntry && perfEntry.value.length > 0 ? (
-                                <TableContainer
-                                  component={Paper}
-                                  variant="outlined"
-                                  sx={{
-                                    borderRadius: 1,
-                                    overflow: "hidden",
-                                    mb: 0.5,
-                                  }}
-                                >
-                                  <Table size="small">
-                                    <TableHead>
-                                      <TableRow>
-                                        <TableCell
-                                          sx={{
-                                            ...headerCellSx,
-                                            ...colDividerSx,
-                                            minWidth: 110,
-                                          }}
-                                        >
-                                          Baualtersklasse
-                                        </TableCell>
-                                        {powerCols.map((range, i) => (
-                                          <TableCell
-                                            key={i}
-                                            align="center"
-                                            sx={{
-                                              ...headerCellSx,
-                                              ...(i < powerCols.length - 1
-                                                ? colDividerSx
-                                                : {}),
-                                              "& .col-del": {
-                                                opacity: 0,
-                                                transition: "opacity 0.15s",
-                                              },
-                                              "&:hover .col-del": {
-                                                opacity: 1,
-                                              },
-                                            }}
-                                          >
-                                            <Box
-                                              sx={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                gap: 0.5,
-                                              }}
-                                            >
-                                              {formatPowerRange(range)}
-                                              {powerCols.length > 1 && (
-                                                <IconButton
-                                                  className="col-del"
-                                                  size="small"
-                                                  onClick={() =>
-                                                    deleteHeatingPerformanceFactorColumn(
-                                                      item.value,
-                                                      i,
-                                                    )
-                                                  }
-                                                  sx={{ p: 0 }}
-                                                >
-                                                  <Delete
-                                                    sx={{ fontSize: 14 }}
-                                                  />
-                                                </IconButton>
-                                              )}
-                                            </Box>
-                                          </TableCell>
-                                        ))}
-                                        <TableCell
-                                          sx={{ ...headerCellSx }}
-                                          padding="none"
-                                          align="center"
-                                          width={36}
-                                        >
-                                          <IconButton
-                                            size="small"
-                                            onClick={() =>
-                                              openAddPerfColumnDialog(
-                                                item.value,
-                                              )
-                                            }
-                                          >
-                                            <Add fontSize="small" />
-                                          </IconButton>
-                                        </TableCell>
-                                      </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                      {(perfEntry.value as YearPerfRow[]).map(
-                                        (datedEntry, yearIndex) => (
-                                          <TableRow
-                                            key={yearIndex}
-                                            sx={{
-                                              "&:nth-of-type(even)": {
-                                                bgcolor: "grey.100",
-                                              },
-                                            }}
-                                          >
-                                            <TableCell
-                                              sx={{
-                                                ...colDividerSx,
-                                                fontWeight: 500,
-                                              }}
-                                            >
-                                              {perfEntry.value.length === 1 ? (
-                                                "alle"
-                                              ) : (
-                                                <InlineYearBandCell
-                                                  from={datedEntry.from}
-                                                  to={datedEntry.to}
-                                                  onCommit={(f, t) =>
-                                                    updateHeatingPerformanceFactorYearBand(
-                                                      item.value,
-                                                      yearIndex,
-                                                      f,
-                                                      t,
-                                                    )
-                                                  }
-                                                />
-                                              )}
-                                            </TableCell>
-                                            {datedEntry.value.map(
-                                              (cell, ci) => (
-                                                <TableCell
-                                                  key={ci}
-                                                  align="center"
-                                                  padding="none"
-                                                  sx={
-                                                    ci <
-                                                    datedEntry.value.length - 1
-                                                      ? colDividerSx
-                                                      : {}
-                                                  }
-                                                >
-                                                  <InlineNumberCell
-                                                    value={cell.value}
-                                                    onCommit={(v) =>
-                                                      updateHeatingPerformanceFactor(
-                                                        item.value,
-                                                        yearIndex,
-                                                        ci,
-                                                        v,
-                                                      )
-                                                    }
-                                                  />
-                                                </TableCell>
-                                              ),
-                                            )}
-                                            <TableCell
-                                              padding="none"
-                                              align="center"
-                                            >
-                                              {perfEntry.value.length > 1 && (
-                                                <IconButton
-                                                  size="small"
-                                                  onClick={() =>
-                                                    deleteHeatingPerformanceFactorRow(
-                                                      item.value,
-                                                      yearIndex,
-                                                    )
-                                                  }
-                                                >
-                                                  <Delete fontSize="small" />
-                                                </IconButton>
-                                              )}
-                                            </TableCell>
-                                          </TableRow>
-                                        ),
-                                      )}
-                                    </TableBody>
-                                  </Table>
-                                </TableContainer>
-                              ) : null}
+                              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                Je Baualtersklasse gilt ein konstanter Faktor oder eine lineare
+                                Interpolation über die Nutzfläche [m²]. Zwischen den Stützpunkten wird
+                                interpoliert; außerhalb gilt der jeweilige Randwert. Mindestens zwei
+                                Stützpunkte sind nötig.
+                              </Typography>
+                              {perfEntry?.value.map((datedEntry, yearIndex) => (
+                                <Paper key={yearIndex} variant="outlined" sx={{ p: 2, mb: 2 }}>
+                                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+                                    <Typography variant="body2">Baualtersklasse</Typography>
+                                    <InlineYearBandCell
+                                      from={"from" in datedEntry ? datedEntry.from : undefined}
+                                      to={"to" in datedEntry ? datedEntry.to : undefined}
+                                      onCommit={(from, to) =>
+                                        updateHeatingPerformanceFactorYearBand(
+                                          item.value,
+                                          yearIndex,
+                                          from,
+                                          to,
+                                        )
+                                      }
+                                    />
+                                    <IconButton
+                                      size="small"
+                                      aria-label="Baualtersklasse entfernen"
+                                      disabled={perfEntry.value.length <= 1}
+                                      onClick={() =>
+                                        deleteHeatingPerformanceFactorRow(item.value, yearIndex)
+                                      }
+                                    >
+                                      <Delete fontSize="small" />
+                                    </IconButton>
+                                  </Box>
+                                  <MuiTextField
+                                    select
+                                    size="small"
+                                    label="Faktormodell"
+                                    value={
+                                      typeof datedEntry.value === "number" ? "constant" : "interpolation"
+                                    }
+                                    sx={{ minWidth: 220, mb: 2 }}
+                                    onChange={(event) => {
+                                      const value =
+                                        typeof datedEntry.value === "number"
+                                          ? datedEntry.value
+                                          : datedEntry.value.points[0].value;
+                                      updateHeatingPerformanceFactor(
+                                        item.value,
+                                        yearIndex,
+                                        event.target.value === "constant"
+                                          ? value
+                                          : {
+                                              points: [
+                                                { at: 150, value },
+                                                { at: 500, value },
+                                              ],
+                                            },
+                                      );
+                                    }}
+                                    helperText="Beim Wechsel wird der erste Faktor übernommen."
+                                  >
+                                    <MenuItem value="constant">Konstanter Faktor</MenuItem>
+                                    <MenuItem value="interpolation">Interpolation über Nutzfläche</MenuItem>
+                                  </MuiTextField>
+                                  {typeof datedEntry.value === "number" ? (
+                                    <Box>
+                                      <NumberField
+                                        label="Aufwandzahl e"
+                                        value={datedEntry.value}
+                                        min={0}
+                                        onCommit={(value) =>
+                                          updateHeatingPerformanceFactor(item.value, yearIndex, value)
+                                        }
+                                      />
+                                    </Box>
+                                  ) : (
+                                    <InterpolationEditor
+                                      value={datedEntry.value}
+                                      atLabel="Nutzfläche [m²]"
+                                      valueLabel="Aufwandzahl e"
+                                      atStep={1}
+                                      onChange={(value) =>
+                                        updateHeatingPerformanceFactor(item.value, yearIndex, value)
+                                      }
+                                    />
+                                  )}
+                                </Paper>
+                              ))}
                               <Box
                                 sx={{
                                   display: "flex",

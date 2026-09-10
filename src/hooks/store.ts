@@ -3,6 +3,7 @@ import type {
   DETConfig,
   ElectricityTypeData,
   HeatFlowDirection,
+  InterpolatedNumber,
   OuterWallConstructionType,
   PrimaryEnergyCarrierData,
   RangeKey,
@@ -15,7 +16,7 @@ import { atom } from "nanostores";
 
 export type PerfFactorEntry = {
   key: string;
-  value: Array<RangeKey & { value: Array<RangeKey & { value: number }> }>;
+  value: Array<RangeKey & { value: InterpolatedNumber }>;
 };
 export type TempControlEntry = {
   key: string;
@@ -225,8 +226,6 @@ export const addPrimaryEnergyCarrier = (entry: CarrierSelection) => {
         baseRate: 0,
         co2Factor: 0,
         primaryEnergyFactor: 0,
-        source: "",
-        date: "",
       },
     });
     draft.heat.allowedHeatingSystemTypesByCarrier.push({
@@ -306,7 +305,10 @@ export const updatePrimaryEnergyCarrierSource = (
     const data = draft.heat.primaryEnergyCarrierData.find(
       (d) => d.key === carrierKey,
     );
-    if (data) data.value.source = value;
+    if (data) {
+      if (value.trim()) data.value.source = value;
+      else delete data.value.source;
+    }
   });
 };
 
@@ -318,7 +320,10 @@ export const updatePrimaryEnergyCarrierDate = (
     const data = draft.heat.primaryEnergyCarrierData.find(
       (d) => d.key === carrierKey,
     );
-    if (data) data.value.date = value;
+    if (data) {
+      if (value) data.value.date = value;
+      else delete data.value.date;
+    }
   });
 };
 
@@ -334,8 +339,6 @@ export const addElectricityType = (entry: Selection) => {
         unitRate: 0,
         baseRate: 0,
         primaryEnergyFactor: 0,
-        source: "",
-        date: "",
       },
     });
   });
@@ -378,14 +381,20 @@ export const updateElectricityTypeData = (
 export const updateElectricityTypeSource = (key: string, value: string) => {
   updateConfig((draft) => {
     const data = draft.heat.electricityTypeData.find((d) => d.key === key);
-    if (data) data.value.source = value;
+    if (data) {
+      if (value.trim()) data.value.source = value;
+      else delete data.value.source;
+    }
   });
 };
 
 export const updateElectricityTypeDate = (key: string, value: string) => {
   updateConfig((draft) => {
     const data = draft.heat.electricityTypeData.find((d) => d.key === key);
-    if (data) data.value.date = value;
+    if (data) {
+      if (value) data.value.date = value;
+      else delete data.value.date;
+    }
   });
 };
 
@@ -406,9 +415,9 @@ export const addHeatingSystemType = (entry: Selection) => {
     const perfYearBands = existingPerf
       ? existingPerf.value.map((yearBand: RangeKey) => ({
           ...yearBand,
-          value: [{ value: 0 }],
+          value: 0,
         }))
-      : [{ value: [{ value: 0 }] }];
+      : [{ value: 0 }];
 
     const tempYearBands = existingTemp
       ? existingTemp.value.map((yearBand: RangeKey) => ({
@@ -444,10 +453,15 @@ export const addHeatingPerformanceFactorRow = (
       entry = { key, value: [] };
       (draft.heat.heatingPerformanceFactor as PerfFactorEntry[]).push(entry);
     }
-    const numCols = entry.value[0]?.value.length ?? 1;
+    const definition = entry.value[0]?.value ?? 0;
     entry.value.push({
       ...yearBand,
-      value: Array.from({ length: numCols }, () => ({ value: 0 })),
+      value:
+        typeof definition === "number"
+          ? definition
+          : ({
+              points: definition.points.map((point) => ({ ...point })),
+            } as Exclude<InterpolatedNumber, number>),
     });
   });
 };
@@ -461,34 +475,6 @@ export const deleteHeatingPerformanceFactorRow = (
       draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
     ).find((e) => e.key === key);
     if (entry) entry.value.splice(yearIndex, 1);
-  });
-};
-
-export const addHeatingPerformanceFactorColumn = (
-  key: string,
-  powerBand: { from?: number; to?: number },
-) => {
-  updateConfig((draft) => {
-    const entry = (
-      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
-    ).find((e) => e.key === key);
-    if (!entry) return;
-    entry.value.forEach((yearRow) =>
-      yearRow.value.push({ ...powerBand, value: 0 }),
-    );
-  });
-};
-
-export const deleteHeatingPerformanceFactorColumn = (
-  key: string,
-  colIndex: number,
-) => {
-  updateConfig((draft) => {
-    const entry = (
-      draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
-    ).find((e) => e.key === key);
-    if (!entry) return;
-    entry.value.forEach((yearRow) => yearRow.value.splice(colIndex, 1));
   });
 };
 
@@ -570,14 +556,14 @@ export const updateHasInternalGains = (key: string, value: boolean) => {
 export const updateHeatingPerformanceFactor = (
   key: string,
   yearIndex: number,
-  powerIndex: number,
-  value: number,
+  value: InterpolatedNumber,
 ) => {
   updateConfig((draft) => {
     const entry = (
       draft.heat.heatingPerformanceFactor as PerfFactorEntry[]
     ).find((e) => e.key === key);
-    if (entry) entry.value[yearIndex]!.value[powerIndex]!.value = value;
+    const row = entry?.value[yearIndex];
+    if (row) row.value = value;
   });
 };
 

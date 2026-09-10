@@ -1,4 +1,9 @@
-import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
+import {
+  getDisplayName,
+  useAvailablePages,
+  useCurrentUser,
+} from "@/hooks/useCurrentUser";
+import { getPageForMatches, type PagePath } from "@/lib/pageAccess";
 import {
   Box,
   Button,
@@ -14,27 +19,18 @@ import {
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Gebäudeliste", path: "/maintenance" },
-  { label: "Systempflege", path: "/config" },
-];
-
-function getTabValue(pathname: string): number | false {
-  if (pathname.startsWith("/dashboard")) return 0;
-  if (pathname.startsWith("/maintenance") || pathname.startsWith("/record"))
-    return 1;
-  if (pathname.startsWith("/config")) return 2;
-  return false;
-}
-
 export function AppHeader() {
   const currentUser = useCurrentUser();
+  const pages = useAvailablePages();
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const activePage = useRouterState({
+    select: (state) => getPageForMatches(state.matches),
+  });
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  const tabValue = getTabValue(pathname);
+  const tabValue = pages.some((page) => page.path === activePage)
+    ? activePage
+    : false;
 
   return (
     <Box
@@ -118,10 +114,10 @@ export function AppHeader() {
       >
         <Tabs
           value={tabValue}
-          onChange={(_, v) => navigate({ to: NAV_ITEMS[v]?.path })}
+          onChange={(_, path: PagePath) => navigate({ to: path })}
         >
-          {NAV_ITEMS.map((item) => (
-            <Tab key={item.path} label={item.label} />
+          {pages.map((item) => (
+            <Tab key={item.path} value={item.path} label={item.label} />
           ))}
         </Tabs>
       </Box>
@@ -134,10 +130,7 @@ export function AppHeader() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button
-            variant="outlined"
-            onClick={() => setLogoutOpen(false)}
-          >
+          <Button variant="outlined" onClick={() => setLogoutOpen(false)}>
             Abbrechen
           </Button>
           <Button variant="contained" href="/logout">

@@ -1,17 +1,19 @@
 import { Add, Delete, Edit } from "@mui/icons-material";
 import { Box, IconButton, TextField, Typography } from "@mui/material";
-import { useStore } from "@nanostores/react";
+import type { DETConfig } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { Fragment } from "react";
 import { toast } from "sonner";
 import {
   addCorrectionFactor,
   deleteCorrectionFactor,
   updateCorrectionFactor,
+  updateConfig,
   updateInternalGainsFactorByBuildingType,
   updateNetFloorAreaFromUsableFloorAreaFactor,
   updateSimpleValue,
 } from "../../../hooks/store";
 import { CollapsibleSection } from "../CollapsibleSection";
+import { NumberField } from "../NumberField";
 import { type DeleteConfirmState, type EditState } from "../ConfigOverview";
 
 export function GeneralParametersSection({
@@ -21,7 +23,7 @@ export function GeneralParametersSection({
   expandedSections,
   toggleSection,
 }: {
-  configStore: ReturnType<typeof useStore>;
+  configStore: DETConfig;
   setEditState: React.Dispatch<React.SetStateAction<EditState>>;
   setDeleteConfirm: React.Dispatch<React.SetStateAction<DeleteConfirmState>>;
   expandedSections: Record<string, boolean>;
@@ -33,12 +35,23 @@ export function GeneralParametersSection({
 
   const handleEditCorrectionFactor = (index: number) => {
     const item = configStore.general.heatedAirVolumeCorrectionFactor[index];
+    if (!item) return;
     setEditState({
       open: true,
       title: "Korrekturfaktor bearbeiten",
       fields: [
-        { key: "from", label: "Von", value: item.from ?? "", type: "number" },
-        { key: "to", label: "Bis", value: item.to ?? "", type: "number" },
+        {
+          key: "from",
+          label: "Von",
+          value: "from" in item ? item.from : "",
+          type: "number",
+        },
+        {
+          key: "to",
+          label: "Bis",
+          value: "to" in item ? item.to : "",
+          type: "number",
+        },
         {
           key: "value",
           label: "Faktor",
@@ -106,6 +119,40 @@ export function GeneralParametersSection({
       toggleSection={toggleSection}
     >
       <Box sx={{ p: 2 }}>
+        <Typography variant="body1" fontWeight="bold" mb={1}>
+          Standardwerte für Wohnungen und Belegung
+        </Typography>
+        <Typography variant="body2" color="text.secondary" mb={2}>
+          Diese Werte werden verwendet, wenn Angaben zur Anzahl der Wohnungen
+          oder Personen fehlen.
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 3 }}>
+          {configStore.general.defaultNumberOfApartments.map((entry) => (
+            <NumberField
+              key={entry.key}
+              label={`Wohnungen: ${lookUpForNames(entry.key)}`}
+              value={entry.value}
+              min={1}
+              step={1}
+              onCommit={(value) =>
+                updateConfig((draft) => {
+                  const target = draft.general.defaultNumberOfApartments.find(
+                    (item) => item.key === entry.key,
+                  );
+                  if (target) target.value = value;
+                })
+              }
+            />
+          ))}
+          <NumberField
+            label="Personen je Wohnung"
+            value={configStore.general.defaultPeoplePerApartment}
+            min={0.01}
+            onCommit={(value) =>
+              updateSimpleValue("general.defaultPeoplePerApartment", value)
+            }
+          />
+        </Box>
         <Typography variant="body1" fontWeight={"bold"} mb={1}>
           Geometrische Annahmen
         </Typography>

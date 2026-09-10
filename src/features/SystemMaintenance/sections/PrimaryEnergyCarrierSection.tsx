@@ -315,15 +315,39 @@ export function PrimaryEnergyCarrierSection({
                           />
                         </Box>
 
-                        <Typography variant="body2" fontWeight={"bold"} mb={1}>
+                        <Typography
+                          variant="body2"
+                          fontWeight={"bold"}
+                          mb={1}
+                        >
                           Brennstoffdaten gemäß{" "}
-                          {carrierData?.source || "unbekannter Quelle"}
+                          {carrierData?.source ||
+                            configStore.heat.globalDefaultSource}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          mb={2}
+                        >
+                          Quelle und Datum überschreiben die globalen Angaben
+                          nur für diesen Energieträger. Leere Felder verwenden
+                          jeweils den Standard aus den kommunalen Parametern.
                         </Typography>
                         <Box sx={{ ...gridSx, mb: 2 }}>
-                          <Typography variant="body2">Quelle</Typography>
+                          <Typography variant="body2">
+                            Abweichende Quelle (optional)
+                          </Typography>
                           <TextField
                             size="small"
                             value={carrierData?.source ?? ""}
+                            placeholder={configStore.heat.globalDefaultSource}
+                            helperText={`Globale Quelle: ${configStore.heat.globalDefaultSource || "nicht angegeben"}`}
+                            slotProps={{
+                              htmlInput: {
+                                "aria-label":
+                                  "Abweichende Quelle für diesen Energieträger",
+                              },
+                            }}
                             onChange={(e) =>
                               updatePrimaryEnergyCarrierSource(
                                 item.value,
@@ -332,11 +356,20 @@ export function PrimaryEnergyCarrierSection({
                             }
                           />
                           <Box />
-                          <Typography variant="body2">Datum</Typography>
+                          <Typography variant="body2">
+                            Abweichender Datenstand (optional)
+                          </Typography>
                           <TextField
                             size="small"
                             type="date"
-                            value={carrierData?.date ?? ""}
+                            value={carrierData?.date?.slice(0, 10) ?? ""}
+                            helperText={`Globaler Datenstand: ${configStore.heat.globalDefaultDate.slice(0, 10) || "nicht angegeben"}`}
+                            slotProps={{
+                              htmlInput: {
+                                "aria-label":
+                                  "Abweichender Datenstand für diesen Energieträger",
+                              },
+                            }}
                             onChange={(e) =>
                               updatePrimaryEnergyCarrierDate(
                                 item.value,

@@ -1,14 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { PageAccess } from "@/components/PageAccess";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    navigate({ to: "/dashboard" });
-  }, [navigate]);
-  return null;
+  return <PageAccess landing />;
 }

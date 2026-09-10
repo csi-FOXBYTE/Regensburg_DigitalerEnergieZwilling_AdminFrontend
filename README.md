@@ -81,3 +81,22 @@ resolution and dev-auth header injection. Do not hand-edit `api.gen.ts`.
 |---|---|---|
 | `VITE_API_BASE_URL` | Yes (`http://localhost:5000`) | Leave empty — requests are same-origin via APISIX |
 | `VITE_DEV_ACCESS_TOKEN` | Yes (JWT from `pnpm jwt:dev`) | None — code path is dead-code-eliminated |
+
+## Software bill of materials
+
+The checked-in `SBOM.cdx.json` is a CycloneDX 1.6 inventory and `SBOM.csv`
+contains the same components in a review-friendly format. The inventory includes
+application runtime dependencies, packages needed by the production build, and
+the Node and NGINX container software declared by the Dockerfile. Test, lint,
+code-generation, and local-development-only packages are excluded.
+
+Regenerate both files with pnpm 11 or newer and the installed dependency tree:
+
+```bash
+pnpm run sbom
+```
+
+Keep `sbom.config.json` synchronized with build-tool imports and the Dockerfile.
+For every Git tag, the image workflow regenerates the CycloneDX file with the
+tag as its component version and publishes it as a signed SBOM attestation for
+the exact GHCR image digest.

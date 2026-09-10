@@ -221,11 +221,30 @@ export default function ElectricityTypesSection({
                     <TableCell colSpan={2} sx={{ p: 0 }}>
                       <Collapse in={!!expandedTypes[index]} unmountOnExit>
                         <Box sx={{ p: 2 }}>
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            mb={2}
+                          >
+                            Quelle und Datum überschreiben die globalen Angaben
+                            nur für diesen Stromtyp. Leere Felder verwenden
+                            jeweils den Standard aus den kommunalen Parametern.
+                          </Typography>
                           <Box sx={{ ...gridSx, mb: 1.5 }}>
-                            <Typography variant="body2">Quelle</Typography>
+                            <Typography variant="body2">
+                              Abweichende Quelle (optional)
+                            </Typography>
                             <TextField
                               size="small"
                               value={data?.source ?? ""}
+                              placeholder={configStore.heat.globalDefaultSource}
+                              helperText={`Globale Quelle: ${configStore.heat.globalDefaultSource || "nicht angegeben"}`}
+                              slotProps={{
+                                htmlInput: {
+                                  "aria-label":
+                                    "Abweichende Quelle für diesen Stromtyp",
+                                },
+                              }}
                               onChange={(e) =>
                                 updateElectricityTypeSource(
                                   item.value,
@@ -234,11 +253,20 @@ export default function ElectricityTypesSection({
                               }
                             />
                             <Box />
-                            <Typography variant="body2">Datum</Typography>
+                            <Typography variant="body2">
+                              Abweichender Datenstand (optional)
+                            </Typography>
                             <TextField
                               size="small"
                               type="date"
-                              value={data?.date ?? ""}
+                              value={data?.date?.slice(0, 10) ?? ""}
+                              helperText={`Globaler Datenstand: ${configStore.heat.globalDefaultDate.slice(0, 10) || "nicht angegeben"}`}
+                              slotProps={{
+                                htmlInput: {
+                                  "aria-label":
+                                    "Abweichender Datenstand für diesen Stromtyp",
+                                },
+                              }}
                               onChange={(e) =>
                                 updateElectricityTypeDate(
                                   item.value,
