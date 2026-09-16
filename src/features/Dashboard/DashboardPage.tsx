@@ -3,6 +3,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DomainIcon from "@mui/icons-material/Domain";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import PublishedWithChangesIcon from "@mui/icons-material/PublishedWithChanges";
 import {
   Alert,
   Box,
@@ -33,6 +34,7 @@ export default function DashboardPage() {
       IN_PRUEFUNG: 0,
       FREIGEGEBEN: 0,
       ABGELEHNT: 0,
+      ERSETZT: 0,
       GELOESCHT: 0,
     };
 
@@ -56,7 +58,7 @@ export default function DashboardPage() {
     status?: keyof typeof statusCounts;
   }[] = [
     {
-      title: "Gesamt Gebäude",
+      title: "Alle Einreichungen",
       value: submissionsData.length,
       icon: <DomainIcon sx={{ fontSize: 28, color: "primary.main" }} />,
       bgColor: "primary.50",
@@ -83,6 +85,17 @@ export default function DashboardPage() {
       icon: <HourglassEmptyIcon sx={{ fontSize: 28, color: "warning.main" }} />,
       bgColor: "warning.50",
       status: "IN_PRUEFUNG",
+    },
+    {
+      title: "Ersetzt",
+      value: statusCounts.ERSETZT,
+      icon: (
+        <PublishedWithChangesIcon
+          sx={{ fontSize: 28, color: "text.secondary" }}
+        />
+      ),
+      bgColor: "grey.100",
+      status: "ERSETZT",
     },
   ];
 
@@ -129,7 +142,7 @@ export default function DashboardPage() {
             gridTemplateColumns: {
               xs: "1fr",
               sm: "1fr 1fr",
-              lg: "repeat(4, 1fr)",
+              lg: "repeat(5, 1fr)",
             },
             gap: 2,
           }}
@@ -293,6 +306,7 @@ export default function DashboardPage() {
                     { status: "IN_PRUEFUNG", label: "In Prüfung" },
                     { status: "FREIGEGEBEN", label: "Freigegeben" },
                     { status: "ABGELEHNT", label: "Abgelehnt" },
+                    { status: "ERSETZT", label: "Ersetzt" },
                   ] as const
                 ).map(({ status, label }) => (
                   <Box

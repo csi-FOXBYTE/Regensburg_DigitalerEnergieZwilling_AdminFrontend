@@ -89,7 +89,8 @@ export function Dashboard() {
       NEU: 1,
       FREIGEGEBEN: 2,
       ABGELEHNT: 3,
-      GELOESCHT: 4,
+      ERSETZT: 4,
+      GELOESCHT: 5,
     };
     const best = new Map<string, SubmissionSummary>();
     for (const r of filteredAndSortedRecords) {

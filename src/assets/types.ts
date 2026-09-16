@@ -5,8 +5,15 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import PublishedWithChangesIcon from "@mui/icons-material/PublishedWithChanges";
 
-export type RecordStatus = "NEU" | "IN_PRUEFUNG" | "FREIGEGEBEN" | "ABGELEHNT" | "GELOESCHT";
+export type RecordStatus =
+  | "NEU"
+  | "IN_PRUEFUNG"
+  | "FREIGEGEBEN"
+  | "ABGELEHNT"
+  | "ERSETZT"
+  | "GELOESCHT";
 
 export interface SubmissionSummary {
   id: string;
@@ -26,6 +33,7 @@ export const STATUS_COLORS: Record<RecordStatus, string> = {
   IN_PRUEFUNG: municipalityDesign.colors.status.inReview,
   FREIGEGEBEN: municipalityDesign.colors.status.approved,
   ABGELEHNT: municipalityDesign.colors.status.rejected,
+  ERSETZT: municipalityDesign.colors.status.superseded,
   GELOESCHT: municipalityDesign.colors.status.deleted,
 };
 
@@ -34,6 +42,7 @@ export const STATUS_LABELS: Record<RecordStatus, string> = {
   IN_PRUEFUNG: "In Prüfung",
   FREIGEGEBEN: "Freigegeben",
   ABGELEHNT: "Abgelehnt",
+  ERSETZT: "Ersetzt",
   GELOESCHT: "Gelöscht",
 };
 
@@ -81,6 +90,12 @@ export const statusConfig = {
     icon: HighlightOffIcon,
     chipColor: "error" as const,
     iconColor: "error.main",
+  },
+  ERSETZT: {
+    label: "Ersetzt",
+    icon: PublishedWithChangesIcon,
+    chipColor: "default" as const,
+    iconColor: "text.secondary",
   },
   GELOESCHT: {
     label: "Gelöscht",

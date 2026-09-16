@@ -2,12 +2,13 @@ import { defineConfig } from "orval";
 
 export default defineConfig({
   api: {
-    input: "http://apisix:9080/docs/json",
+    input: process.env.OPENAPI_URL ?? "http://apisix:9080/docs/json",
     output: {
       target: "./src/api/api.gen.ts",
       client: "fetch",
       mode: "single",
       clean: true,
+      prettier: true,
       baseUrl: "",
       override: {
         fetch: {

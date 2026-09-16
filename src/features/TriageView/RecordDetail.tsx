@@ -1,4 +1,3 @@
-import { postApiAdminSubmissionsSubmissionIdDecline } from "@/api/api.gen";
 import { statusConfig } from "@/assets/types";
 import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { AppFooter } from "@/components/Footer";
@@ -8,6 +7,7 @@ import {
   useAssignSubmission,
   useDeclineSubmission,
   useDeleteSubmission,
+  useDeleteBuildingSubmissions,
   useSubmission,
   useSubmissions,
   useUnassignSubmission,
@@ -42,6 +42,11 @@ import {
   CardHeader,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Link,
   TextField,
   Typography,
 } from "@mui/material";
@@ -86,13 +91,16 @@ export function RecordDetail({ id }: { id: string }) {
 
   const [notes, setNotes] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [freigebenPending, setFreigebenPending] = useState(false);
+  const [deleteBuildingDialogOpen, setDeleteBuildingDialogOpen] = useState(false);
+  const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
+  const [isAcceptPending, setIsAcceptPending] = useState(false);
 
   const assignMutation = useAssignSubmission();
   const unassignMutation = useUnassignSubmission();
   const acceptMutation = useAcceptSubmission();
   const declineMutation = useDeclineSubmission();
   const deleteMutation = useDeleteSubmission();
+  const deleteBuildingMutation = useDeleteBuildingSubmissions();
 
   const variantSiblings = useMemo(() => {
     if (!detail?.otherSubmissionIds.length) return [];
@@ -179,11 +187,11 @@ export function RecordDetail({ id }: { id: string }) {
     );
   };
 
-  const handleAblehnen = () => {
+  const handleDecline = () => {
     if (!notes.trim())
       return toast.error("Ein Kommentar ist bei Ablehnung erforderlich.");
     declineMutation.mutate(
-      { submissionId: id },
+      { submissionId: id, comment: notes.trim() },
       {
         onSuccess: () => {
           invalidate();
@@ -194,41 +202,43 @@ export function RecordDetail({ id }: { id: string }) {
     );
   };
 
-  const handleFreigeben = async () => {
-    setFreigebenPending(true);
+  const performAccept = async () => {
+    setIsAcceptPending(true);
     try {
-      await acceptMutation.mutateAsync({ submissionId: id });
+      const result = await acceptMutation.mutateAsync({
+        submissionId: id,
+        comment: notes.trim() || undefined,
+      });
+      setReplaceDialogOpen(false);
+      setNotes("");
+      invalidate();
+      if (result.supersededSubmissionIds.length > 0) {
+        toast.success(
+          "Einreichung freigegeben. Die bisherige Freigabe wurde auf ‚Ersetzt‘ gesetzt.",
+        );
+      } else if (result.declinedSubmissionIds.length > 0) {
+        toast.success(
+          "Einreichung freigegeben. Weitere offene Einreichungen wurden automatisch abgelehnt.",
+        );
+      } else {
+        toast.success("Einreichung freigegeben.");
+      }
     } catch {
       toast.error("Freigabe fehlgeschlagen.");
-      setFreigebenPending(false);
+    } finally {
+      setIsAcceptPending(false);
+    }
+  };
+
+  const handleAccept = () => {
+    if (
+      detail.currentAcceptedSubmissionId &&
+      detail.currentAcceptedSubmissionId !== id
+    ) {
+      setReplaceDialogOpen(true);
       return;
     }
-
-    const siblingsToDecline = variantSiblings.filter(
-      (s) =>
-        s.id !== id && s.status !== "FREIGEGEBEN" && s.status !== "ABGELEHNT",
-    );
-    if (siblingsToDecline.length > 0) {
-      try {
-        await Promise.all(
-          siblingsToDecline.map((s) =>
-            postApiAdminSubmissionsSubmissionIdDecline(s.id),
-          ),
-        );
-        toast.success(
-          "Datensatz freigegeben. Andere Einreichungen automatisch abgelehnt.",
-        );
-      } catch {
-        toast.warning(
-          "Datensatz freigegeben. Andere Einreichungen konnten nicht automatisch abgelehnt werden.",
-        );
-      }
-    } else {
-      toast.success("Datensatz freigegeben.");
-    }
-
-    invalidate();
-    setFreigebenPending(false);
+    void performAccept();
   };
 
   const handleDelete = () => {
@@ -241,6 +251,23 @@ export function RecordDetail({ id }: { id: string }) {
           navigate({ to: "/maintenance" });
         },
         onError: () => toast.error("Löschen fehlgeschlagen."),
+      },
+    );
+  };
+
+  const handleDeleteBuilding = () => {
+    deleteBuildingMutation.mutate(
+      { buildingId: detail.buildingId },
+      {
+        onSuccess: (result) => {
+          void queryClient.invalidateQueries({ queryKey: ["submissions"] });
+          toast.success(`${result.deletedCount} Einreichungen wurden gelöscht.`);
+          navigate({ to: "/maintenance" });
+        },
+        onError: () =>
+          toast.error(
+            "Die Einreichungen konnten nicht gemeinsam gelöscht werden. Prüfen Sie, ob alle Einreichungen abgelehnt sind.",
+          ),
       },
     );
   };
@@ -307,6 +334,19 @@ export function RecordDetail({ id }: { id: string }) {
           <Alert severity="warning">
             Dieser Datensatz ist bereits <strong>{detail?.assignedTo}</strong>{" "}
             zugewiesen.
+          </Alert>
+        )}
+
+        {status === "ERSETZT" && detail.currentAcceptedSubmissionId && (
+          <Alert severity="info">
+            Diese Einreichung wurde durch eine neuere Freigabe ersetzt.{" "}
+            <Link
+              href={`/record/${encodeURIComponent(detail.currentAcceptedSubmissionId)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Aktuell freigegebene Einreichung öffnen
+            </Link>
           </Alert>
         )}
 
@@ -788,7 +828,9 @@ export function RecordDetail({ id }: { id: string }) {
         )}
 
         {/* Prüfung und Freigabe / Audit-Protokoll */}
-        {status === "FREIGEGEBEN" || status === "ABGELEHNT" ? (
+        {status === "FREIGEGEBEN" ||
+        status === "ABGELEHNT" ||
+        status === "ERSETZT" ? (
           <Card>
             <CardHeader
               title={<Typography variant="h4">Audit-Protokoll</Typography>}
@@ -827,6 +869,22 @@ export function RecordDetail({ id }: { id: string }) {
                           .filter(Boolean)
                           .join(" ") || entry.by.email}
                       </Typography>
+                      {entry.comment && (
+                        <Typography variant="body2" sx={{ mt: 0.75 }}>
+                          {entry.comment}
+                        </Typography>
+                      )}
+                      {entry.relatedSubmissionId && (
+                        <Link
+                          href={`/record/${encodeURIComponent(entry.relatedSubmissionId)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          variant="body2"
+                          sx={{ display: "inline-block", mt: 0.75 }}
+                        >
+                          Zugehörige Einreichung öffnen
+                        </Link>
+                      )}
                     </Box>
                   </Box>
                 ))}
@@ -875,8 +933,8 @@ export function RecordDetail({ id }: { id: string }) {
                   fullWidth
                   size="large"
                   startIcon={<TaskAltIcon />}
-                  disabled={!canDecide || freigebenPending}
-                  onClick={handleFreigeben}
+                  disabled={!canDecide || isAcceptPending}
+                  onClick={handleAccept}
                   sx={{
                     "&.Mui-disabled": {
                       bgcolor: "success.main",
@@ -894,7 +952,7 @@ export function RecordDetail({ id }: { id: string }) {
                   size="large"
                   startIcon={<CancelIcon />}
                   disabled={!canDecide || declineMutation.isPending}
-                  onClick={handleAblehnen}
+                  onClick={handleDecline}
                   sx={{
                     "&.Mui-disabled": {
                       bgcolor: "error.main",
@@ -929,6 +987,18 @@ export function RecordDetail({ id }: { id: string }) {
             >
               Einreichung löschen
             </Button>
+            {detail.allSubmissionsDeclined && detail.submissionCount > 1 && (
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={() => setDeleteBuildingDialogOpen(true)}
+                disabled={deleteBuildingMutation.isPending}
+                sx={{ mt: 1, ml: 1 }}
+              >
+                Alle {detail.submissionCount} Einreichungen dieses Gebäudes löschen
+              </Button>
+            )}
           </CardContent>
         </Card>
 
@@ -942,6 +1012,54 @@ export function RecordDetail({ id }: { id: string }) {
         onConfirm={handleDelete}
         onCancel={() => setDeleteDialogOpen(false)}
       />
+      <ConfirmDeleteDialog
+        open={deleteBuildingDialogOpen}
+        title={`Möchten Sie alle ${detail.submissionCount} abgelehnten Einreichungen dieses Gebäudes dauerhaft löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+        onConfirm={handleDeleteBuilding}
+        onCancel={() => setDeleteBuildingDialogOpen(false)}
+      />
+      <Dialog
+        open={replaceDialogOpen}
+        onClose={() => !isAcceptPending && setReplaceDialogOpen(false)}
+        aria-labelledby="replace-submission-title"
+      >
+        <DialogTitle id="replace-submission-title">
+          Bestehende Freigabe ersetzen?
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Für dieses Gebäude ist bereits eine Einreichung freigegeben. Wenn
+            Sie die neue Einreichung freigeben, erhält die bisherige
+            Einreichung automatisch den Status „Ersetzt“.
+          </Typography>
+          {detail.currentAcceptedSubmissionId && (
+            <Link
+              href={`/record/${encodeURIComponent(detail.currentAcceptedSubmissionId)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ display: "inline-block", mt: 2 }}
+            >
+              Aktuell freigegebene Einreichung öffnen
+            </Link>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setReplaceDialogOpen(false)}
+            disabled={isAcceptPending}
+          >
+            Abbrechen
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => void performAccept()}
+            disabled={isAcceptPending}
+          >
+            Freigeben und ersetzen
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

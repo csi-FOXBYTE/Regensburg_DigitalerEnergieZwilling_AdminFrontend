@@ -1,5 +1,6 @@
 import {
   deleteApiAdminSubmissionsSubmissionId,
+  deleteApiAdminSubmissionsBuildingBuildingId,
   deleteApiAdminSubmissionsSubmissionIdAssignment,
   getApiAdminSubmissions,
   getApiAdminSubmissionsSubmissionId,
@@ -7,7 +8,6 @@ import {
   postApiAdminSubmissionsSubmissionIdAccept,
   postApiAdminSubmissionsSubmissionIdDecline,
   type GetApiAdminSubmissions200DataItem,
-  type GetApiAdminSubmissions200DataItemSubmissionsItem,
   type GetApiAdminSubmissionsSubmissionId200,
   type GetApiAdminSubmissionsSubmissionId200HistoryItem,
   type GetApiAdminSubmissionsSubmissionId200UsedConfig,
@@ -16,6 +16,12 @@ import {
 import type { DETInput } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { RecordStatus, SubmissionSummary } from "@/assets/types";
+import {
+  toDetailStatus,
+  toRecordStatus,
+} from "@/lib/submissionStatus";
+
+export { toDetailStatus } from "@/lib/submissionStatus";
 
 export type SubmissionDetail = {
   id: string;
@@ -29,40 +35,13 @@ export type SubmissionDetail = {
   assignedTo: string | null;
   assignedAt: string | null;
   otherSubmissionIds: string[];
+  currentAcceptedSubmissionId: string | null;
+  allSubmissionsDeclined: boolean;
+  submissionCount: number;
   history: GetApiAdminSubmissionsSubmissionId200HistoryItem[];
   usedConfig: GetApiAdminSubmissionsSubmissionId200UsedConfig;
   detInput: DETInput | undefined;
 };
-
-function toRecordStatus(
-  status: GetApiAdminSubmissions200DataItemSubmissionsItem["status"],
-): RecordStatus {
-  switch (status) {
-    case "NEW":
-      return "NEU";
-    case "ASSIGNED":
-      return "IN_PRUEFUNG";
-    case "ACCEPTED":
-      return "FREIGEGEBEN";
-    case "DECLINED":
-      return "ABGELEHNT";
-  }
-}
-
-export function toDetailStatus(
-  status: GetApiAdminSubmissionsSubmissionId200["status"],
-): RecordStatus {
-  switch (status) {
-    case "NEW":
-      return "NEU";
-    case "ASSIGNED":
-      return "IN_PRUEFUNG";
-    case "ACCEPTED":
-      return "FREIGEGEBEN";
-    case "DECLINED":
-      return "ABGELEHNT";
-  }
-}
 
 function groupToSummaries(group: GetApiAdminSubmissions200DataItem): SubmissionSummary[] {
   const useVariants = group.submissions.length > 1;
@@ -100,6 +79,9 @@ function toSubmissionDetail(data: GetApiAdminSubmissionsSubmissionId200): Submis
       : null,
     assignedAt: data.assignedAt,
     otherSubmissionIds: data.otherSubmissionIds,
+    currentAcceptedSubmissionId: data.currentAcceptedSubmissionId,
+    allSubmissionsDeclined: data.allSubmissionsDeclined,
+    submissionCount: data.submissionCount,
     history: data.history,
     usedConfig: data.usedConfig,
     detInput: data.raw as DETInput | undefined,
@@ -132,6 +114,13 @@ export function useDeleteSubmission() {
   });
 }
 
+export function useDeleteBuildingSubmissions() {
+  return useMutation({
+    mutationFn: ({ buildingId }: { buildingId: string }) =>
+      deleteApiAdminSubmissionsBuildingBuildingId(buildingId),
+  });
+}
+
 export function useAssignSubmission() {
   return useMutation({
     mutationFn: ({
@@ -154,14 +143,24 @@ export function useUnassignSubmission() {
 
 export function useAcceptSubmission() {
   return useMutation({
-    mutationFn: ({ submissionId }: { submissionId: string }) =>
-      postApiAdminSubmissionsSubmissionIdAccept(submissionId),
+    mutationFn: ({
+      submissionId,
+      comment,
+    }: {
+      submissionId: string;
+      comment?: string;
+    }) => postApiAdminSubmissionsSubmissionIdAccept(submissionId, { comment }),
   });
 }
 
 export function useDeclineSubmission() {
   return useMutation({
-    mutationFn: ({ submissionId }: { submissionId: string }) =>
-      postApiAdminSubmissionsSubmissionIdDecline(submissionId),
+    mutationFn: ({
+      submissionId,
+      comment,
+    }: {
+      submissionId: string;
+      comment: string;
+    }) => postApiAdminSubmissionsSubmissionIdDecline(submissionId, { comment }),
   });
 }
