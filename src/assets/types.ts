@@ -2,7 +2,6 @@ import { municipalityDesign } from "@/config/theme";
 import type { DETInput } from "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import PublishedWithChangesIcon from "@mui/icons-material/PublishedWithChanges";
@@ -12,8 +11,7 @@ export type RecordStatus =
   | "IN_PRUEFUNG"
   | "FREIGEGEBEN"
   | "ABGELEHNT"
-  | "ERSETZT"
-  | "GELOESCHT";
+  | "ERSETZT";
 
 export interface SubmissionSummary {
   id: string;
@@ -34,7 +32,6 @@ export const STATUS_COLORS: Record<RecordStatus, string> = {
   FREIGEGEBEN: municipalityDesign.colors.status.approved,
   ABGELEHNT: municipalityDesign.colors.status.rejected,
   ERSETZT: municipalityDesign.colors.status.superseded,
-  GELOESCHT: municipalityDesign.colors.status.deleted,
 };
 
 export const STATUS_LABELS: Record<RecordStatus, string> = {
@@ -43,7 +40,6 @@ export const STATUS_LABELS: Record<RecordStatus, string> = {
   FREIGEGEBEN: "Freigegeben",
   ABGELEHNT: "Abgelehnt",
   ERSETZT: "Ersetzt",
-  GELOESCHT: "Gelöscht",
 };
 
 export interface BuildingRecord {
@@ -96,11 +92,5 @@ export const statusConfig = {
     icon: PublishedWithChangesIcon,
     chipColor: "default" as const,
     iconColor: "text.secondary",
-  },
-  GELOESCHT: {
-    label: "Gelöscht",
-    icon: DeleteOutlineIcon,
-    chipColor: "default" as const,
-    iconColor: "text.disabled",
   },
 };
