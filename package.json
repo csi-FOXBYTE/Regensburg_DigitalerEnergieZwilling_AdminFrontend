@@ -15,7 +15,7 @@
     "sbom": "node scripts/generate-sbom.mjs"
   },
   "dependencies": {
-    "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore": "0.20.1",
+    "@csi-foxbyte/regensburg_digitalerenergiezwilling_energycalculationcore": "0.20.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mdxeditor/editor": "^3.55.0",
