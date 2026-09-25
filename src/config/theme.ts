@@ -39,7 +39,6 @@ export const municipalityDesign = {
       approved: "#22c55e",
       rejected: "#C1272D",
       superseded: "#6b7280",
-      deleted: "#9e9e9e",
     },
     map: {
       attributionText: "#333333",

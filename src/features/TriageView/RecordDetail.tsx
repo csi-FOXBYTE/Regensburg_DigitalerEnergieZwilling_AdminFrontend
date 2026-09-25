@@ -13,6 +13,7 @@ import {
   useUnassignSubmission,
 } from "@/hooks/submissionHooks";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { downloadDeletionReceipt } from "@/lib/deletionReceipt";
 import {
   calculate,
   type DETConfig,
@@ -91,7 +92,8 @@ export function RecordDetail({ id }: { id: string }) {
 
   const [notes, setNotes] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [deleteBuildingDialogOpen, setDeleteBuildingDialogOpen] = useState(false);
+  const [deleteBuildingDialogOpen, setDeleteBuildingDialogOpen] =
+    useState(false);
   const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
   const [isAcceptPending, setIsAcceptPending] = useState(false);
 
@@ -108,7 +110,9 @@ export function RecordDetail({ id }: { id: string }) {
     return (submissions ?? [])
       .filter((s) => siblingIds.has(s.id))
       .sort(
-        (a, b) => new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime(),
+        (a, b) =>
+          new Date(b.receivedDate).getTime() -
+          new Date(a.receivedDate).getTime(),
       );
   }, [submissions, detail, id]);
 
@@ -245,9 +249,12 @@ export function RecordDetail({ id }: { id: string }) {
     deleteMutation.mutate(
       { submissionId: id },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
           void queryClient.invalidateQueries({ queryKey: ["submissions"] });
-          toast.success("Datensatz gelöscht.");
+          downloadDeletionReceipt(result.receipt);
+          toast.success(
+            "Datensatz gelöscht. Der Löschbeleg wurde heruntergeladen.",
+          );
           navigate({ to: "/maintenance" });
         },
         onError: () => toast.error("Löschen fehlgeschlagen."),
@@ -261,7 +268,10 @@ export function RecordDetail({ id }: { id: string }) {
       {
         onSuccess: (result) => {
           void queryClient.invalidateQueries({ queryKey: ["submissions"] });
-          toast.success(`${result.deletedCount} Einreichungen wurden gelöscht.`);
+          downloadDeletionReceipt(result.receipt);
+          toast.success(
+            `${result.deletedCount} Einreichungen wurden gelöscht. Der Löschbeleg wurde heruntergeladen.`,
+          );
           navigate({ to: "/maintenance" });
         },
         onError: () =>
@@ -996,7 +1006,8 @@ export function RecordDetail({ id }: { id: string }) {
                 disabled={deleteBuildingMutation.isPending}
                 sx={{ mt: 1, ml: 1 }}
               >
-                Alle {detail.submissionCount} Einreichungen dieses Gebäudes löschen
+                Alle {detail.submissionCount} Einreichungen dieses Gebäudes
+                löschen
               </Button>
             )}
           </CardContent>
@@ -1029,8 +1040,8 @@ export function RecordDetail({ id }: { id: string }) {
         <DialogContent>
           <Typography>
             Für dieses Gebäude ist bereits eine Einreichung freigegeben. Wenn
-            Sie die neue Einreichung freigeben, erhält die bisherige
-            Einreichung automatisch den Status „Ersetzt“.
+            Sie die neue Einreichung freigeben, erhält die bisherige Einreichung
+            automatisch den Status „Ersetzt“.
           </Typography>
           {detail.currentAcceptedSubmissionId && (
             <Link

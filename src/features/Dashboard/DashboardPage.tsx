@@ -35,7 +35,6 @@ export default function DashboardPage() {
       FREIGEGEBEN: 0,
       ABGELEHNT: 0,
       ERSETZT: 0,
-      GELOESCHT: 0,
     };
 
     for (const submission of submissionsData) {

@@ -7,6 +7,7 @@ import {
   useSubmissions,
 } from "@/hooks/submissionHooks";
 import { getDisplayName, useCurrentUser } from "@/hooks/useCurrentUser";
+import { downloadDeletionReceipt } from "@/lib/deletionReceipt";
 import { Alert, Box, Card, CardContent, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useState } from "react";
@@ -90,7 +91,6 @@ export function Dashboard() {
       FREIGEGEBEN: 2,
       ABGELEHNT: 3,
       ERSETZT: 4,
-      GELOESCHT: 5,
     };
     const best = new Map<string, SubmissionSummary>();
     for (const r of filteredAndSortedRecords) {
@@ -144,10 +144,13 @@ export function Dashboard() {
       deleteMutation.mutate(
         { submissionId: id },
         {
-          onSuccess: () => {
+          onSuccess: (result) => {
             invalidate();
             setRecordToDelete(null);
-            toast.success("Datensatz wurde gelöscht.");
+            downloadDeletionReceipt(result.receipt);
+            toast.success(
+              "Datensatz wurde gelöscht. Der Löschbeleg wurde heruntergeladen.",
+            );
           },
           onError: () => toast.error("Löschen fehlgeschlagen."),
         },

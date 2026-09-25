@@ -131,7 +131,6 @@ export function FiltersControls({
             <MenuItem value="FREIGEGEBEN">Freigegeben</MenuItem>
             <MenuItem value="ABGELEHNT">Abgelehnt</MenuItem>
             <MenuItem value="ERSETZT">Ersetzt</MenuItem>
-            <MenuItem value="GELOESCHT">Gelöscht</MenuItem>
           </TextField>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
